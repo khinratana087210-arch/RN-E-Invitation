@@ -126,7 +126,9 @@ function loadSavedStateOrUrlParams() {
   // Always enforce Video.mp4 for royal wedding gate
   appState.gateVideo = 'Video.mp4';
   if (!appState.coverImage) appState.coverImage = window.WEDDING_CONFIG?.images?.coverImage || 'cover.jpg';
-  if (!appState.envelopeImage) appState.envelopeImage = window.WEDDING_CONFIG?.images?.envelopeImage || appState.coverImage || 'cover.jpg';
+  if (!appState.envelopeImage || appState.envelopeImage === 'cover.jpg') {
+    appState.envelopeImage = appState.coverImage;
+  }
   if (!appState.entranceBg) appState.entranceBg = window.WEDDING_CONFIG?.images?.entranceBg || appState.bgImage || 'bg.jpg';
   if (!appState.bgImage1) appState.bgImage1 = window.WEDDING_CONFIG?.images?.bgImage1 || 'bg.jpg';
   if (!appState.bgImage2) appState.bgImage2 = window.WEDDING_CONFIG?.images?.bgImage2 || 'bg.jpg';
@@ -677,7 +679,7 @@ function bindImageUploads() {
       if (!file) return;
 
       showToast('កំពុងដំណើរការរូបភាព...');
-      compressImage(file, 1200, 0.82, async dataUrl => {
+      compressImage(file, 900, 0.75, async dataUrl => {
         if (!dataUrl) return;
         // 1. Instant local thumbnail & preview
         appState[item.key] = dataUrl;
