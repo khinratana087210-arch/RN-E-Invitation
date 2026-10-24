@@ -14,10 +14,10 @@ function toKhmerDigits(num) {
 const defaultState = {
   // Wedding details
   eventTitle: 'សិរីមង្គលអាពាហ៍ពិពាហ៍',
-  groomKhmer: 'ប្រុស តូច',
-  groomLatin: 'Pros Toch',
-  brideKhmer: 'ខៀវ ពេជ្រចរណៃ',
-  brideLatin: 'Khiev Pich Chorai',
+  groomKhmer: 'យឺន រតនា',
+  groomLatin: 'Yoeun Ratana',
+  brideKhmer: 'ឌិន រចនា',
+  brideLatin: 'Din Rachana',
   weddingDate: '2026-12-10',
   weddingTime: '17:00',
   dateFullKhmer: 'ថ្ងៃព្រហស្បតិ៍ ទី១០ ខែធ្នូ ឆ្នាំ២០២៦ វេលាម៉ោង ៥:០០ ល្ងាច',
@@ -137,7 +137,20 @@ function loadSavedStateOrUrlParams() {
   if (!appState.gallery3) appState.gallery3 = window.WEDDING_CONFIG?.images?.gallery3 || 'gallery3.jpg';
   if (!appState.gallery4) appState.gallery4 = window.WEDDING_CONFIG?.images?.gallery4 || 'gallery4.jpg';
 
-  // 3. Guest Mode Detection: URL param, guest.html, or mobile device on public site
+  // 3. URL Query Parameters Override (Groom, Bride, Title, Date, Venue)
+  const groomParam = urlParams.get('groom');
+  const brideParam = urlParams.get('bride');
+  const titleParam = urlParams.get('title');
+  const dateParam = urlParams.get('date');
+  const venueParam = urlParams.get('venue');
+
+  if (groomParam) appState.groomKhmer = decodeURIComponent(groomParam).replace(/_/g, ' ');
+  if (brideParam) appState.brideKhmer = decodeURIComponent(brideParam).replace(/_/g, ' ');
+  if (titleParam) appState.eventTitle = decodeURIComponent(titleParam).replace(/_/g, ' ');
+  if (dateParam) appState.dateFullKhmer = decodeURIComponent(dateParam).replace(/_/g, ' ');
+  if (venueParam) appState.venueName = decodeURIComponent(venueParam).replace(/_/g, ' ');
+
+  // 4. Guest Mode Detection: URL param, guest.html, or mobile device on public site
   const isGuestPage = window.location.pathname.includes('guest.html');
   const isMobile = window.innerWidth <= 768;
   const isExplicitAdmin = urlParams.get('admin') === 'true' || urlParams.get('edit') === '1';
@@ -1067,11 +1080,30 @@ function updateGeneratedLink(guestName) {
   const baseGuestUrl = getBaseGuestUrl();
   const cleanGuest = (guestName || appState.guestName || 'ភ្ញៀវកិត្តិយស').trim();
   const guestSlug = cleanGuest.replace(/\s+/g, '_');
+  const groomSlug = (appState.groomKhmer || '').trim().replace(/\s+/g, '_');
+  const brideSlug = (appState.brideKhmer || '').trim().replace(/\s+/g, '_');
+  const titleSlug = (appState.eventTitle || '').trim().replace(/\s+/g, '_');
+
+  let queryReadable = `guest=${guestSlug}`;
+  let queryEncoded = `guest=${encodeURIComponent(guestSlug)}`;
+
+  if (groomSlug) {
+    queryReadable += `&groom=${groomSlug}`;
+    queryEncoded += `&groom=${encodeURIComponent(groomSlug)}`;
+  }
+  if (brideSlug) {
+    queryReadable += `&bride=${brideSlug}`;
+    queryEncoded += `&bride=${encodeURIComponent(brideSlug)}`;
+  }
+  if (titleSlug && titleSlug !== 'សិរីមង្គលអាពាហ៍ពិពាហ៍') {
+    queryReadable += `&title=${titleSlug}`;
+    queryEncoded += `&title=${encodeURIComponent(titleSlug)}`;
+  }
 
   // Readable URL with Khmer text for visual inspection and easy copying
-  const readableUrl = `${baseGuestUrl}?guest=${guestSlug}`;
+  const readableUrl = `${baseGuestUrl}?${queryReadable}`;
   // Encoded URL for web links/browsers/Telegram
-  const webLinkUrl = `${baseGuestUrl}?guest=${encodeURIComponent(guestSlug)}`;
+  const webLinkUrl = `${baseGuestUrl}?${queryEncoded}`;
 
   const linkInput = document.getElementById('modalGeneratedLink');
   if (linkInput) linkInput.value = readableUrl;
@@ -1082,7 +1114,7 @@ function updateGeneratedLink(guestName) {
     `ចូលរួមជាអធិបតី និងជាភ្ញៀវកិត្តិយស ក្នុងពិធីសិរីមង្គលអាពាហ៍ពិពាហ៍\n\n` +
     `📅 កាលបរិច្ឆេទ៖ ${appState.dateFullKhmer}\n` +
     `📍 ទីតាំង៖ ${appState.venueName}\n\n` +
-    `👉 សូមចុចតំណភ្ជាប់ខាងក្រោម ដើម្បីបើកមើលធៀបការឌីជីថល៖\n${readableUrl}`;
+    `👉 សូមចុចតំណភ្ជាប់ខាងក្រោម ដើម្បីបើកមើលធៀបការឌីជីថល៖\n${webLinkUrl}`;
 
   const msgArea = document.getElementById('modalShareMessage');
   if (msgArea) msgArea.value = fullMessage;
@@ -1159,7 +1191,18 @@ window.WEDDING_CONFIG = {
   a.href = URL.createObjectURL(blob);
   a.download = 'config.js';
   a.click();
-  showToast('បានទាញយក config.js! សូមយកវាទៅជំនួស config.js ក្នុង Folder រួច Upload ទៅ Render');
+  showToast('បានទាញយក config.js! សូមយកវាទៅ Upload ចូល GitHub');
+  openSaveGuideModal();
+}
+
+function openSaveGuideModal() {
+  const modal = document.getElementById('saveGuideModal');
+  if (modal) modal.classList.add('active');
+}
+
+function closeSaveGuideModal() {
+  const modal = document.getElementById('saveGuideModal');
+  if (modal) modal.classList.remove('active');
 }
 
 /**

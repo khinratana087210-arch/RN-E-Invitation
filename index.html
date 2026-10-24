@@ -671,9 +671,9 @@
                   
                   <!-- Groom and Bride Names -->
                   <div class="cover-couple-names" id="previewCoverCouple">
-                    <span class="couple-name groom" id="previewCoverGroom">ប្រុស តូច</span>
+                    <span class="couple-name groom" id="previewCoverGroom">យឺន រតនា</span>
                     <span class="couple-ampersand">និង</span>
-                    <span class="couple-name bride" id="previewCoverBride">ខៀវ ពេជ្រចរណៃ</span>
+                    <span class="couple-name bride" id="previewCoverBride">ឌិន រចនា</span>
                   </div>
                 </div>
 
@@ -715,8 +715,8 @@
                 <div class="couple-formal-names">
                   <div class="role-box">
                     <span class="role-title">កូនប្រុស</span>
-                    <h3 class="role-name groom-color" id="previewFormalGroom">ប្រុស តូច</h3>
-                    <span class="role-latin" id="previewFormalGroomLatin">Pros Toch</span>
+                    <h3 class="role-name groom-color" id="previewFormalGroom">យឺន រតនា</h3>
+                    <span class="role-latin" id="previewFormalGroomLatin">Yoeun Ratana</span>
                   </div>
 
                   <div class="heart-symbol-box">
@@ -727,8 +727,8 @@
 
                   <div class="role-box">
                     <span class="role-title">កូនស្រី</span>
-                    <h3 class="role-name bride-color" id="previewFormalBride">ខៀវ ពេជ្រចរណៃ</h3>
-                    <span class="role-latin" id="previewFormalBrideLatin">Khiev Pich Chorai</span>
+                    <h3 class="role-name bride-color" id="previewFormalBride">ឌិន រចនា</h3>
+                    <span class="role-latin" id="previewFormalBrideLatin">Din Rachana</span>
                   </div>
                 </div>
 
@@ -885,8 +885,16 @@
         <h3 class="modal-title">🔗 ចម្លង Link ធៀបការសម្រាប់ផ្ញើ</h3>
         <button type="button" class="modal-close" onclick="closeShareModal()">&times;</button>
       </div>
-      <div class="modal-body">
-        <p class="modal-desc">អ្នកអាចវាយបញ្ចូលឈ្មោះភ្ញៀវ ដើម្បីបង្កើត Link ពិសេសដែលមានឈ្មោះគាត់ដោយស្វ័យប្រវត្តិ៖</p>
+        <!-- Important Notice for publishing photos and edits to all guests -->
+        <div style="background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.45); border-radius: 8px; padding: 12px 14px; margin-bottom: 14px;">
+          <div style="display: flex; align-items: center; gap: 7px; font-weight: 600; color: #6ee7b7; font-size: 13px; margin-bottom: 6px;">
+            <span>💡</span> ព័ត៌មានសំខាន់សម្រាប់ការផ្ញើ Link ទៅភ្ញៀវ៖
+          </div>
+          <ul style="font-size: 12px; color: #d1fae5; margin: 0; padding-left: 18px; line-height: 1.6;">
+            <li><strong>ឈ្មោះកូនកំលោះ-ក្រមុំ & ភ្ញៀវ៖</strong> ត្រូវបានបង្កប់ចូលក្នុង Link ខាងក្រោមដោយស្វ័យប្រវត្តិ ពេលភ្ញៀវបើក Link នឹងឃើញឈ្មោះភ្លាមៗ!</li>
+            <li><strong>រូបថត & Background៖</strong> សូមចុចប៊ូតុងពណ៌បៃតង <strong>"💾 រក្សាទុក (Save)"</strong> នៅរបារខាងលើ ដើម្បីទាញយក <code>config.js</code> រួច Upload ចូល GitHub នោះរូបថតទាំងអស់នឹងបង្ហាញលើទូរស័ព្ទភ្ញៀវគ្រប់គ្នា!</li>
+          </ul>
+        </div>
         
         <!-- Website Domain / Base Host input -->
         <div class="form-group" style="margin-bottom: 14px; background: rgba(0, 0, 0, 0.25); padding: 12px; border-radius: 8px; border: 1px solid rgba(223, 158, 40, 0.25);">
@@ -934,6 +942,56 @@
           </button>
         </div>
       </div>
+    </div>
+  <!-- Save & GitHub Upload Guide Modal -->
+  <div class="modal-backdrop" id="saveGuideModal">
+    <div class="modal-card" style="max-width: 520px; border-color: rgba(16, 185, 129, 0.4);">
+      <div class="modal-header">
+        <h3 class="modal-title" style="color: #6ee7b7; display: flex; align-items: center; gap: 8px;">
+          <span>💾</span> របៀបដាក់ឲ្យភ្ញៀវទាំងអស់មើលឃើញរូបភាព & ទិន្នន័យ
+        </h3>
+        <button type="button" class="modal-close" onclick="closeSaveGuideModal()">&times;</button>
+      </div>
+
+      <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 10px; padding: 14px; margin-bottom: 16px;">
+        <p style="font-size: 13.5px; color: #d1fae5; margin: 0 0 6px 0; font-weight: 600;">
+          ✅ ឯកសារ <code>config.js</code> ត្រូវបានទាញយក (Download) ចូលកុំព្យូទ័ររបស់អ្នករួចរាល់ហើយ!
+        </p>
+        <p style="font-size: 12.5px; color: #a7f3d0; margin: 0; line-height: 1.5;">
+          ដោយសារគេហទំព័រលើ Render ភ្ជាប់ជាមួយ GitHub ដូច្នេះដើម្បីឲ្យភ្ញៀវទាំងអស់បើកលើទូរស័ព្ទដៃឃើញរូបភាព និងឈ្មោះដែលអ្នកទើបកែ សូមធ្វើតាម ៣ ជំហានងាយៗខាងក្រោម៖
+        </p>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px;">
+        <div style="display: flex; gap: 12px; align-items: flex-start; background: rgba(255, 255, 255, 0.03); padding: 10px 14px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.08);">
+          <div style="background: #10b981; color: #000; font-weight: bold; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 13px;">1</div>
+          <div style="font-size: 13px; color: #e2e8f0; line-height: 1.5;">
+            បើកមើលកន្លែងផ្ទុកឯកសារ GitHub របស់អ្នក (GitHub Repository) ក្នុង Browser។
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 12px; align-items: flex-start; background: rgba(255, 255, 255, 0.03); padding: 10px 14px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.08);">
+          <div style="background: #10b981; color: #000; font-weight: bold; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 13px;">2</div>
+          <div style="font-size: 13px; color: #e2e8f0; line-height: 1.5;">
+            ចុចលើប៊ូតុង <strong>Add file</strong> ➡️ រួចរើស <strong>Upload files</strong>។
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 12px; align-items: flex-start; background: rgba(255, 255, 255, 0.03); padding: 10px 14px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.08);">
+          <div style="background: #10b981; color: #000; font-weight: bold; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 13px;">3</div>
+          <div style="font-size: 13px; color: #e2e8f0; line-height: 1.5;">
+            អូសទម្លាក់ (Drag & Drop) ឯកសារ <code>config.js</code> ដែលទើបទាញយកអម្បាញ់មិញ រួចចុចប៊ូតុងពណ៌បៃតង <strong>Commit changes</strong>។
+          </div>
+        </div>
+      </div>
+
+      <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 8px; padding: 10px 12px; margin-bottom: 16px; font-size: 12px; color: #fde68a;">
+        ⚡ <strong>ចំណាំ៖</strong> បន្ទាប់ពី Commit រួច Render នឹងដំណើរការ Update ដោយស្វ័យប្រវត្តិក្នុងរយៈពេលប្រហែល ៣០ វិនាទី!
+      </div>
+
+      <button type="button" class="copy-action-btn" onclick="closeSaveGuideModal()" style="width: 100%; justify-content: center; display: flex; padding: 12px;">
+        យល់ព្រម (OK)
+      </button>
     </div>
   </div>
 

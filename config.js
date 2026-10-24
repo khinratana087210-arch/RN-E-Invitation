@@ -7,10 +7,10 @@
 window.WEDDING_CONFIG = {
   // ព័ត៌មានកម្មវិធី
   eventTitle: 'សិរីមង្គលអាពាហ៍ពិពាហ៍',
-  groomKhmer: 'ប្រុស តូច',
-  groomLatin: 'Pros Toch',
-  brideKhmer: 'ខៀវ ពេជ្រចរណៃ',
-  brideLatin: 'Khiev Pich Chorai',
+  groomKhmer: 'យឺន រតនា',
+  groomLatin: 'Yoeun Ratana',
+  brideKhmer: 'ឌិន រចនា',
+  brideLatin: 'Din Rachana',
   weddingDate: '2026-12-10',
   weddingTime: '17:00',
   dateFullKhmer: 'ថ្ងៃព្រហស្បតិ៍ ទី១០ ខែធ្នូ ឆ្នាំ២០២៦ វេលាម៉ោង ៥:០០ ល្ងាច',
