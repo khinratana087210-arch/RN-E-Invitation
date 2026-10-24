@@ -137,18 +137,36 @@ function loadSavedStateOrUrlParams() {
   if (!appState.gallery3) appState.gallery3 = window.WEDDING_CONFIG?.images?.gallery3 || 'gallery3.jpg';
   if (!appState.gallery4) appState.gallery4 = window.WEDDING_CONFIG?.images?.gallery4 || 'gallery4.jpg';
 
-  // 3. URL Query Parameters Override (Groom, Bride, Title, Date, Venue)
+  // 3. URL Query Parameters Override (Groom, Bride, Title, Date, Venue, Cloud Images)
   const groomParam = urlParams.get('groom');
   const brideParam = urlParams.get('bride');
   const titleParam = urlParams.get('title');
   const dateParam = urlParams.get('date');
   const venueParam = urlParams.get('venue');
+  const coverParam = urlParams.get('cover');
+  const bgParam = urlParams.get('bg');
+  const envParam = urlParams.get('env');
 
   if (groomParam) appState.groomKhmer = decodeURIComponent(groomParam).replace(/_/g, ' ');
   if (brideParam) appState.brideKhmer = decodeURIComponent(brideParam).replace(/_/g, ' ');
   if (titleParam) appState.eventTitle = decodeURIComponent(titleParam).replace(/_/g, ' ');
   if (dateParam) appState.dateFullKhmer = decodeURIComponent(dateParam).replace(/_/g, ' ');
   if (venueParam) appState.venueName = decodeURIComponent(venueParam).replace(/_/g, ' ');
+
+  // Direct Cloud Image URLs passed via link (allows 100% GitHub-free sharing!)
+  if (coverParam) {
+    appState.coverImage = decodeURIComponent(coverParam);
+    if (!envParam) appState.envelopeImage = appState.coverImage;
+  }
+  if (bgParam) {
+    const cleanBg = decodeURIComponent(bgParam);
+    appState.entranceBg = cleanBg;
+    appState.bgImage = cleanBg;
+    appState.bgImage1 = cleanBg;
+  }
+  if (envParam) {
+    appState.envelopeImage = decodeURIComponent(envParam);
+  }
 
   // 4. Guest Mode Detection: URL param, guest.html, or mobile device on public site
   const isGuestPage = window.location.pathname.includes('guest.html');
@@ -166,10 +184,14 @@ function loadSavedStateOrUrlParams() {
     const envOverlay = document.getElementById('envelopeOverlay');
     const envTitle = document.getElementById('envelopeEventTitle');
     const envGuest = document.getElementById('envelopeGuestName');
+    const envGroom = document.getElementById('envelopeGroom');
+    const envBride = document.getElementById('envelopeBride');
     if (envOverlay) {
       envOverlay.style.display = 'flex';
       if (envTitle) envTitle.textContent = appState.eventTitle;
       if (envGuest) envGuest.textContent = appState.guestName;
+      if (envGroom) envGroom.textContent = appState.groomKhmer;
+      if (envBride) envBride.textContent = appState.brideKhmer;
       updateEnvelopePhotoPreview();
       updateEntranceBgPreview();
     }
@@ -530,7 +552,67 @@ function compressImage(file, maxDimension, quality, callback) {
 }
 
 /**
- * Handle File Uploads with instant Base64 preview & auto-compression
+ * Auto Cloud Upload Service
+ * បង្ហោះរូបភាពឡើង Cloud ដោយស្វ័យប្រវត្តិ (Freeimage + ImgBB)
+ * ដើម្បីឱ្យភ្ញៀវទាំងអស់ដែលបើក Link មើលឃើញរូបភាពភ្លាម ដោយមិនបាច់ Upload ចូល GitHub!
+ */
+async function uploadImageToCloud(base64DataUrl) {
+  if (!base64DataUrl || typeof base64DataUrl !== 'string') return null;
+  if (base64DataUrl.startsWith('http://') || base64DataUrl.startsWith('https://')) {
+    return base64DataUrl;
+  }
+  const base64Clean = base64DataUrl.includes(',') ? base64DataUrl.split(',')[1] : base64DataUrl;
+  if (!base64Clean) return null;
+
+  // Provider 1: Freeimage.host API (Chevereto CORS key)
+  try {
+    const formData = new FormData();
+    formData.append('key', '6d207e02198a847aa98d0a2a901485a5');
+    formData.append('action', 'upload');
+    formData.append('source', base64Clean);
+    formData.append('format', 'json');
+
+    const res = await fetch('https://freeimage.host/api/1/upload', {
+      method: 'POST',
+      body: formData
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.image && data.image.url) {
+        console.log('Cloud Upload Success (Freeimage):', data.image.url);
+        return data.image.url;
+      }
+    }
+  } catch (err) {
+    console.warn('Freeimage upload failed, trying fallback:', err);
+  }
+
+  // Provider 2: ImgBB API
+  try {
+    const apiKey = localStorage.getItem('wedding_imgbb_key') || 'c0e86b460e1d71104e4c27fc74d47e45';
+    const formData = new FormData();
+    formData.append('image', base64Clean);
+
+    const res = await fetch(`https://api.imgbb.com/1/upload?key=${apiKey}`, {
+      method: 'POST',
+      body: formData
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.data && data.data.url) {
+        console.log('Cloud Upload Success (ImgBB):', data.data.url);
+        return data.data.url;
+      }
+    }
+  } catch (err) {
+    console.warn('ImgBB upload failed:', err);
+  }
+
+  return null;
+}
+
+/**
+ * Handle File Uploads with instant Base64 preview & auto-compression & Auto Cloud Upload
  */
 function bindImageUploads() {
   const fileInputs = [
@@ -556,16 +638,60 @@ function bindImageUploads() {
       if (!file) return;
 
       showToast('កំពុងដំណើរការរូបភាព...');
-      compressImage(file, 1200, 0.82, dataUrl => {
+      compressImage(file, 1200, 0.82, async dataUrl => {
         if (!dataUrl) return;
+        // 1. Instant local thumbnail & preview
         appState[item.key] = dataUrl;
         updateThumbnail(item.thumbId, dataUrl);
         item.updateFn();
         saveStateDebounced();
-        showToast('បានផ្លាស់ប្ដូររូបភាពរួចរាល់!');
+
+        // 2. Auto Cloud Upload in Background
+        showToast('☁️ កំពុង Auto Upload ឡើង Cloud...');
+        try {
+          const cloudUrl = await uploadImageToCloud(dataUrl);
+          if (cloudUrl) {
+            appState[item.key] = cloudUrl;
+            if (item.key === 'coverImage') {
+              appState.envelopeImage = cloudUrl;
+            }
+            if (item.key === 'entranceBg') {
+              appState.bgImage = cloudUrl;
+              appState.bgImage1 = cloudUrl;
+            }
+            updateThumbnail(item.thumbId, cloudUrl);
+            item.updateFn();
+            saveStateDebounced();
+            showToast('✅ Upload ឡើង Cloud ជោគជ័យ! ភ្ញៀវទាំងអស់អាចមើលឃើញ!');
+            return;
+          }
+        } catch (err) {
+          console.warn('Auto cloud upload error:', err);
+        }
+        showToast('បានផ្លាស់ប្ដូររូបភាពក្នុងម៉ាស៊ីន (Offline)!');
       });
     });
   });
+
+  // Direct Image URL inputs (optional quick paste)
+  const bindDirectUrlInput = (inputId, key, thumbId, updateFn) => {
+    const el = document.getElementById(inputId);
+    if (!el) return;
+    el.addEventListener('input', e => {
+      const url = e.target.value.trim();
+      if (url.startsWith('http')) {
+        appState[key] = url;
+        updateThumbnail(thumbId, url);
+        updateFn();
+        saveStateDebounced();
+        showToast('បានភ្ជាប់ Link រូបភាពជោគជ័យ!');
+      }
+    });
+  };
+
+  bindDirectUrlInput('inputEnvelopeImageUrl', 'envelopeImage', 'envelopeThumb', updateEnvelopePhotoPreview);
+  bindDirectUrlInput('inputCoverImageUrl', 'coverImage', 'coverThumb', updateCoverPreview);
+  bindDirectUrlInput('inputEntranceBgUrl', 'entranceBg', 'entranceBgThumb', updateEntranceBgPreview);
 }
 
 /**
@@ -672,6 +798,12 @@ function updateFullPreview() {
   const mapBtn = document.getElementById('previewGoogleMapBtn');
   if (mapBtn) mapBtn.href = appState.locationUrl || '#';
   setText('previewThankYouText', appState.thankYouText);
+
+  // Envelope Card texts
+  setText('envelopeEventTitle', appState.eventTitle);
+  setText('envelopeGuestName', appState.guestName);
+  setText('envelopeGroom', appState.groomKhmer);
+  setText('envelopeBride', appState.brideKhmer);
 
   // Images
   updateEnvelopePhotoPreview();
@@ -977,9 +1109,11 @@ function triggerWeddingGateOpening() {
     tryPlay();
 
     let hasEnded = false;
+    let safetyTimer = null;
     const endVideo = () => {
       if (hasEnded) return;
       hasEnded = true;
+      if (safetyTimer) clearTimeout(safetyTimer);
       video.classList.remove('playing');
       if (btnSkip) btnSkip.style.display = 'none';
       setTimeout(() => {
@@ -996,6 +1130,8 @@ function triggerWeddingGateOpening() {
         }, 900);
       }, 350);
     };
+
+    safetyTimer = setTimeout(endVideo, 3200);
 
     video.onended = endVideo;
     video.onclick = endVideo; // allow tap video to skip
@@ -1098,6 +1234,20 @@ function updateGeneratedLink(guestName) {
   if (titleSlug && titleSlug !== 'សិរីមង្គលអាពាហ៍ពិពាហ៍') {
     queryReadable += `&title=${titleSlug}`;
     queryEncoded += `&title=${encodeURIComponent(titleSlug)}`;
+  }
+
+  // Include Cloud Image URLs if available (allows 100% GitHub-free photo sharing!)
+  if (appState.coverImage && appState.coverImage.startsWith('http')) {
+    queryReadable += `&cover=${encodeURIComponent(appState.coverImage)}`;
+    queryEncoded += `&cover=${encodeURIComponent(appState.coverImage)}`;
+  }
+  if (appState.entranceBg && appState.entranceBg.startsWith('http')) {
+    queryReadable += `&bg=${encodeURIComponent(appState.entranceBg)}`;
+    queryEncoded += `&bg=${encodeURIComponent(appState.entranceBg)}`;
+  }
+  if (appState.envelopeImage && appState.envelopeImage.startsWith('http') && appState.envelopeImage !== appState.coverImage) {
+    queryReadable += `&env=${encodeURIComponent(appState.envelopeImage)}`;
+    queryEncoded += `&env=${encodeURIComponent(appState.envelopeImage)}`;
   }
 
   // Readable URL with Khmer text for visual inspection and easy copying

@@ -1533,7 +1533,7 @@ body.guest-view-mode .floating-admin-toggle {
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  filter: brightness(0.45) saturate(1.15);
+  filter: brightness(0.85) saturate(1.2);
   transform: scale(1.05);
   z-index: 0;
   transition: opacity 0.8s ease;
@@ -1543,7 +1543,7 @@ body.guest-view-mode .floating-admin-toggle {
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at center, rgba(20, 24, 33, 0.42) 0%, rgba(10, 12, 16, 0.85) 100%);
+  background: radial-gradient(circle at center, rgba(20, 24, 33, 0.2) 0%, rgba(10, 12, 16, 0.55) 100%);
   z-index: 1;
   pointer-events: none;
 }
@@ -1693,14 +1693,29 @@ body.guest-view-mode .floating-admin-toggle {
   font-size: 19px;
   color: #df951e;
   text-shadow: 0 1px 1px rgba(255, 255, 255, 0.8);
+  margin-bottom: 4px;
+}
+
+.envelope-couple-names {
+  font-family: var(--font-title);
+  font-size: 18px;
+  color: #d88914;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.9), 0 2px 4px rgba(100, 50, 0, 0.15);
   margin-bottom: 6px;
+  letter-spacing: 0.3px;
+}
+
+.envelope-couple-names .envelope-amp {
+  font-size: 14px;
+  color: #8c570b;
+  margin: 0 4px;
 }
 
 .envelope-subtitle {
   font-family: var(--font-title);
-  font-size: 14px;
+  font-size: 12.5px;
   color: #a46c19;
-  margin-bottom: 18px;
+  margin-bottom: 16px;
 }
 
 .envelope-guest-badge {

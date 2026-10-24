@@ -32,6 +32,9 @@
       </div>
 
       <h2 class="envelope-title" id="envelopeEventTitle">សិរីមង្គលអាពាហ៍ពិពាហ៍</h2>
+      <div class="envelope-couple-names" id="envelopeCoupleNames">
+        <span id="envelopeGroom">យឺន រតនា</span> <span class="envelope-amp">&</span> <span id="envelopeBride">ឌិន រចនា</span>
+      </div>
       <p class="envelope-subtitle">លិខិតអញ្ជើញឌីជីថល E-Invitation</p>
       
       <div class="envelope-guest-badge">
@@ -131,6 +134,14 @@
             </button>
           </div>
 
+          <!-- Cloud Upload Active Banner -->
+          <div style="background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.45); border-radius: 8px; padding: 10px 14px; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+            <div style="display: flex; align-items: center; gap: 8px; color: #6ee7b7; font-size: 13px; font-weight: 600;">
+              <span style="font-size: 16px;">☁️</span>
+              <span><strong>Auto Cloud Upload៖</strong> បើកដំណើរការ (ជ្រើសរូបពីម៉ាស៊ីន វានឹងឡើង Cloud ស្វ័យប្រវត្តិ ភ្ញៀវមើលឃើញភ្លាម មិនបាច់ Upload GitHub ឡើយ!)</span>
+            </div>
+          </div>
+
           <!-- Multiple Center Welcome Photos (កន្លែងដាក់រូបគូស្នេហ៍កណ្ដាល - អាចដាក់បានច្រើនរូប) -->
           <!-- Entrance Photo, Entrance Background & Gate Video -->
           <div class="form-row">
@@ -144,10 +155,11 @@
                 <input type="file" id="envelopeImageInput" accept="image/*" class="file-input">
                 <div class="upload-placeholder">
                   <span class="upload-icon">💍</span>
-                  <span class="upload-text">ជ្រើសរើសរូបក្នុងរង្វង់</span>
+                  <span class="upload-text">ជ្រើសរើសរូបក្នុងរង្វង់ (Auto Cloud)</span>
                 </div>
                 <div class="img-preview-thumb" id="envelopeThumb"></div>
               </div>
+              <input type="url" id="inputEnvelopeImageUrl" class="form-control" placeholder="🔗 ឬបិទភ្ជាប់ Link រូបភាព (Image URL)..." style="font-size: 11.5px; margin-top: 6px;">
             </div>
 
             <!-- 2. Entrance Background Image -->
@@ -164,10 +176,9 @@
                 </div>
                 <div class="img-preview-thumb" id="entranceBgThumb"></div>
               </div>
+              <input type="url" id="inputEntranceBgUrl" class="form-control" placeholder="🔗 ឬបិទភ្ជាប់ Link រូបភាព (Image URL)..." style="font-size: 11.5px; margin-top: 6px;">
             </div>
           </div>
-
-
 
           <!-- Section Divider for 5 Images -->
           <div style="margin: 20px 0 14px 0; border-top: 1px dashed rgba(223, 158, 40, 0.35); padding-top: 14px;">
@@ -189,10 +200,11 @@
               <input type="file" id="coverImageInput" accept="image/*" class="file-input">
               <div class="upload-placeholder">
                 <span class="upload-icon">📷</span>
-                <span class="upload-text">ជ្រើសរើសរូបភាព Cover ខាងមុខ</span>
+                <span class="upload-text">ជ្រើសរើសរូបភាព Cover (Auto Cloud)</span>
               </div>
               <div class="img-preview-thumb" id="coverThumb"></div>
             </div>
+            <input type="url" id="inputCoverImageUrl" class="form-control" placeholder="🔗 ឬបិទភ្ជាប់ Link រូបភាព Cover (Image URL)..." style="font-size: 11.5px; margin-top: 6px;">
           </div>
 
           <!-- 4 BACKGROUND TEXTURES (2x2 GRID) -->
