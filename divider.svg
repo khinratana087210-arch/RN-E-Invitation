@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 50" width="100%" height="40">
+  <defs>
+    <linearGradient id="goldFiligree" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#cf9838" stop-opacity="0" />
+      <stop offset="25%" stop-color="#dfad4c" stop-opacity="0.8" />
+      <stop offset="50%" stop-color="#ffdc73" stop-opacity="1" />
+      <stop offset="75%" stop-color="#dfad4c" stop-opacity="0.8" />
+      <stop offset="100%" stop-color="#cf9838" stop-opacity="0" />
+    </linearGradient>
+    <filter id="goldGlow">
+      <feGaussianBlur stdDeviation="1.5" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+  
+  <!-- Central Diamond / Floral Core -->
+  <g transform="translate(200, 25)" filter="url(#goldGlow)">
+    <!-- Central Flower -->
+    <circle cx="0" cy="0" r="4.5" fill="#ffd868"/>
+    <!-- Petals -->
+    <path d="M 0 -13 C -3 -7 -3 -3 0 0 C 3 -3 3 -7 0 -13 Z" fill="#e8b449"/>
+    <path d="M 0 13 C -3 7 -3 3 0 0 C 3 3 3 7 0 13 Z" fill="#e8b449"/>
+    <path d="M -13 0 C -7 -3 -3 -3 0 0 C -3 3 -7 3 -13 0 Z" fill="#e8b449"/>
+    <path d="M 13 0 C 7 -3 3 -3 0 0 C 3 3 7 3 13 0 Z" fill="#e8b449"/>
+    
+    <!-- Diagonal Little Buds -->
+    <circle cx="-8" cy="-8" r="2" fill="#ffd868"/>
+    <circle cx="8" cy="-8" r="2" fill="#ffd868"/>
+    <circle cx="-8" cy="8" r="2" fill="#ffd868"/>
+    <circle cx="8" cy="8" r="2" fill="#ffd868"/>
+  </g>
+
+  <!-- Left Horizontal Ornamental Wing -->
+  <g stroke="#dfad4c" stroke-width="1.8" fill="none">
+    <path d="M 180 25 C 160 22 140 27 120 25 S 80 23 40 25"/>
+    <circle cx="170" cy="25" r="2.5" fill="#fbd166" stroke="none"/>
+    <circle cx="120" cy="25" r="3.5" fill="#fbd166" stroke="none"/>
+    <path d="M 120 22 Q 115 15 105 18 Q 110 24 120 25" fill="#dfad4c"/>
+    <path d="M 120 28 Q 115 35 105 32 Q 110 26 120 25" fill="#dfad4c"/>
+    <line x1="120" y1="25" x2="30" y2="25" stroke="url(#goldFiligree)" stroke-width="2"/>
+    <circle cx="30" cy="25" r="2" fill="#dfad4c" stroke="none"/>
+  </g>
+
+  <!-- Right Horizontal Ornamental Wing -->
+  <g stroke="#dfad4c" stroke-width="1.8" fill="none" transform="translate(400,0) scale(-1, 1)">
+    <path d="M 180 25 C 160 22 140 27 120 25 S 80 23 40 25"/>
+    <circle cx="170" cy="25" r="2.5" fill="#fbd166" stroke="none"/>
+    <circle cx="120" cy="25" r="3.5" fill="#fbd166" stroke="none"/>
+    <path d="M 120 22 Q 115 15 105 18 Q 110 24 120 25" fill="#dfad4c"/>
+    <path d="M 120 28 Q 115 35 105 32 Q 110 26 120 25" fill="#dfad4c"/>
+    <line x1="120" y1="25" x2="30" y2="25" stroke="url(#goldFiligree)" stroke-width="2"/>
+    <circle cx="30" cy="25" r="2" fill="#dfad4c" stroke="none"/>
+  </g>
+</svg>

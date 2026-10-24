@@ -55,19 +55,19 @@ window.WEDDING_CONFIG = {
 
   // ផ្លូវរូបភាព (Relative asset paths)
   images: {
-    envelopeImage: 'assets/cover.jpg',     // រូបកូនកំលោះកូនក្រមុំកណ្ដាលរង្វង់លើធៀប
-    entranceBg: 'assets/bg.jpg',           // រូបភាពផ្ទៃខាងក្រោយ Background លើផ្ទាំងបើកធៀប
-    gateVideo: 'Video.mp4',                // វីដេអូបើកទ្វាររោងការ
-    coverImage: 'assets/cover.jpg',
-    bgImage: 'assets/bg.jpg',
-    bgImage1: 'assets/bg.jpg', // ផ្ទៃ Background ផ្នែកទី ២ (រាប់ថយក្រោយ)
-    bgImage2: 'assets/bg.jpg', // ផ្ទៃ Background ផ្នែកទី ៣ (ទីតាំង & ផែនទី)
-    bgImage3: 'assets/bg.jpg', // ផ្ទៃ Background ផ្នែកទី ៤ (កម្រងរូបភាព)
-    bgImage4: 'assets/bg.jpg', // ផ្ទៃ Background ផ្នែកទី ៥ (ថ្លែងអំណរគុណ)
-    mapImage: 'assets/map.svg',
-    gallery1: 'assets/gallery1.jpg',
-    gallery2: 'assets/gallery2.jpg',
-    gallery3: 'assets/gallery3.jpg',
-    gallery4: 'assets/gallery4.jpg'
+    envelopeImage: 'cover.jpg',     // រូបកូនកំលោះកូនក្រមុំកណ្ដាលរង្វង់លើធៀប
+    entranceBg: 'bg.jpg',           // រូបភាពផ្ទៃខាងក្រោយ Background លើផ្ទាំងបើកធៀប
+    gateVideo: 'Video.mp4',         // វីដេអូបើកទ្វាររោងការ
+    coverImage: 'cover.jpg',
+    bgImage: 'bg.jpg',
+    bgImage1: 'bg.jpg', // ផ្ទៃ Background ផ្នែកទី ២ (រាប់ថយក្រោយ)
+    bgImage2: 'bg.jpg', // ផ្ទៃ Background ផ្នែកទី ៣ (ទីតាំង & ផែនទី)
+    bgImage3: 'bg.jpg', // ផ្ទៃ Background ផ្នែកទី ៤ (កម្រងរូបភាព)
+    bgImage4: 'bg.jpg', // ផ្ទៃ Background ផ្នែកទី ៥ (ថ្លែងអំណរគុណ)
+    mapImage: 'map.svg',
+    gallery1: 'gallery1.jpg',
+    gallery2: 'gallery2.jpg',
+    gallery3: 'gallery3.jpg',
+    gallery4: 'gallery4.jpg'
   }
 };

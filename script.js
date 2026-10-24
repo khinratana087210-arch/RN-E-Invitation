@@ -45,20 +45,20 @@ const defaultState = {
   guestColor: '#1a3250',
 
   // Images & Media (Fallback relative paths)
-  envelopeImage: 'assets/cover.jpg',     // រូបកូនកំលោះកូនក្រមុំក្នុងរង្វង់លើធៀប
-  entranceBg: 'assets/bg.jpg',           // រូបភាពផ្ទៃខាងក្រោយ Background លើផ្ទាំងបើកធៀប
+  envelopeImage: 'cover.jpg',     // រូបកូនកំលោះកូនក្រមុំក្នុងរង្វង់លើធៀប
+  entranceBg: 'bg.jpg',           // រូបភាពផ្ទៃខាងក្រោយ Background លើផ្ទាំងបើកធៀប
   gateVideo: 'Video.mp4',
-  coverImage: 'assets/cover.jpg',
-  bgImage: 'assets/bg.jpg',
-  bgImage1: 'assets/bg.jpg',
-  bgImage2: 'assets/bg.jpg',
-  bgImage3: 'assets/bg.jpg',
-  bgImage4: 'assets/bg.jpg',
-  mapImage: 'assets/map.svg',
-  gallery1: 'assets/gallery1.jpg',
-  gallery2: 'assets/gallery2.jpg',
-  gallery3: 'assets/gallery3.jpg',
-  gallery4: 'assets/gallery4.jpg'
+  coverImage: 'cover.jpg',
+  bgImage: 'bg.jpg',
+  bgImage1: 'bg.jpg',
+  bgImage2: 'bg.jpg',
+  bgImage3: 'bg.jpg',
+  bgImage4: 'bg.jpg',
+  mapImage: 'map.svg',
+  gallery1: 'gallery1.jpg',
+  gallery2: 'gallery2.jpg',
+  gallery3: 'gallery3.jpg',
+  gallery4: 'gallery4.jpg'
 };
 
 // Current Active State
@@ -125,21 +125,24 @@ function loadSavedStateOrUrlParams() {
 
   // Always enforce Video.mp4 for royal wedding gate
   appState.gateVideo = 'Video.mp4';
-  if (!appState.coverImage) appState.coverImage = window.WEDDING_CONFIG?.images?.coverImage || 'assets/cover.jpg';
-  if (!appState.envelopeImage) appState.envelopeImage = window.WEDDING_CONFIG?.images?.envelopeImage || appState.coverImage || 'assets/cover.jpg';
-  if (!appState.entranceBg) appState.entranceBg = window.WEDDING_CONFIG?.images?.entranceBg || appState.bgImage || 'assets/bg.jpg';
-  if (!appState.bgImage1) appState.bgImage1 = window.WEDDING_CONFIG?.images?.bgImage1 || 'assets/bg.jpg';
-  if (!appState.bgImage2) appState.bgImage2 = window.WEDDING_CONFIG?.images?.bgImage2 || 'assets/bg.jpg';
-  if (!appState.bgImage3) appState.bgImage3 = window.WEDDING_CONFIG?.images?.bgImage3 || 'assets/bg.jpg';
-  if (!appState.bgImage4) appState.bgImage4 = window.WEDDING_CONFIG?.images?.bgImage4 || 'assets/bg.jpg';
-  if (!appState.gallery1) appState.gallery1 = window.WEDDING_CONFIG?.images?.gallery1 || 'assets/gallery1.jpg';
-  if (!appState.gallery2) appState.gallery2 = window.WEDDING_CONFIG?.images?.gallery2 || 'assets/gallery2.jpg';
-  if (!appState.gallery3) appState.gallery3 = window.WEDDING_CONFIG?.images?.gallery3 || 'assets/gallery3.jpg';
-  if (!appState.gallery4) appState.gallery4 = window.WEDDING_CONFIG?.images?.gallery4 || 'assets/gallery4.jpg';
+  if (!appState.coverImage) appState.coverImage = window.WEDDING_CONFIG?.images?.coverImage || 'cover.jpg';
+  if (!appState.envelopeImage) appState.envelopeImage = window.WEDDING_CONFIG?.images?.envelopeImage || appState.coverImage || 'cover.jpg';
+  if (!appState.entranceBg) appState.entranceBg = window.WEDDING_CONFIG?.images?.entranceBg || appState.bgImage || 'bg.jpg';
+  if (!appState.bgImage1) appState.bgImage1 = window.WEDDING_CONFIG?.images?.bgImage1 || 'bg.jpg';
+  if (!appState.bgImage2) appState.bgImage2 = window.WEDDING_CONFIG?.images?.bgImage2 || 'bg.jpg';
+  if (!appState.bgImage3) appState.bgImage3 = window.WEDDING_CONFIG?.images?.bgImage3 || 'bg.jpg';
+  if (!appState.bgImage4) appState.bgImage4 = window.WEDDING_CONFIG?.images?.bgImage4 || 'bg.jpg';
+  if (!appState.gallery1) appState.gallery1 = window.WEDDING_CONFIG?.images?.gallery1 || 'gallery1.jpg';
+  if (!appState.gallery2) appState.gallery2 = window.WEDDING_CONFIG?.images?.gallery2 || 'gallery2.jpg';
+  if (!appState.gallery3) appState.gallery3 = window.WEDDING_CONFIG?.images?.gallery3 || 'gallery3.jpg';
+  if (!appState.gallery4) appState.gallery4 = window.WEDDING_CONFIG?.images?.gallery4 || 'gallery4.jpg';
 
-  // 3. If guest parameter is in URL or if on guest.html, activate Guest View Mode
+  // 3. Guest Mode Detection: URL param, guest.html, or mobile device on public site
   const isGuestPage = window.location.pathname.includes('guest.html');
-  if (guestParam || isGuestPage || urlParams.get('mode') === 'guest' || urlParams.get('view') === 'guest') {
+  const isMobile = window.innerWidth <= 768;
+  const isExplicitAdmin = urlParams.get('admin') === 'true' || urlParams.get('edit') === '1';
+
+  if (guestParam || isGuestPage || urlParams.get('mode') === 'guest' || urlParams.get('view') === 'guest' || (!isExplicitAdmin && isMobile)) {
     if (guestParam) {
       // Replace underscores with spaces for clean URLs
       appState.guestName = decodeURIComponent(guestParam).replace(/_/g, ' ');
@@ -552,54 +555,80 @@ function bindImageUploads() {
   });
 }
 
+/**
+ * Safely set background image with automatic dual-path fallback (root vs assets/)
+ */
+function safeSetBg(element, primaryUrl, fallbackFilename) {
+  if (!element) return;
+  const url = primaryUrl || fallbackFilename;
+  if (!url) return;
+  if (url.startsWith('data:')) {
+    element.style.backgroundImage = `url('${url}')`;
+    return;
+  }
+
+  element.style.backgroundImage = `url('${url}')`;
+  const img = new Image();
+  img.onerror = () => {
+    const alt = url.startsWith('assets/') ? url.replace(/^assets\//, '') : ('assets/' + url);
+    element.style.backgroundImage = `url('${alt}')`;
+  };
+  img.src = url;
+}
+
+/**
+ * Safely set img element src with automatic dual-path fallback (root vs assets/)
+ */
+function safeSetImg(imgEl, primaryUrl, fallbackFilename) {
+  if (!imgEl) return;
+  const url = primaryUrl || fallbackFilename;
+  if (!url) return;
+  imgEl.src = url;
+  if (!url.startsWith('data:')) {
+    imgEl.onerror = () => {
+      imgEl.onerror = null;
+      const alt = url.startsWith('assets/') ? url.replace(/^assets\//, '') : ('assets/' + url);
+      imgEl.src = alt;
+    };
+  }
+}
+
 function updateEnvelopePhotoPreview() {
   const photo = document.getElementById('envelopePhotoImg');
-  if (photo) {
-    photo.src = appState.envelopeImage || appState.coverImage || 'assets/cover.jpg';
-  }
+  safeSetImg(photo, appState.envelopeImage || appState.coverImage, 'cover.jpg');
 }
 
 function updateEntranceBgPreview() {
   const bgBackdrop = document.getElementById('envelopeBgBackdrop');
-  if (bgBackdrop) {
-    const bgUrl = appState.entranceBg || appState.bgImage || 'assets/bg.jpg';
-    bgBackdrop.style.backgroundImage = `url('${bgUrl}')`;
-  }
+  safeSetBg(bgBackdrop, appState.entranceBg || appState.bgImage || appState.bgImage1, 'bg.jpg');
 }
 
 function updateCoverPreview() {
   const coverBg = document.getElementById('previewCoverBg');
-  if (coverBg) {
-    const url = appState.coverImage || 'assets/cover.jpg';
-    coverBg.style.backgroundImage = `url('${url}')`;
-  }
+  safeSetBg(coverBg, appState.coverImage, 'cover.jpg');
 }
 
 function updateBgPreview() {
   const bgConfigs = [
-    { id: 'previewBgSection2', img: appState.bgImage1 || appState.bgImage || 'assets/bg.jpg' },
-    { id: 'previewBgSection3', img: appState.bgImage2 || appState.bgImage || 'assets/bg.jpg' },
-    { id: 'previewBgSection4', img: appState.bgImage3 || appState.bgImage || 'assets/bg.jpg' },
-    { id: 'previewBgSection5', img: appState.bgImage4 || appState.bgImage || 'assets/bg.jpg' }
+    { id: 'previewBgSection2', img: appState.bgImage1 || appState.bgImage, def: 'bg.jpg' },
+    { id: 'previewBgSection3', img: appState.bgImage2 || appState.bgImage, def: 'bg.jpg' },
+    { id: 'previewBgSection4', img: appState.bgImage3 || appState.bgImage, def: 'bg.jpg' },
+    { id: 'previewBgSection5', img: appState.bgImage4 || appState.bgImage, def: 'bg.jpg' }
   ];
   bgConfigs.forEach(item => {
     const el = document.getElementById(item.id);
-    if (el) el.style.backgroundImage = `url('${item.img}')`;
+    safeSetBg(el, item.img, item.def);
   });
 }
 
 function updateMapPreview() {
   const mapImg = document.getElementById('previewMapImage');
-  if (mapImg) {
-    mapImg.src = appState.mapImage;
-  }
+  safeSetImg(mapImg, appState.mapImage, 'map.svg');
 }
 
 function updateGallerySlot(slotNum) {
   const imgEl = document.getElementById(`previewGallery${slotNum}`);
-  if (imgEl) {
-    imgEl.src = appState[`gallery${slotNum}`];
-  }
+  safeSetImg(imgEl, appState[`gallery${slotNum}`], `gallery${slotNum}.jpg`);
 }
 
 /**
@@ -1107,20 +1136,20 @@ window.WEDDING_CONFIG = {
   },
 
   images: {
-    envelopeImage: ${JSON.stringify(appState.envelopeImage || 'assets/cover.jpg')},
-    entranceBg: ${JSON.stringify(appState.entranceBg || 'assets/bg.jpg')},
+    envelopeImage: ${JSON.stringify(appState.envelopeImage || 'cover.jpg')},
+    entranceBg: ${JSON.stringify(appState.entranceBg || 'bg.jpg')},
     gateVideo: 'Video.mp4',
-    coverImage: ${JSON.stringify(appState.coverImage || 'assets/cover.jpg')},
-    bgImage: ${JSON.stringify(appState.bgImage || 'assets/bg.jpg')},
-    bgImage1: ${JSON.stringify(appState.bgImage1 || appState.bgImage || 'assets/bg.jpg')},
-    bgImage2: ${JSON.stringify(appState.bgImage2 || appState.bgImage || 'assets/bg.jpg')},
-    bgImage3: ${JSON.stringify(appState.bgImage3 || appState.bgImage || 'assets/bg.jpg')},
-    bgImage4: ${JSON.stringify(appState.bgImage4 || appState.bgImage || 'assets/bg.jpg')},
-    mapImage: ${JSON.stringify(appState.mapImage)},
-    gallery1: ${JSON.stringify(appState.gallery1)},
-    gallery2: ${JSON.stringify(appState.gallery2)},
-    gallery3: ${JSON.stringify(appState.gallery3)},
-    gallery4: ${JSON.stringify(appState.gallery4)}
+    coverImage: ${JSON.stringify(appState.coverImage || 'cover.jpg')},
+    bgImage: ${JSON.stringify(appState.bgImage || 'bg.jpg')},
+    bgImage1: ${JSON.stringify(appState.bgImage1 || 'bg.jpg')},
+    bgImage2: ${JSON.stringify(appState.bgImage2 || 'bg.jpg')},
+    bgImage3: ${JSON.stringify(appState.bgImage3 || 'bg.jpg')},
+    bgImage4: ${JSON.stringify(appState.bgImage4 || 'bg.jpg')},
+    mapImage: ${JSON.stringify(appState.mapImage || 'map.svg')},
+    gallery1: ${JSON.stringify(appState.gallery1 || 'gallery1.jpg')},
+    gallery2: ${JSON.stringify(appState.gallery2 || 'gallery2.jpg')},
+    gallery3: ${JSON.stringify(appState.gallery3 || 'gallery3.jpg')},
+    gallery4: ${JSON.stringify(appState.gallery4 || 'gallery4.jpg')}
   }
 };
 `;

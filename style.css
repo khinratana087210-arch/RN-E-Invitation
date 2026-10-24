@@ -766,11 +766,11 @@ textarea.form-control {
   box-sizing: border-box;
 }
 
-/* Background Texture for Sections 2, 3, 4, 5 */
 .section-pattern-bg {
   position: absolute;
   inset: 0;
-  background-image: url('assets/bg.jpg');
+  background-color: #fffdfa;
+  background-image: url('bg.jpg'), url('assets/bg.jpg');
   background-size: cover;
   background-repeat: repeat;
   background-position: center;
@@ -884,7 +884,8 @@ textarea.form-control {
 .cover-bg-image {
   position: absolute;
   inset: 0;
-  background-image: url('assets/cover.jpg');
+  background-color: #1a1610;
+  background-image: url('cover.jpg'), url('assets/cover.jpg');
   background-size: cover;
   background-position: center top;
   z-index: 1;
@@ -1524,10 +1525,11 @@ body.guest-view-mode .floating-admin-toggle {
   transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1), transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Entrance Background Photo Backdrop (ផ្ទៃ Background ខាងក្រោយ អាចដាក់រូបបាន) */
 .envelope-bg-backdrop {
   position: absolute;
   inset: 0;
+  background-color: #0d0f15;
+  background-image: url('bg.jpg'), url('assets/bg.jpg');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
