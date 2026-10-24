@@ -45,10 +45,8 @@ const defaultState = {
   guestColor: '#1a3250',
 
   // Images & Media (Fallback relative paths)
-  envelopeImage: 'assets/cover.jpg',     // រូបកណ្ដាល ១ (Main)
-  envelopeImage2: 'assets/gallery1.jpg', // រូបកណ្ដាល ២ (បន្ថែម)
-  envelopeImage3: 'assets/gallery2.jpg', // រូបកណ្ដាល ៣ (បន្ថែម)
-  envelopeImage4: '',                    // រូបកណ្ដាល ៤ (បន្ថែម)
+  envelopeImage: 'assets/cover.jpg',     // រូបកូនកំលោះកូនក្រមុំក្នុងរង្វង់លើធៀប
+  entranceBg: 'assets/bg.jpg',           // រូបភាពផ្ទៃខាងក្រោយ Background លើផ្ទាំងបើកធៀប
   gateVideo: 'Video.mp4',
   coverImage: 'assets/cover.jpg',
   bgImage: 'assets/bg.jpg',
@@ -125,18 +123,19 @@ function loadSavedStateOrUrlParams() {
     }
   }
 
-  // Ensure gateVideo and new bg textures fallback to WEDDING_CONFIG if localStorage had empty values
-  if ((!appState.gateVideo || appState.gateVideo === '') && window.WEDDING_CONFIG && window.WEDDING_CONFIG.images && window.WEDDING_CONFIG.images.gateVideo) {
-    appState.gateVideo = window.WEDDING_CONFIG.images.gateVideo;
-  }
-  if (!appState.envelopeImage && window.WEDDING_CONFIG?.images?.envelopeImage) appState.envelopeImage = window.WEDDING_CONFIG.images.envelopeImage;
-  if (!appState.envelopeImage2 && window.WEDDING_CONFIG?.images?.envelopeImage2) appState.envelopeImage2 = window.WEDDING_CONFIG.images.envelopeImage2;
-  if (!appState.envelopeImage3 && window.WEDDING_CONFIG?.images?.envelopeImage3) appState.envelopeImage3 = window.WEDDING_CONFIG.images.envelopeImage3;
-  if (!appState.envelopeImage4 && window.WEDDING_CONFIG?.images?.envelopeImage4) appState.envelopeImage4 = window.WEDDING_CONFIG.images.envelopeImage4;
-  if (!appState.bgImage1 && window.WEDDING_CONFIG?.images?.bgImage1) appState.bgImage1 = window.WEDDING_CONFIG.images.bgImage1;
-  if (!appState.bgImage2 && window.WEDDING_CONFIG?.images?.bgImage2) appState.bgImage2 = window.WEDDING_CONFIG.images.bgImage2;
-  if (!appState.bgImage3 && window.WEDDING_CONFIG?.images?.bgImage3) appState.bgImage3 = window.WEDDING_CONFIG.images.bgImage3;
-  if (!appState.bgImage4 && window.WEDDING_CONFIG?.images?.bgImage4) appState.bgImage4 = window.WEDDING_CONFIG.images.bgImage4;
+  // Always enforce Video.mp4 for royal wedding gate
+  appState.gateVideo = 'Video.mp4';
+  if (!appState.coverImage) appState.coverImage = window.WEDDING_CONFIG?.images?.coverImage || 'assets/cover.jpg';
+  if (!appState.envelopeImage) appState.envelopeImage = window.WEDDING_CONFIG?.images?.envelopeImage || appState.coverImage || 'assets/cover.jpg';
+  if (!appState.entranceBg) appState.entranceBg = window.WEDDING_CONFIG?.images?.entranceBg || appState.bgImage || 'assets/bg.jpg';
+  if (!appState.bgImage1) appState.bgImage1 = window.WEDDING_CONFIG?.images?.bgImage1 || 'assets/bg.jpg';
+  if (!appState.bgImage2) appState.bgImage2 = window.WEDDING_CONFIG?.images?.bgImage2 || 'assets/bg.jpg';
+  if (!appState.bgImage3) appState.bgImage3 = window.WEDDING_CONFIG?.images?.bgImage3 || 'assets/bg.jpg';
+  if (!appState.bgImage4) appState.bgImage4 = window.WEDDING_CONFIG?.images?.bgImage4 || 'assets/bg.jpg';
+  if (!appState.gallery1) appState.gallery1 = window.WEDDING_CONFIG?.images?.gallery1 || 'assets/gallery1.jpg';
+  if (!appState.gallery2) appState.gallery2 = window.WEDDING_CONFIG?.images?.gallery2 || 'assets/gallery2.jpg';
+  if (!appState.gallery3) appState.gallery3 = window.WEDDING_CONFIG?.images?.gallery3 || 'assets/gallery3.jpg';
+  if (!appState.gallery4) appState.gallery4 = window.WEDDING_CONFIG?.images?.gallery4 || 'assets/gallery4.jpg';
 
   // 3. If guest parameter is in URL or if on guest.html, activate Guest View Mode
   const isGuestPage = window.location.pathname.includes('guest.html');
@@ -156,6 +155,7 @@ function loadSavedStateOrUrlParams() {
       if (envTitle) envTitle.textContent = appState.eventTitle;
       if (envGuest) envGuest.textContent = appState.guestName;
       updateEnvelopePhotoPreview();
+      updateEntranceBgPreview();
     }
   }
 
@@ -214,9 +214,7 @@ function populateFormFields() {
 
   // Thumbnails & Media
   updateThumbnail('envelopeThumb', appState.envelopeImage);
-  updateThumbnail('envelopeThumb2', appState.envelopeImage2);
-  updateThumbnail('envelopeThumb3', appState.envelopeImage3);
-  updateThumbnail('envelopeThumb4', appState.envelopeImage4);
+  updateThumbnail('entranceBgThumb', appState.entranceBg || appState.bgImage || 'assets/bg.jpg');
   updateThumbnail('coverThumb', appState.coverImage);
   updateThumbnail('bgThumb1', appState.bgImage1 || appState.bgImage || 'assets/bg.jpg');
   updateThumbnail('bgThumb2', appState.bgImage2 || appState.bgImage || 'assets/bg.jpg');
@@ -228,8 +226,6 @@ function populateFormFields() {
   updateThumbnail('galleryThumb3', appState.gallery3);
   updateThumbnail('galleryThumb4', appState.gallery4);
 
-  const vThumb = document.getElementById('gateVideoThumb');
-  if (vThumb) vThumb.style.display = appState.gateVideo ? 'flex' : 'none';
 }
 
 function updateThumbnail(elemId, imgUrl) {
@@ -480,14 +476,50 @@ function applyTypographyStyles() {
 }
 
 /**
- * Handle File Uploads with instant Base64 preview
+ * Client-side Canvas Image Compression Helper
+ * បង្រួមរូបភាពស្វ័យប្រវត្តិកុំឲ្យលើសកំណត់ localStorage 5MB
+ */
+function compressImage(file, maxDimension, quality, callback) {
+  const reader = new FileReader();
+  reader.onload = e => {
+    if (file.type === 'image/svg+xml') {
+      return callback(e.target.result);
+    }
+    const img = new Image();
+    img.onload = () => {
+      let w = img.width;
+      let h = img.height;
+      if (w > maxDimension || h > maxDimension) {
+        if (w > h) {
+          h = Math.round((h * maxDimension) / w);
+          w = maxDimension;
+        } else {
+          w = Math.round((w * maxDimension) / h);
+          h = maxDimension;
+        }
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, w, h);
+      const compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
+      callback(compressedDataUrl);
+    };
+    img.onerror = () => callback(e.target.result);
+    img.src = e.target.result;
+  };
+  reader.onerror = () => callback(null);
+  reader.readAsDataURL(file);
+}
+
+/**
+ * Handle File Uploads with instant Base64 preview & auto-compression
  */
 function bindImageUploads() {
   const fileInputs = [
     { inputId: 'envelopeImageInput', key: 'envelopeImage', thumbId: 'envelopeThumb', updateFn: updateEnvelopePhotoPreview },
-    { inputId: 'envelopeImageInput2', key: 'envelopeImage2', thumbId: 'envelopeThumb2', updateFn: updateEnvelopePhotoPreview },
-    { inputId: 'envelopeImageInput3', key: 'envelopeImage3', thumbId: 'envelopeThumb3', updateFn: updateEnvelopePhotoPreview },
-    { inputId: 'envelopeImageInput4', key: 'envelopeImage4', thumbId: 'envelopeThumb4', updateFn: updateEnvelopePhotoPreview },
+    { inputId: 'entranceBgInput', key: 'entranceBg', thumbId: 'entranceBgThumb', updateFn: updateEntranceBgPreview },
     { inputId: 'coverImageInput', key: 'coverImage', thumbId: 'coverThumb', updateFn: updateCoverPreview },
     { inputId: 'bgImageInput1', key: 'bgImage1', thumbId: 'bgThumb1', updateFn: updateBgPreview },
     { inputId: 'bgImageInput2', key: 'bgImage2', thumbId: 'bgThumb2', updateFn: updateBgPreview },
@@ -507,187 +539,39 @@ function bindImageUploads() {
       const file = e.target.files[0];
       if (!file) return;
 
-      const reader = new FileReader();
-      reader.onload = evt => {
-        const dataUrl = evt.target.result;
+      showToast('កំពុងដំណើរការរូបភាព...');
+      compressImage(file, 1200, 0.82, dataUrl => {
+        if (!dataUrl) return;
         appState[item.key] = dataUrl;
         updateThumbnail(item.thumbId, dataUrl);
         item.updateFn();
         saveStateDebounced();
         showToast('បានផ្លាស់ប្ដូររូបភាពរួចរាល់!');
-      };
-      reader.readAsDataURL(file);
+      });
     });
   });
-
-  // Gate Opening Video File Upload
-  const gateVideoInput = document.getElementById('gateVideoInput');
-  if (gateVideoInput) {
-    gateVideoInput.addEventListener('change', e => {
-      const file = e.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = evt => {
-        appState.gateVideo = evt.target.result;
-        const vThumb = document.getElementById('gateVideoThumb');
-        if (vThumb) vThumb.style.display = 'flex';
-        const lbl = document.getElementById('gateVideoLabelText');
-        if (lbl) lbl.textContent = 'បានជ្រើសរើស Video រួចរាល់!';
-        const urlInput = document.getElementById('inputGateVideoUrl');
-        if (urlInput) urlInput.value = '';
-        saveStateDebounced();
-        showToast('បានផ្ទុកឡើងវីដេអូបើកទ្វាររួចរាល់!');
-      };
-      reader.readAsDataURL(file);
-    });
-  }
-
-  // Gate Opening Video URL input
-  const gateVideoUrl = document.getElementById('inputGateVideoUrl');
-  if (gateVideoUrl) {
-    gateVideoUrl.addEventListener('input', e => {
-      appState.gateVideo = e.target.value.trim();
-      const vThumb = document.getElementById('gateVideoThumb');
-      if (vThumb) vThumb.style.display = appState.gateVideo ? 'flex' : 'none';
-      saveStateDebounced();
-    });
-  }
-}
-
-/**
- * Multi-photo Arch Showcase & Auto Slideshow for Entrance Card
- */
-let currentEnvSlide = 0;
-let envSliderTimer = null;
-
-function getEnvelopePhotosList() {
-  const list = [
-    appState.envelopeImage,
-    appState.envelopeImage2,
-    appState.envelopeImage3,
-    appState.envelopeImage4
-  ].filter(src => src && typeof src === 'string' && src.trim() !== '');
-  
-  if (list.length === 0) {
-    return [appState.coverImage || 'assets/cover.jpg'];
-  }
-  return list;
 }
 
 function updateEnvelopePhotoPreview() {
-  const track = document.getElementById('envelopeSlidesTrack');
-  const dotsWrap = document.getElementById('envelopeSliderDots');
-  const prevBtn = document.getElementById('btnEnvPrev');
-  const nextBtn = document.getElementById('btnEnvNext');
-  const legacyImg = document.getElementById('envelopePhotoImg');
-
-  const photos = getEnvelopePhotosList();
-  if (currentEnvSlide >= photos.length) currentEnvSlide = 0;
-
-  if (legacyImg) {
-    legacyImg.src = photos[currentEnvSlide] || photos[0];
+  const photo = document.getElementById('envelopePhotoImg');
+  if (photo) {
+    photo.src = appState.envelopeImage || appState.coverImage || 'assets/cover.jpg';
   }
-
-  if (track) {
-    track.innerHTML = photos.map((src, idx) => `
-      <img src="${src}" alt="កូនកំលោះកូនក្រមុំ ${idx + 1}" class="envelope-slide-img ${idx === currentEnvSlide ? 'active' : ''}" data-idx="${idx}">
-    `).join('');
-  }
-
-  if (dotsWrap) {
-    if (photos.length > 1) {
-      dotsWrap.innerHTML = photos.map((_, idx) => `
-        <button type="button" class="envelope-dot ${idx === currentEnvSlide ? 'active' : ''}" data-idx="${idx}" aria-label="រូបទី ${idx + 1}"></button>
-      `).join('');
-      dotsWrap.style.display = 'flex';
-
-      dotsWrap.querySelectorAll('.envelope-dot').forEach(dot => {
-        dot.onclick = (e) => {
-          e.stopPropagation();
-          setEnvelopeSlide(parseInt(dot.getAttribute('data-idx'), 10));
-        };
-      });
-    } else {
-      dotsWrap.innerHTML = '';
-      dotsWrap.style.display = 'none';
-    }
-  }
-
-  if (prevBtn && nextBtn) {
-    if (photos.length > 1) {
-      prevBtn.style.display = 'flex';
-      nextBtn.style.display = 'flex';
-      prevBtn.onclick = (e) => {
-        e.stopPropagation();
-        changeEnvelopeSlide(-1);
-      };
-      nextBtn.onclick = (e) => {
-        e.stopPropagation();
-        changeEnvelopeSlide(1);
-      };
-    } else {
-      prevBtn.style.display = 'none';
-      nextBtn.style.display = 'none';
-    }
-  }
-
-  const archFrame = document.getElementById('envelopeArchFrame');
-  if (archFrame) {
-    archFrame.onclick = (e) => {
-      if (e.target.closest('.env-nav-btn')) return;
-      if (photos.length > 1) changeEnvelopeSlide(1);
-    };
-  }
-
-  restartEnvelopeSliderTimer(photos.length);
 }
 
-function setEnvelopeSlide(index) {
-  const photos = getEnvelopePhotosList();
-  if (photos.length <= 1) return;
-  currentEnvSlide = (index + photos.length) % photos.length;
-
-  const slides = document.querySelectorAll('#envelopeSlidesTrack .envelope-slide-img');
-  slides.forEach((img, idx) => {
-    if (idx === currentEnvSlide) {
-      img.classList.add('active');
-    } else {
-      img.classList.remove('active');
-    }
-  });
-
-  const dots = document.querySelectorAll('#envelopeSliderDots .envelope-dot');
-  dots.forEach((dot, idx) => {
-    if (idx === currentEnvSlide) {
-      dot.classList.add('active');
-    } else {
-      dot.classList.remove('active');
-    }
-  });
-
-  const legacyImg = document.getElementById('envelopePhotoImg');
-  if (legacyImg) legacyImg.src = photos[currentEnvSlide];
-
-  restartEnvelopeSliderTimer(photos.length);
-}
-
-function changeEnvelopeSlide(step) {
-  setEnvelopeSlide(currentEnvSlide + step);
-}
-
-function restartEnvelopeSliderTimer(photoCount) {
-  if (envSliderTimer) clearInterval(envSliderTimer);
-  if (photoCount > 1) {
-    envSliderTimer = setInterval(() => {
-      changeEnvelopeSlide(1);
-    }, 3200);
+function updateEntranceBgPreview() {
+  const bgBackdrop = document.getElementById('envelopeBgBackdrop');
+  if (bgBackdrop) {
+    const bgUrl = appState.entranceBg || appState.bgImage || 'assets/bg.jpg';
+    bgBackdrop.style.backgroundImage = `url('${bgUrl}')`;
   }
 }
 
 function updateCoverPreview() {
   const coverBg = document.getElementById('previewCoverBg');
   if (coverBg) {
-    coverBg.style.backgroundImage = `url('${appState.coverImage}')`;
+    const url = appState.coverImage || 'assets/cover.jpg';
+    coverBg.style.backgroundImage = `url('${url}')`;
   }
 }
 
@@ -749,6 +633,7 @@ function updateFullPreview() {
 
   // Images
   updateEnvelopePhotoPreview();
+  updateEntranceBgPreview();
   updateCoverPreview();
   updateBgPreview();
   updateMapPreview();
@@ -888,6 +773,26 @@ function bindViewButtons() {
     });
   }
 
+  const domainModalInput = document.getElementById('modalDomainInput');
+  const btnSaveDomain = document.getElementById('btnSaveDomain');
+  if (domainModalInput) {
+    domainModalInput.addEventListener('input', e => {
+      localStorage.setItem('wedding_custom_domain', e.target.value.trim());
+      const guestInput = document.getElementById('modalGuestInput');
+      updateGeneratedLink(guestInput ? guestInput.value : appState.guestName);
+    });
+  }
+  if (btnSaveDomain) {
+    btnSaveDomain.addEventListener('click', () => {
+      if (domainModalInput) {
+        localStorage.setItem('wedding_custom_domain', domainModalInput.value.trim());
+        const guestInput = document.getElementById('modalGuestInput');
+        updateGeneratedLink(guestInput ? guestInput.value : appState.guestName);
+        showToast('បានរក្សាទុក Domain ជោគជ័យ!');
+      }
+    });
+  }
+
   const guestModalInput = document.getElementById('modalGuestInput');
   if (guestModalInput) {
     guestModalInput.addEventListener('input', e => {
@@ -970,7 +875,7 @@ function bindViewButtons() {
 }
 
 /**
- * Trigger Royal Wedding Gate Opening with 3D Doors Animation or Video Effect
+ * Trigger Royal Wedding Gate Opening with Video.mp4 directly
  */
 function triggerWeddingGateOpening() {
   const overlay = document.getElementById('envelopeOverlay');
@@ -984,9 +889,9 @@ function triggerWeddingGateOpening() {
     toggleAudio();
   }
 
-  // 1. If Video Effect is configured (MP4/WebM file or URL)
-  if (appState.gateVideo && video) {
-    video.src = appState.gateVideo;
+  // Directly use Video.mp4 as requested
+  if (video) {
+    video.src = 'Video.mp4';
     video.style.display = 'block';
     video.currentTime = 0;
 
@@ -997,13 +902,37 @@ function triggerWeddingGateOpening() {
       card.style.pointerEvents = 'none';
     }
 
-    video.play().then(() => {
-      video.classList.add('playing');
-      if (btnSkip) btnSkip.style.display = 'block';
-    }).catch(err => {
-      console.warn('Video auto-play blocked, using 3D gate fallback:', err);
-      run3DGateAnimation(overlay);
-    });
+    const tryPlay = () => {
+      video.play().then(() => {
+        video.classList.add('playing');
+        if (btnSkip) btnSkip.style.display = 'block';
+      }).catch(err => {
+        console.warn('Video auto-play blocked, trying fallback assets/Video.mp4:', err);
+        if (!video.src.includes('assets/')) {
+          video.src = 'assets/Video.mp4';
+          video.play().then(() => {
+            video.classList.add('playing');
+            if (btnSkip) btnSkip.style.display = 'block';
+          }).catch(e => {
+            console.warn('Fallback video blocked, running doors fallback:', e);
+            run3DGateAnimation(overlay);
+          });
+        } else {
+          run3DGateAnimation(overlay);
+        }
+      });
+    };
+
+    video.onerror = () => {
+      if (!video.src.includes('assets/')) {
+        video.src = 'assets/Video.mp4';
+        tryPlay();
+      } else {
+        run3DGateAnimation(overlay);
+      }
+    };
+
+    tryPlay();
 
     let hasEnded = false;
     const endVideo = () => {
@@ -1032,7 +961,7 @@ function triggerWeddingGateOpening() {
     return;
   }
 
-  // 2. Built-in Majestic 3D Double Khmer Doors Animation
+  // Built-in Majestic 3D Double Khmer Doors Animation fallback
   run3DGateAnimation(overlay);
 }
 
@@ -1051,9 +980,25 @@ function run3DGateAnimation(overlay) {
 
 function openShareModal() {
   const modal = document.getElementById('shareModal');
+  const domainInput = document.getElementById('modalDomainInput');
   const guestInput = document.getElementById('modalGuestInput');
-  if (guestInput) guestInput.value = appState.guestName;
-  updateGeneratedLink(appState.guestName);
+
+  if (domainInput) {
+    const saved = localStorage.getItem('wedding_custom_domain');
+    if (saved) {
+      domainInput.value = saved;
+    } else if (window.location.protocol.startsWith('http') && window.location.origin && window.location.origin !== 'null') {
+      domainInput.value = window.location.origin;
+    } else {
+      domainInput.value = '';
+    }
+  }
+
+  if (guestInput) {
+    guestInput.value = appState.guestName;
+  }
+
+  updateGeneratedLink(guestInput ? guestInput.value : appState.guestName);
   if (modal) modal.classList.add('active');
 }
 
@@ -1063,22 +1008,44 @@ function closeShareModal() {
 }
 
 /**
+ * Get Base Domain safely without "null/E:..." mess
+ */
+function getBaseGuestUrl() {
+  // 1. Check if user configured a custom domain or Render URL
+  const savedDomain = localStorage.getItem('wedding_custom_domain');
+  if (savedDomain && savedDomain.trim()) {
+    let d = savedDomain.trim().replace(/\/+$/, '');
+    if (!d.startsWith('http://') && !d.startsWith('https://')) {
+      d = 'https://' + d;
+    }
+    return `${d}/guest.html`;
+  }
+
+  // 2. If running via HTTP/HTTPS (e.g. Render, Vercel, or local Python server)
+  if (window.location.protocol.startsWith('http') && window.location.origin && window.location.origin !== 'null') {
+    let path = window.location.pathname.replace(/\/index\.html$/, '').replace(/\/+$/, '');
+    return `${window.location.origin}${path}/guest.html`;
+  }
+
+  // 3. Clean fallback for file:/// protocol so it never produces "null/E:/..."
+  return 'http://localhost:8000/guest.html';
+}
+
+/**
  * Generate clean, human-readable guest invitation link & Telegram message
  */
 function updateGeneratedLink(guestName) {
-  let baseUrl = window.location.origin + window.location.pathname;
-  
-  // Format clean link targeting guest.html or current path
-  if (!baseUrl.includes('guest.html') && !baseUrl.endsWith('/')) {
-    baseUrl = baseUrl.replace(/index\.html$/, 'guest.html');
-  }
+  const baseGuestUrl = getBaseGuestUrl();
+  const cleanGuest = (guestName || appState.guestName || 'ភ្ញៀវកិត្តិយស').trim();
+  const guestSlug = cleanGuest.replace(/\s+/g, '_');
 
-  const cleanGuest = (guestName || 'ភ្ញៀវកិត្តិយស').trim();
-  // Clean readable URL without %E1%9E... mess
-  const cleanUrl = `${baseUrl}?guest=${encodeURI(cleanGuest.replace(/\s+/g, '_'))}`;
+  // Readable URL with Khmer text for visual inspection and easy copying
+  const readableUrl = `${baseGuestUrl}?guest=${guestSlug}`;
+  // Encoded URL for web links/browsers/Telegram
+  const webLinkUrl = `${baseGuestUrl}?guest=${encodeURIComponent(guestSlug)}`;
 
   const linkInput = document.getElementById('modalGeneratedLink');
-  if (linkInput) linkInput.value = cleanUrl;
+  if (linkInput) linkInput.value = readableUrl;
 
   const fullMessage = `💍 ${appState.eventTitle} 💍\n` +
     `កូនកំលោះ៖ ${appState.groomKhmer} & កូនក្រមុំ៖ ${appState.brideKhmer}\n\n` +
@@ -1086,18 +1053,15 @@ function updateGeneratedLink(guestName) {
     `ចូលរួមជាអធិបតី និងជាភ្ញៀវកិត្តិយស ក្នុងពិធីសិរីមង្គលអាពាហ៍ពិពាហ៍\n\n` +
     `📅 កាលបរិច្ឆេទ៖ ${appState.dateFullKhmer}\n` +
     `📍 ទីតាំង៖ ${appState.venueName}\n\n` +
-    `👉 សូមចុចតំណភ្ជាប់ខាងក្រោម ដើម្បីបើកមើលធៀបការឌីជីថល៖\n${cleanUrl}`;
+    `👉 សូមចុចតំណភ្ជាប់ខាងក្រោម ដើម្បីបើកមើលធៀបការឌីជីថល៖\n${readableUrl}`;
 
   const msgArea = document.getElementById('modalShareMessage');
   if (msgArea) msgArea.value = fullMessage;
 
-  const encodedUrl = encodeURIComponent(cleanUrl);
-  const encodedText = encodeURIComponent(fullMessage);
-  
   const tgBtn = document.getElementById('shareTelegram');
   const fbBtn = document.getElementById('shareFacebook');
-  if (tgBtn) tgBtn.href = `https://t.me/share/url?url=${encodedUrl}&text=${encodedText}`;
-  if (fbBtn) fbBtn.href = `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`;
+  if (tgBtn) tgBtn.href = `https://t.me/share/url?url=${encodeURIComponent(webLinkUrl)}&text=${encodeURIComponent(fullMessage)}`;
+  if (fbBtn) fbBtn.href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(webLinkUrl)}`;
 }
 
 /**
@@ -1144,11 +1108,9 @@ window.WEDDING_CONFIG = {
 
   images: {
     envelopeImage: ${JSON.stringify(appState.envelopeImage || 'assets/cover.jpg')},
-    envelopeImage2: ${JSON.stringify(appState.envelopeImage2 || '')},
-    envelopeImage3: ${JSON.stringify(appState.envelopeImage3 || '')},
-    envelopeImage4: ${JSON.stringify(appState.envelopeImage4 || '')},
-    gateVideo: ${JSON.stringify(appState.gateVideo || '')},
-    coverImage: ${JSON.stringify(appState.coverImage)},
+    entranceBg: ${JSON.stringify(appState.entranceBg || 'assets/bg.jpg')},
+    gateVideo: 'Video.mp4',
+    coverImage: ${JSON.stringify(appState.coverImage || 'assets/cover.jpg')},
     bgImage: ${JSON.stringify(appState.bgImage || 'assets/bg.jpg')},
     bgImage1: ${JSON.stringify(appState.bgImage1 || appState.bgImage || 'assets/bg.jpg')},
     bgImage2: ${JSON.stringify(appState.bgImage2 || appState.bgImage || 'assets/bg.jpg')},
@@ -1349,20 +1311,14 @@ function exportInvitationHTML() {
 <body class="guest-view-mode">
   <!-- Ceremonial Royal Wedding Gate & Entrance Overlay -->
   <div class="envelope-overlay" id="envelopeOverlay">
+    <div class="envelope-bg-backdrop" id="envelopeBgBackdrop" style="background-image: url('${appState.entranceBg || appState.bgImage || 'assets/bg.jpg'}');"></div>
     <video id="gateOpeningVideo" class="gate-opening-video" playsinline preload="auto" style="display: none;"></video>
     <div class="gate-light-rays" id="gateLightRays"></div>
     <!-- Center Grand Invitation Welcome Card -->
     <div class="envelope-card" id="envelopeCard">
-      <div class="envelope-showcase-container">
-        <div class="envelope-arch-frame" id="envelopeArchFrame">
-          <div class="envelope-slides-track" id="envelopeSlidesTrack">
-            <img src="${appState.envelopeImage || appState.coverImage || 'assets/cover.jpg'}" alt="កូនកំលោះកូនក្រមុំ" class="envelope-slide-img active" id="envelopePhotoImg">
-          </div>
-          <button type="button" class="env-nav-btn prev" id="btnEnvPrev" aria-label="Previous Photo">❮</button>
-          <button type="button" class="env-nav-btn next" id="btnEnvNext" aria-label="Next Photo">❯</button>
-          <div class="frame-gold-border"></div>
-        </div>
-        <div class="envelope-dots-wrap" id="envelopeSliderDots"></div>
+      <div class="envelope-photo-frame">
+        <img src="${appState.envelopeImage || 'assets/cover.jpg'}" alt="កូនកំលោះកូនក្រមុំ" id="envelopePhotoImg" class="envelope-photo-img">
+        <div class="frame-gold-border"></div>
       </div>
       <h2 class="envelope-title" id="envelopeEventTitle">${appState.eventTitle}</h2>
       <p class="envelope-subtitle">លិខិតអញ្ជើញឌីជីថល E-Invitation</p>
@@ -1419,6 +1375,7 @@ function saveStateDebounced() {
       localStorage.setItem('khmer_e_invitation_state', JSON.stringify(appState));
     } catch (e) {
       console.warn('LocalStorage save failed:', e);
+      showToast('⚠️ ការចងចាំ Browser ពេញ! សូមចុចប៊ូតុង "រក្សាទុក config.js"');
     }
-  }, 400);
+  }, 250);
 }

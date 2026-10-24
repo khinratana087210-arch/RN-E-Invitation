@@ -1515,15 +1515,35 @@ body.guest-view-mode .floating-admin-toggle {
   position: fixed;
   inset: 0;
   z-index: 999;
-  background: 
-    radial-gradient(circle at 50% 35%, rgba(184, 122, 20, 0.28) 0%, transparent 60%),
-    radial-gradient(circle at center, #1b202c 0%, #0b0d13 100%);
+  background: #0d0f15;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 20px;
   overflow: hidden;
   transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1), transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Entrance Background Photo Backdrop (ផ្ទៃ Background ខាងក្រោយ អាចដាក់រូបបាន) */
+.envelope-bg-backdrop {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  filter: brightness(0.45) saturate(1.15);
+  transform: scale(1.05);
+  z-index: 0;
+  transition: opacity 0.8s ease;
+}
+
+.envelope-overlay::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(20, 24, 33, 0.42) 0%, rgba(10, 12, 16, 0.85) 100%);
+  z-index: 1;
+  pointer-events: none;
 }
 
 /* Background Golden Light Burst Behind Card */
@@ -1533,7 +1553,7 @@ body.guest-view-mode .floating-admin-toggle {
   width: 220%;
   height: 220%;
   background: radial-gradient(circle at center, rgba(255, 230, 140, 0.85) 0%, rgba(245, 175, 40, 0.5) 28%, rgba(212, 139, 17, 0.15) 50%, transparent 70%);
-  z-index: 1;
+  z-index: 2;
   opacity: 0;
   transform: scale(0.5) rotate(0deg);
   transition: opacity 1.2s ease, transform 2.2s cubic-bezier(0.2, 0.8, 0.2, 1);
@@ -1587,7 +1607,7 @@ body.guest-view-mode .floating-admin-toggle {
 /* Grand Welcome Card */
 .envelope-card {
   width: 100%;
-  max-width: 410px;
+  max-width: 400px;
   background: linear-gradient(135deg, #fefcf7 0%, #f7f1e1 50%, #eee3c8 100%);
   border-radius: 24px;
   padding: 28px 24px 26px 24px;
@@ -1612,145 +1632,18 @@ body.guest-view-mode .floating-admin-toggle {
   pointer-events: none;
 }
 
-/* Couple Multi-Photo Arch Showcase (កន្លែងដាក់រូបគូស្នេហ៍កណ្ដាល - អាចដាក់បានច្រើនរូប) */
-.envelope-showcase-container {
+/* Couple Photo Frame on Entrance Card (Circular Gold Frame) */
+.envelope-photo-frame {
+  width: 124px;
+  height: 124px;
   margin: 0 auto 16px auto;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
   position: relative;
-}
-
-.envelope-arch-frame {
-  width: 140px;
-  height: 168px;
-  position: relative;
-  border-radius: 70px 70px 18px 18px;
+  border-radius: 50%;
   padding: 4px;
   background: linear-gradient(135deg, #ffe699 0%, #d89924 45%, #8c570b 100%);
   box-shadow: 
-    0 12px 30px rgba(0, 0, 0, 0.38),
-    0 0 25px rgba(235, 180, 72, 0.5);
-  overflow: hidden;
-  cursor: pointer;
-}
-
-.envelope-slides-track {
-  width: 100%;
-  height: 100%;
-  position: relative;
-  border-radius: 66px 66px 14px 14px;
-  overflow: hidden;
-  background: #2a1603;
-}
-
-.envelope-slide-img {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: 66px 66px 14px 14px;
-  opacity: 0;
-  transform: scale(1.06);
-  transition: opacity 0.7s ease-in-out, transform 0.7s ease-in-out;
-  pointer-events: none;
-}
-
-.envelope-slide-img.active {
-  opacity: 1;
-  transform: scale(1);
-  pointer-events: auto;
-}
-
-/* Left / Right Nav Arrows inside Arch */
-.env-nav-btn {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  background: rgba(0, 0, 0, 0.55);
-  border: 1px solid rgba(255, 216, 117, 0.7);
-  color: #ffd875;
-  font-size: 13px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  opacity: 0;
-  transition: opacity 0.2s, background 0.2s;
-  z-index: 10;
-  backdrop-filter: blur(4px);
-  padding: 0;
-  line-height: 1;
-}
-
-.envelope-arch-frame:hover .env-nav-btn,
-.envelope-showcase-container:focus-within .env-nav-btn {
-  opacity: 0.9;
-}
-
-.env-nav-btn:hover {
-  background: rgba(223, 158, 40, 0.95);
-  color: #1a1005;
-  opacity: 1 !important;
-}
-
-.env-nav-btn.prev {
-  left: 6px;
-}
-
-.env-nav-btn.next {
-  right: 6px;
-}
-
-/* Arch Frame Gold Border Animation */
-.envelope-arch-frame .frame-gold-border {
-  position: absolute;
-  inset: -2px;
-  border-radius: 72px 72px 20px 20px;
-  border: 1.5px dashed rgba(255, 230, 150, 0.85);
-  pointer-events: none;
-}
-
-/* Dot Indicators */
-.envelope-dots-wrap {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  margin-top: 8px;
-  min-height: 10px;
-}
-
-.envelope-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 4px;
-  background: rgba(184, 122, 20, 0.35);
-  border: 1px solid rgba(247, 198, 86, 0.5);
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.envelope-dot.active {
-  width: 22px;
-  background: linear-gradient(90deg, #f59e0b, #ffd875);
-  border-color: #ffe699;
-  box-shadow: 0 0 8px rgba(245, 158, 11, 0.8);
-}
-
-/* Legacy fallback frame compatibility */
-.envelope-photo-frame {
-  width: 130px;
-  height: 130px;
-  margin: 0 auto 16px auto;
-  position: relative;
-  border-radius: 50%;
-  padding: 4px;
-  background: linear-gradient(135deg, #ffe699 0%, #d89924 45%, #8c570b 100%);
+    0 10px 25px rgba(0, 0, 0, 0.35),
+    0 0 20px rgba(235, 180, 72, 0.55);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1759,9 +1652,20 @@ body.guest-view-mode .floating-admin-toggle {
 .envelope-photo-img {
   width: 100%;
   height: 100%;
-  border-radius: inherit;
+  border-radius: 50%;
   object-fit: cover;
+  border: 2px solid #fffdf7;
   display: block;
+  background: #2a1603;
+}
+
+.frame-gold-border {
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 1.5px dashed rgba(255, 230, 150, 0.85);
+  pointer-events: none;
+  animation: rotateSlow 24s linear infinite;
 }
 
 @keyframes rotateSlow {

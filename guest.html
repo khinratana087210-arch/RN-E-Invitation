@@ -16,6 +16,9 @@
 
   <!-- Ceremonial Royal Wedding Gate & Entrance Overlay (ទ្វារមង្គលការ 3D & វីដេអូបើកទ្វារ) -->
   <div class="envelope-overlay" id="envelopeOverlay">
+    <!-- Entrance Background Photo (ផ្ទៃ Background ខាងក្រោយ អាចដាក់រូបបាន) -->
+    <div class="envelope-bg-backdrop" id="envelopeBgBackdrop"></div>
+
     <video id="gateOpeningVideo" class="gate-opening-video" playsinline webkit-playsinline preload="auto" style="display: none;"></video>
     <button type="button" class="video-skip-btn" id="btnSkipVideo" style="display: none;">រំលង Skip ⏭️</button>
 
@@ -24,18 +27,10 @@
 
     <!-- Center Grand Invitation Welcome Card -->
     <div class="envelope-card" id="envelopeCard">
-      <!-- Couple Photos Arch Showcase (កន្លែងដាក់រូបគូស្នេហ៍កណ្ដាល - អាចដាក់បានច្រើនរូប) -->
-      <div class="envelope-showcase-container">
-        <div class="envelope-arch-frame" id="envelopeArchFrame">
-          <div class="envelope-slides-track" id="envelopeSlidesTrack">
-            <img src="assets/cover.jpg" alt="កូនកំលោះកូនក្រមុំ" class="envelope-slide-img active" id="envelopePhotoImg">
-          </div>
-          <button type="button" class="env-nav-btn prev" id="btnEnvPrev" aria-label="Previous Photo">❮</button>
-          <button type="button" class="env-nav-btn next" id="btnEnvNext" aria-label="Next Photo">❯</button>
-          <div class="frame-gold-border"></div>
-        </div>
-        <!-- Dot Indicators for multiple photos -->
-        <div class="envelope-dots-wrap" id="envelopeSliderDots"></div>
+      <!-- Couple Photo Frame on Entrance Card (រូបកូនកំលោះកូនក្រមុំកណ្ដាល) -->
+      <div class="envelope-photo-frame">
+        <img src="assets/cover.jpg" alt="កូនកំលោះកូនក្រមុំ" id="envelopePhotoImg" class="envelope-photo-img">
+        <div class="frame-gold-border"></div>
       </div>
 
       <h2 class="envelope-title" id="envelopeEventTitle">សិរីមង្គលអាពាហ៍ពិពាហ៍</h2>
