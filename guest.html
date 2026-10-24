@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>សិរីមង្គលអាពាហ៍ពិពាហ៍ - E-Invitation</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Battambang:wght@400;700&family=Cinzel:wght@500;700&family=Great+Vibes&family=Kantumruy+Pro:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Moul&family=Playfair+Display:ital,wght@0,600;1,500&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="guest-view-mode">
+
+  <!-- Ceremonial Envelope Opening Screen -->
+  <div class="envelope-overlay" id="envelopeOverlay">
+    <div class="envelope-card">
+      <div class="envelope-kbach">💍</div>
+      <h2 class="envelope-title" id="envelopeEventTitle">សិរីមង្គលអាពាហ៍ពិពាហ៍</h2>
+      <p class="envelope-subtitle">លិខិតអញ្ជើញឌីជីថល E-Invitation</p>
+      
+      <div class="envelope-guest-badge">
+        <span style="font-size: 13px; color: #83561a; display: block; margin-bottom: 2px;">សូមគោរពអញ្ជើញ</span>
+        <strong class="envelope-guest-name" id="envelopeGuestName">ភ្ញៀវកិត្តិយស</strong>
+      </div>
+
+      <button type="button" class="envelope-open-btn" id="btnOpenEnvelope">
+        <span>💌 ចុចបើកធៀបការ</span>
+      </button>
+    </div>
+  </div>
+
+  <main class="app-main">
+    <section class="preview-panel">
+      <div class="phone-mockup-wrapper">
+        <div class="phone-device">
+          
+          <div class="phone-island">
+            <div class="island-camera"></div>
+            <div class="island-speaker"></div>
+          </div>
+
+          <div class="phone-screen" id="phoneScreen">
+            
+            <!-- Audio Toggle Button -->
+            <button type="button" class="floating-music-btn" id="floatingMusicBtn" title="ចាក់/ផ្អាក តន្ត្រី">
+              <span class="music-disc">🎵</span>
+            </button>
+
+            <!-- 1. COVER SECTION -->
+            <section class="invitation-section screen-cover" id="section-cover">
+              <div class="cover-bg-image" id="previewCoverBg"></div>
+              <div class="cover-gradient-overlay"></div>
+
+              <div class="cover-content">
+                <div class="cover-top-header">
+                  <h2 class="cover-title-khmer" id="previewCoverTitle">សិរីមង្គលអាពាហ៍ពិពាហ៍</h2>
+                  
+                  <div class="cover-couple-names" id="previewCoverCouple">
+                    <span class="couple-name groom" id="previewCoverGroom">ប្រុស តូច</span>
+                    <span class="couple-ampersand">និង</span>
+                    <span class="couple-name bride" id="previewCoverBride">ខៀវ ពេជ្រចរណៃ</span>
+                  </div>
+                </div>
+
+                <div class="cover-bottom-area">
+                  <div class="guest-salutation" id="previewCoverSalutation">សូមគោរពអញ្ជើញ</div>
+                  
+                  <div class="guest-golden-capsule">
+                    <span class="guest-name-text" id="previewCoverGuest">ភ្ញៀវកិត្តិយស</span>
+                  </div>
+
+                  <p class="cover-date-text" id="previewCoverDate">ថ្ងៃព្រហស្បតិ៍ ទី១០ ខែធ្នូ ឆ្នាំ២០២៦ វេលាម៉ោង ៥:០០ ល្ងាច</p>
+
+                  <div class="scroll-down-badge" onclick="scrollToPreviewSection('section-countdown')">
+                    <div class="scroll-hand">👆</div>
+                    <div class="scroll-labels">
+                      <span class="scroll-km">សូមអូសចុះក្រោម</span>
+                      <span class="scroll-en">Scroll down</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- 2. COUNTDOWN SECTION -->
+            <section class="invitation-section screen-invitation" id="section-countdown">
+              <div class="section-pattern-bg" id="previewBgSection2"></div>
+              
+              <div class="section-inner-container">
+                <div class="couple-formal-names">
+                  <div class="role-box">
+                    <span class="role-title">កូនប្រុស</span>
+                    <h3 class="role-name groom-color" id="previewFormalGroom">ប្រុស តូច</h3>
+                    <span class="role-latin" id="previewFormalGroomLatin">Pros Toch</span>
+                  </div>
+
+                  <div class="heart-symbol-box">
+                    <svg class="golden-heart" viewBox="0 0 40 40" width="36" height="36">
+                      <path d="M 20 32 C 10 24 4 17 4 10.5 C 4 5 8 2 13 2 C 16.5 2 19 4 20 6.5 C 21 4 23.5 2 27 2 C 32 2 36 5 36 10.5 C 36 17 30 24 20 32 Z" fill="none" stroke="#d49a37" stroke-width="2.5" stroke-linecap="round"/>
+                    </svg>
+                  </div>
+
+                  <div class="role-box">
+                    <span class="role-title">កូនស្រី</span>
+                    <h3 class="role-name bride-color" id="previewFormalBride">ខៀវ ពេជ្រចរណៃ</h3>
+                    <span class="role-latin" id="previewFormalBrideLatin">Khiev Pich Chorai</span>
+                  </div>
+                </div>
+
+                <div class="formal-invitation-body">
+                  <p class="invite-lead" id="previewInviteBody">យើងខ្ញុំមានកិត្តិយសសូមគោរពអញ្ជើញ</p>
+                  <div class="guest-callout" id="previewFormalGuest">ភ្ញៀវកិត្តិយស</div>
+                </div>
+
+                <div class="divider-ornament">
+                  <img src="assets/divider.svg" alt="Gold Divider" class="divider-img">
+                </div>
+
+                <div class="countdown-wrapper">
+                  <h4 class="countdown-heading">ចំនួនថ្ងៃរាប់ថយក្រោយ</h4>
+                  <p class="countdown-date-sub" id="previewCountdownDate">ថ្ងៃព្រហស្បតិ៍ ទី១០ ខែធ្នូ ឆ្នាំ២០២៦ វេលាម៉ោង ៥:០០ ល្ងាច</p>
+
+                  <div class="countdown-boxes-row">
+                    <div class="cd-box">
+                      <span class="cd-number" id="cdDays">២៧</span>
+                      <span class="cd-unit">ថ្ងៃ</span>
+                    </div>
+                    <div class="cd-box">
+                      <span class="cd-number" id="cdHours">៦</span>
+                      <span class="cd-unit">ម៉ោង</span>
+                    </div>
+                    <div class="cd-box">
+                      <span class="cd-number" id="cdMinutes">៥៧</span>
+                      <span class="cd-unit">នាទី</span>
+                    </div>
+                    <div class="cd-box">
+                      <span class="cd-number" id="cdSeconds">៤៨</span>
+                      <span class="cd-unit">វិនាទី</span>
+                    </div>
+                  </div>
+
+                  <button type="button" class="gold-ribbon-btn" id="btnAddToCalendar">
+                    <span class="ribbon-label">កត់ចូលក្នុងប្រតិទិនអ្នក</span>
+                  </button>
+                </div>
+              </div>
+            </section>
+
+            <!-- 3. LOCATION & MAP -->
+            <section class="invitation-section screen-location" id="section-map">
+              <div class="section-pattern-bg" id="previewBgSection3"></div>
+
+              <div class="section-inner-container">
+                <div class="location-header">
+                  <h3 class="gold-header-title">ទីតាំងកម្មវិធី</h3>
+                  <h4 class="venue-title-text" id="previewVenueName">ភោជនីយដ្ឋាន សេនរេប្រាយ យីង</h4>
+                </div>
+
+                <div class="map-blueprint-card">
+                  <img src="assets/map.svg" alt="Venue Map" id="previewMapImage" class="map-card-img">
+                </div>
+
+                <a href="https://maps.google.com" target="_blank" rel="noopener noreferrer" class="gold-ribbon-btn" id="previewGoogleMapBtn">
+                  <span class="ribbon-label">មើលក្នុង Google Map</span>
+                </a>
+              </div>
+            </section>
+
+            <!-- 4. GALLERY -->
+            <section class="invitation-section screen-gallery" id="section-gallery">
+              <div class="section-pattern-bg" id="previewBgSection4"></div>
+
+              <div class="section-inner-container">
+                <div class="gallery-header">
+                  <h3 class="gold-header-title">កម្រងរូបភាព</h3>
+                </div>
+
+                <div class="wedding-gallery-grid">
+                  <div class="gallery-photo-card" onclick="openLightbox(0)">
+                    <img src="assets/gallery1.jpg" alt="រូបថតមង្គលការ ១" id="previewGallery1" class="gallery-img">
+                  </div>
+                  <div class="gallery-photo-card" onclick="openLightbox(1)">
+                    <img src="assets/gallery2.jpg" alt="រូបថតមង្គលការ ២" id="previewGallery2" class="gallery-img">
+                  </div>
+                  <div class="gallery-photo-card" onclick="openLightbox(2)">
+                    <img src="assets/gallery3.jpg" alt="រូបថតមង្គលការ ៣" id="previewGallery3" class="gallery-img">
+                  </div>
+                  <div class="gallery-photo-card" onclick="openLightbox(3)">
+                    <img src="assets/gallery4.jpg" alt="រូបថតមង្គលការ ៤" id="previewGallery4" class="gallery-img">
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- 5. THANK YOU & APOLOGY -->
+            <section class="invitation-section screen-thanks" id="section-thanks">
+              <div class="section-pattern-bg" id="previewBgSection5"></div>
+
+              <div class="section-inner-container">
+                <div class="divider-ornament">
+                  <img src="assets/divider.svg" alt="Gold Divider" class="divider-img">
+                </div>
+
+                <div class="thanks-content-box">
+                  <h3 class="thanks-main-title">សូមអរគុណ និងសូមអភ័យទោស</h3>
+                  
+                  <p class="thanks-paragraph-text" id="previewThankYouText">
+                    យើងខ្ញុំទាំងពីរ សូមថ្លែងអំណរគុណ យ៉ាងជ្រាលជ្រៅ ចំពោះវត្តមាន ដ៏ឧត្តុង្គឧត្តមរបស់ សម្តេច ឯកឧត្តម លោកជំទាវ លោកអ្នកឧកញ៉ា អ្នកឧកញ៉ា ឧកញ៉ា លោក លោកស្រី អ្នកនាង កញ្ញា ដែលបាន អញ្ជើញចូលរួមជាកិត្តិយស ក្នុងពិធីសិរីសួស្តីអាពាហ៍ពិពាហ៍ របស់យើងខ្ញុំ នាពេលខាងមុខនេះ។ យើងខ្ញុំសូមការខន្តីអភ័យទោស ដែលពុំបានជូនលិខិតអញ្ជើញ ដោយផ្ទាល់ ។ ដោយការកិច្ចដ៏ខ្ពង់ខ្ពស់ពីយើងខ្ញុំ។
+                  </p>
+                </div>
+
+                <div class="wedding-footer-seal">
+                  <div class="seal-icon">⚜️</div>
+                  <div class="seal-text">សិរីមង្គលអាពាហ៍ពិពាហ៍</div>
+                </div>
+              </div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Photo Lightbox Modal -->
+  <div class="lightbox-modal" id="lightboxModal" onclick="closeLightbox()">
+    <button class="lightbox-close" onclick="closeLightbox()">&times;</button>
+    <img src="" alt="Full view" id="lightboxImg" class="lightbox-content">
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="toast-notification" id="toastNotice">
+    <span class="toast-icon">✨</span>
+    <span class="toast-text" id="toastText"></span>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

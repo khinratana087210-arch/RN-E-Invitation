@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Khmer E-Invitation Builder - បង្កើតធៀបការឌីជីថលបែបខ្មែរ</title>
+  <meta name="description" content="កម្មវិធីបង្កើតធៀបការអាពាហ៍ពិពាហ៍ឌីជីថលបែបខ្មែរ E-Invitation ប្រកបដោយភាពប្រណិត សោភ័ណភាព និងទាន់សម័យ">
+  
+  <!-- Google Fonts: Moul for Khmer Royal Headings, Kantumruy Pro & Battambang for Elegant Text, Playfair Display for Latin Names -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Battambang:wght@400;700&family=Cinzel:wght@500;700&family=Great+Vibes&family=Kantumruy+Pro:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Moul&family=Playfair+Display:ital,wght@0,600;1,500&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Ceremonial Envelope Opening Screen (បង្ហាញពេលភ្ញៀវបើក Link) -->
+  <div class="envelope-overlay" id="envelopeOverlay" style="display: none;">
+    <div class="envelope-card">
+      <div class="envelope-kbach">💍</div>
+      <h2 class="envelope-title" id="envelopeEventTitle">សិរីមង្គលអាពាហ៍ពិពាហ៍</h2>
+      <p class="envelope-subtitle">លិខិតអញ្ជើញឌីជីថល E-Invitation</p>
+      
+      <div class="envelope-guest-badge">
+        <span style="font-size: 13px; color: #83561a; display: block; margin-bottom: 2px;">សូមគោរពអញ្ជើញ</span>
+        <strong class="envelope-guest-name" id="envelopeGuestName">លោក សុខ រតនៈវិសាល និងភរិយា</strong>
+      </div>
+
+      <button type="button" class="envelope-open-btn" id="btnOpenEnvelope">
+        <span>💌 ចុចបើកធៀបការ</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Discreet Floating Admin / Editor Button (in Guest Mode) -->
+  <button type="button" class="floating-admin-toggle" id="btnBackToAdmin" title="ចូលផ្ទាំងកែសម្រួល">
+    <span>✏️ កែសម្រួលព័ត៌មាន</span>
+  </button>
+
+  <!-- Top App Bar / Header -->
+  <header class="app-header">
+    <div class="header-brand">
+      <div class="brand-logo">💍</div>
+      <div class="brand-text">
+        <h1 class="brand-title">E-Invitation <span>ធៀបការឌីជីថល</span></h1>
+        <p class="brand-subtitle">បង្កើត និងកែសម្រួលធៀបអាពាហ៍ពិពាហ៍បែបខ្មែរប្រណិត</p>
+      </div>
+    </div>
+    
+    <div class="header-actions">
+      <!-- Device mode buttons -->
+      <div class="view-toggle">
+        <button type="button" class="view-btn active" id="btnModeSplit" title="បង្ហាញទន្ទឹមគ្នា">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="3" x2="12" y2="21"/></svg>
+          <span class="btn-text">កែសម្រួល & Preview</span>
+        </button>
+        <button type="button" class="view-btn" id="btnModeFullscreen" title="មើលពេញអេក្រង់ (Guest View)">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+          <span class="btn-text">មើលពេញអេក្រង់</span>
+        </button>
+      </div>
+
+      <!-- Quick Action Buttons -->
+      <button type="button" class="action-btn share-btn" id="btnShareLink" title="ចម្លងតំណភ្ជាប់ផ្ញើឱ្យភ្ញៀវ">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        <span>ចម្លង Link ភ្ញៀវ</span>
+      </button>
+
+      <button type="button" class="action-btn export-btn" id="btnExport" title="ទាញយកធៀបការជា HTML">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        <span>ទាញយក (Download)</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Mobile Tab Switcher (Visible on small screens) -->
+  <div class="mobile-tabs">
+    <button class="mobile-tab-btn active" data-tab="editor-tab">
+      ✏️ ដាក់ព័ត៌មាន (Editor)
+    </button>
+    <button class="mobile-tab-btn" data-tab="preview-tab">
+      📱 មើលគំរូ (Preview)
+    </button>
+  </div>
+
+  <!-- Main Container -->
+  <main class="app-main">
+    
+    <!-- LEFT PANEL: INFORMATION EDITOR (កន្លែងដាក់ព័ត៌មាន) -->
+    <section class="editor-panel" id="editorSection">
+      <div class="panel-header">
+        <div class="panel-title-wrap">
+          <h2 class="panel-title">📝 កន្លែងដាក់ព័ត៌មានធៀបការ</h2>
+          <p class="panel-desc">បញ្ចូលទិន្នន័យខាងក្រោម ហើយផ្ទាំង Preview ខាងស្ដាំនឹងផ្លាស់ប្ដូរភ្លាមៗ</p>
+        </div>
+        <button type="button" class="reset-btn" id="btnResetDefault" title="កំណត់មកទម្រង់ដើមវិញ">
+          🔄 ដើម
+        </button>
+      </div>
+
+      <form id="invitationForm" class="editor-form" onsubmit="return false;">
+        
+        <!-- SECTION 1: រូបភាពចម្បង (Images) -->
+        <div class="form-card">
+          <div class="card-title">
+            <span class="card-icon">🖼️</span>
+            <h3>រូបភាពក្រប & ផ្ទៃខាងក្រោយ (Images)</h3>
+          </div>
+          
+          <div class="form-row">
+            <div class="form-group flex-1">
+              <label for="coverImageInput">
+                រូបភាពក្របខាងមុខ (Cover Photo)
+                <span class="label-hint">រូបធំទំព័រមុខ</span>
+              </label>
+              <div class="file-upload-box">
+                <input type="file" id="coverImageInput" accept="image/*" class="file-input">
+                <div class="upload-placeholder">
+                  <span class="upload-icon">📷</span>
+                  <span class="upload-text">ជ្រើសរើសរូបភាព Cover</span>
+                </div>
+                <div class="img-preview-thumb" id="coverThumb"></div>
+              </div>
+            </div>
+
+            <div class="form-group flex-1">
+              <label for="bgImageInput">
+                ផ្ទៃខាងក្រោម (Background Texture)
+                <span class="label-hint">ក្បាច់ភ្ញីផ្កាខ្មែរ</span>
+              </label>
+              <div class="file-upload-box">
+                <input type="file" id="bgImageInput" accept="image/*" class="file-input">
+                <div class="upload-placeholder">
+                  <span class="upload-icon">✨</span>
+                  <span class="upload-text">ជ្រើសរើសរូបផ្ទៃ Background</span>
+                </div>
+                <div class="img-preview-thumb" id="bgThumb"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 2: ព័ត៌មានកូនកំលោះ កូនក្រមុំ & ចំណងជើង (Names & Title) -->
+        <div class="form-card">
+          <div class="card-title">
+            <span class="card-icon">👑</span>
+            <h3>ឈ្មោះកូនកំលោះ កូនក្រមុំ & ចំណងជើង</h3>
+          </div>
+
+          <div class="form-group">
+            <label for="inputEventTitle">ចំណងជើងកម្មវិធី (Event Title)</label>
+            <input type="text" id="inputEventTitle" class="form-control" value="សិរីមង្គលអាពាហ៍ពិពាហ៍" placeholder="ឧ. សិរីមង្គលអាពាហ៍ពិពាហ៍">
+          </div>
+
+          <div class="form-row">
+            <div class="form-group flex-1">
+              <label for="inputGroomKhmer">ឈ្មោះកូនកំលោះ (ភាសាខ្មែរ)</label>
+              <input type="text" id="inputGroomKhmer" class="form-control" value="ប្រុស តូច" placeholder="ឧ. ប្រុស តូច">
+            </div>
+            <div class="form-group flex-1">
+              <label for="inputGroomLatin">ឈ្មោះកូនកំលោះ (ឡាតាំង)</label>
+              <input type="text" id="inputGroomLatin" class="form-control" value="Pros Toch" placeholder="ឧ. Pros Toch">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group flex-1">
+              <label for="inputBrideKhmer">ឈ្មោះកូនក្រមុំ (ភាសាខ្មែរ)</label>
+              <input type="text" id="inputBrideKhmer" class="form-control" value="ខៀវ ពេជ្រចរណៃ" placeholder="ឧ. ខៀវ ពេជ្រចរណៃ">
+            </div>
+            <div class="form-group flex-1">
+              <label for="inputBrideLatin">ឈ្មោះកូនក្រមុំ (ឡាតាំង)</label>
+              <input type="text" id="inputBrideLatin" class="form-control" value="Khiev Pich Chorai" placeholder="ឧ. Khiev Pich Chorai">
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 3: កាលបរិច្ឆេទ & ម៉ោងកម្មវិធី (Date, Time & Countdown) -->
+        <div class="form-card">
+          <div class="card-title">
+            <span class="card-icon">📅</span>
+            <h3>កាលបរិច្ឆេទ និងម៉ោងកម្មវិធី</h3>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group flex-1">
+              <label for="inputWeddingDate">កាលបរិច្ឆេទមង្គលការ (Date)</label>
+              <input type="date" id="inputWeddingDate" class="form-control" value="2026-12-10">
+            </div>
+            <div class="form-group flex-1">
+              <label for="inputWeddingTime">ម៉ោងកម្មវិធី (Time)</label>
+              <input type="time" id="inputWeddingTime" class="form-control" value="17:00">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="inputDateFullKhmer">
+              កាលបរិច្ឆេទពេញ (ជាភាសាខ្មែរ)
+              <span class="label-hint">បង្ហាញលើផ្ទាំងក្រប និងរាប់ថយក្រោយ</span>
+            </label>
+            <input type="text" id="inputDateFullKhmer" class="form-control" value="ថ្ងៃព្រហស្បតិ៍ ទី១០ ខែធ្នូ ឆ្នាំ២០២៦ វេលាម៉ោង ៥:០០ ល្ងាច">
+          </div>
+
+          <div class="form-row toggle-row">
+            <label class="toggle-label" for="toggleKhmerNumerals">
+              <input type="checkbox" id="toggleKhmerNumerals" checked>
+              <span class="toggle-slider"></span>
+              <span class="toggle-text">ប្រើលេខខ្មែរលើនាឡិការាប់ថយក្រោយ (២៧ ថ្ងៃ / ៦ ម៉ោង...)</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- SECTION 4: សារអញ្ជើញ & ឈ្មោះភ្ញៀវ (Guest & Invitation Messages) -->
+        <div class="form-card">
+          <div class="card-title">
+            <span class="card-icon">💌</span>
+            <h3>សារអញ្ជើញ & ឈ្មោះភ្ញៀវកិត្តិយស</h3>
+          </div>
+
+          <div class="form-group">
+            <label for="inputGuestSalutation">សារគោរពអញ្ជើញ (Salutation)</label>
+            <input type="text" id="inputGuestSalutation" class="form-control" value="សូមគោរពអញ្ជើញ">
+          </div>
+
+          <div class="form-group">
+            <label for="inputGuestName">
+              ឈ្មោះភ្ញៀវកិត្តិយស (Honored Guest Name)
+              <span class="label-hint">អាចប្ដូរតាម Link: ?guest=ឈ្មោះ</span>
+            </label>
+            <input type="text" id="inputGuestName" class="form-control highlight-input" value="លោក សុខ រតនៈវិសាល និងភរិយា" placeholder="ឧ. លោក សុខ រតនៈវិសាល និងភរិយា">
+          </div>
+
+          <div class="form-group">
+            <label for="inputInviteBody">សារអញ្ជើញលម្អិត</label>
+            <textarea id="inputInviteBody" class="form-control" rows="2">យើងខ្ញុំមានកិត្តិយសសូមគោរពអញ្ជើញ</textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="inputThankYouText">សារថ្លែងអំណរគុណ និងសូមអភ័យទោស (Thank You & Apology)</label>
+            <textarea id="inputThankYouText" class="form-control" rows="4">យើងខ្ញុំទាំងពីរ សូមថ្លែងអំណរគុណ យ៉ាងជ្រាលជ្រៅ ចំពោះវត្តមាន ដ៏ឧត្តុង្គឧត្តមរបស់ សម្តេច ឯកឧត្តម លោកជំទាវ លោកអ្នកឧកញ៉ា អ្នកឧកញ៉ា ឧកញ៉ា លោក លោកស្រី អ្នកនាង កញ្ញា ដែលបាន អញ្ជើញចូលរួមជាកិត្តិយស ក្នុងពិធីសិរីសួស្តីអាពាហ៍ពិពាហ៍ របស់យើងខ្ញុំ នាពេលខាងមុខនេះ។ យើងខ្ញុំសូមការខន្តីអភ័យទោស ដែលពុំបានជូនលិខិតអញ្ជើញ ដោយផ្ទាល់ ។ ដោយការកិច្ចដ៏ខ្ពង់ខ្ពស់ពីយើងខ្ញុំ។</textarea>
+          </div>
+        </div>
+
+        <!-- SECTION 5: ទីតាំង និងផែនទី (Location & Map) -->
+        <div class="form-card">
+          <div class="card-title">
+            <span class="card-icon">📍</span>
+            <h3>ទីតាំងកម្មវិធី & ផែនទី (Venue & Map)</h3>
+          </div>
+
+          <div class="form-group">
+            <label for="inputVenueName">ឈ្មោះទីតាំងកម្មវិធី (Venue Name)</label>
+            <input type="text" id="inputVenueName" class="form-control" value="ភោជនីយដ្ឋាន សេនរេប្រាយ យីង" placeholder="ឧ. ភោជនីយដ្ឋាន សេនរេប្រាយ យីង">
+          </div>
+
+          <div class="form-group">
+            <label for="inputLocationUrl">តំណភ្ជាប់ Google Maps (Location URL)</label>
+            <input type="url" id="inputLocationUrl" class="form-control" value="https://maps.google.com/?q=Phnom+Penh+Wedding+Hall" placeholder="https://maps.google.com/...">
+          </div>
+
+          <div class="form-group">
+            <label for="mapImageInput">
+              រូបភាព Map & QR Code
+              <span class="label-hint">អាចផ្ទុកឡើងរូបប្លង់ផ្ទាល់ខ្លួនបាន</span>
+            </label>
+            <div class="file-upload-box">
+              <input type="file" id="mapImageInput" accept="image/*" class="file-input">
+              <div class="upload-placeholder">
+                <span class="upload-icon">🗺️</span>
+                <span class="upload-text">ជ្រើសរើសរូបភាពផែនទី</span>
+              </div>
+              <div class="img-preview-thumb" id="mapThumb"></div>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group flex-1">
+              <label for="inputPhone1">លេខទូរស័ព្ទ Metfone</label>
+              <input type="text" id="inputPhone1" class="form-control" value="097 258 15 37">
+            </div>
+            <div class="form-group flex-1">
+              <label for="inputPhone2">លេខទូរស័ព្ទ Smart</label>
+              <input type="text" id="inputPhone2" class="form-control" value="011 867 506">
+            </div>
+            <div class="form-group flex-1">
+              <label for="inputPhone3">លេខទូរស័ព្ទ Cellcard</label>
+              <input type="text" id="inputPhone3" class="form-control" value="089 483 683">
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 6: កម្រងរូបភាព ៤ សន្លឹក (Gallery 4 Photos) -->
+        <div class="form-card">
+          <div class="card-title">
+            <span class="card-icon">📸</span>
+            <h3>កម្រងរូបភាពកូនកំលោះកូនក្រមុំ ៤ រូប (Gallery 4 Photos)</h3>
+          </div>
+
+          <p class="form-hint-text">ជ្រើសរើសរូបភាពស្អាតៗចំនួន ៤ សន្លឹក ដើម្បីបង្ហាញលើក្រឡា ២x២ ក្នុងទំព័រធៀប</p>
+
+          <div class="gallery-slots-grid">
+            <!-- Slot 1 -->
+            <div class="gallery-slot">
+              <span class="slot-label">រូបភាពទី ១</span>
+              <div class="slot-thumb" id="galleryThumb1"></div>
+              <input type="file" id="galleryInput1" accept="image/*" class="file-input">
+              <button type="button" class="slot-btn" onclick="document.getElementById('galleryInput1').click()">ជ្រើសរូប</button>
+            </div>
+            
+            <!-- Slot 2 -->
+            <div class="gallery-slot">
+              <span class="slot-label">រូបភាពទី ២</span>
+              <div class="slot-thumb" id="galleryThumb2"></div>
+              <input type="file" id="galleryInput2" accept="image/*" class="file-input">
+              <button type="button" class="slot-btn" onclick="document.getElementById('galleryInput2').click()">ជ្រើសរូប</button>
+            </div>
+
+            <!-- Slot 3 -->
+            <div class="gallery-slot">
+              <span class="slot-label">រូបភាពទី ៣</span>
+              <div class="slot-thumb" id="galleryThumb3"></div>
+              <input type="file" id="galleryInput3" accept="image/*" class="file-input">
+              <button type="button" class="slot-btn" onclick="document.getElementById('galleryInput3').click()">ជ្រើសរូប</button>
+            </div>
+
+            <!-- Slot 4 -->
+            <div class="gallery-slot">
+              <span class="slot-label">រូបភាពទី ៤</span>
+              <div class="slot-thumb" id="galleryThumb4"></div>
+              <input type="file" id="galleryInput4" accept="image/*" class="file-input">
+              <button type="button" class="slot-btn" onclick="document.getElementById('galleryInput4').click()">ជ្រើសរូប</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 7: តន្ត្រីពិធីការ (Music Options) -->
+        <div class="form-card">
+          <div class="card-title">
+            <span class="card-icon">🎶</span>
+            <h3>តន្ត្រីកំដរពិធីការ (Background Music)</h3>
+          </div>
+          <div class="music-controls-group">
+            <div class="music-desc">
+              ភ្លេងមង្គលការពិរោះរណ្តំ ចាក់កំដរពេលភ្ញៀវបើកធៀបការ
+            </div>
+            <div class="music-actions">
+              <button type="button" class="btn-music-test" id="btnTestMusic">
+                ▶️ ចាក់ភ្លេងតេស្ត
+              </button>
+              <label class="music-file-label">
+                📂 ដាក់បទចម្រៀង MP3 ផ្ទាល់ខ្លួន
+                <input type="file" id="musicFileInput" accept="audio/*" style="display:none">
+              </label>
+            </div>
+          </div>
+        </div>
+
+      </form>
+    </section>
+
+    <!-- RIGHT PANEL: LIVE PREVIEW (កន្លែង Preview មើលឃើញ) -->
+    <section class="preview-panel" id="previewSection">
+      <div class="preview-toolbar">
+        <div class="preview-status">
+          <span class="status-indicator"></span>
+          <span>Live Preview មើលឃើញជាក់ស្ដែង</span>
+        </div>
+        <div class="preview-nav-pills">
+          <button type="button" class="nav-pill active" onclick="scrollToPreviewSection('section-cover')">ទំព័រមុខ</button>
+          <button type="button" class="nav-pill" onclick="scrollToPreviewSection('section-countdown')">រាប់ថយក្រោយ</button>
+          <button type="button" class="nav-pill" onclick="scrollToPreviewSection('section-map')">ទីតាំង</button>
+          <button type="button" class="nav-pill" onclick="scrollToPreviewSection('section-gallery')">រូបភាព</button>
+          <button type="button" class="nav-pill" onclick="scrollToPreviewSection('section-thanks')">អរគុណ</button>
+        </div>
+      </div>
+
+      <!-- Smartphone Device Mockup Frame -->
+      <div class="phone-mockup-wrapper">
+        <div class="phone-device" id="phoneDevice">
+          <!-- Phone Speaker & Camera Island -->
+          <div class="phone-island">
+            <div class="island-camera"></div>
+            <div class="island-speaker"></div>
+          </div>
+
+          <!-- Phone Screen Container (Scrollable E-Invitation Content) -->
+          <div class="phone-screen" id="phoneScreen">
+            
+            <!-- Audio Player Floating Widget -->
+            <button type="button" class="floating-music-btn" id="floatingMusicBtn" title="ចាក់/ផ្អាក តន្ត្រី">
+              <span class="music-disc">🎵</span>
+              <span class="music-waves">
+                <i></i><i></i><i></i>
+              </span>
+            </button>
+
+            <!-- ==============================================
+                 PAGE 1: COVER SECTION (ដូចរូបទី១)
+                 ============================================== -->
+            <section class="invitation-section screen-cover" id="section-cover">
+              <!-- Cover Background Photo -->
+              <div class="cover-bg-image" id="previewCoverBg"></div>
+              <div class="cover-gradient-overlay"></div>
+
+              <div class="cover-content">
+                <!-- Top Main Wedding Title -->
+                <div class="cover-top-header">
+                  <h2 class="cover-title-khmer" id="previewCoverTitle">សិរីមង្គលអាពាហ៍ពិពាហ៍</h2>
+                  
+                  <!-- Groom and Bride Names -->
+                  <div class="cover-couple-names" id="previewCoverCouple">
+                    <span class="couple-name groom" id="previewCoverGroom">ប្រុស តូច</span>
+                    <span class="couple-ampersand">និង</span>
+                    <span class="couple-name bride" id="previewCoverBride">ខៀវ ពេជ្រចរណៃ</span>
+                  </div>
+                </div>
+
+                <!-- Bottom Guest Honor Card & Date -->
+                <div class="cover-bottom-area">
+                  <div class="guest-salutation" id="previewCoverSalutation">សូមគោរពអញ្ជើញ</div>
+                  
+                  <!-- Luxury Gold Framed Pill / Badge -->
+                  <div class="guest-golden-capsule">
+                    <div class="capsule-border-dots"></div>
+                    <span class="guest-name-text" id="previewCoverGuest">លោក សុខ រតនៈវិសាល និងភរិយា</span>
+                  </div>
+
+                  <!-- Date & Time -->
+                  <p class="cover-date-text" id="previewCoverDate">ថ្ងៃព្រហស្បតិ៍ ទី១០ ខែធ្នូ ឆ្នាំ២០២៦ វេលាម៉ោង ៥:០០ ល្ងាច</p>
+
+                  <!-- Animated Scroll Down Indicator -->
+                  <div class="scroll-down-badge" onclick="scrollToPreviewSection('section-countdown')">
+                    <div class="scroll-hand">👆</div>
+                    <div class="scroll-labels">
+                      <span class="scroll-km">សូមអូសចុះក្រោម</span>
+                      <span class="scroll-en">Scroll down</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+
+            <!-- ==============================================
+                 PAGE 2: INVITATION & COUNTDOWN (ដូចរូបទី២)
+                 ============================================== -->
+            <section class="invitation-section screen-invitation" id="section-countdown">
+              <div class="section-pattern-bg" id="previewBgSection2"></div>
+              
+              <div class="section-inner-container">
+                
+                <!-- Couple Column Header -->
+                <div class="couple-formal-names">
+                  <div class="role-box">
+                    <span class="role-title">កូនប្រុស</span>
+                    <h3 class="role-name groom-color" id="previewFormalGroom">ប្រុស តូច</h3>
+                    <span class="role-latin" id="previewFormalGroomLatin">Pros Toch</span>
+                  </div>
+
+                  <div class="heart-symbol-box">
+                    <svg class="golden-heart" viewBox="0 0 40 40" width="36" height="36">
+                      <path d="M 20 32 C 10 24 4 17 4 10.5 C 4 5 8 2 13 2 C 16.5 2 19 4 20 6.5 C 21 4 23.5 2 27 2 C 32 2 36 5 36 10.5 C 36 17 30 24 20 32 Z" fill="none" stroke="#d49a37" stroke-width="2.5" stroke-linecap="round"/>
+                    </svg>
+                  </div>
+
+                  <div class="role-box">
+                    <span class="role-title">កូនស្រី</span>
+                    <h3 class="role-name bride-color" id="previewFormalBride">ខៀវ ពេជ្រចរណៃ</h3>
+                    <span class="role-latin" id="previewFormalBrideLatin">Khiev Pich Chorai</span>
+                  </div>
+                </div>
+
+                <!-- Invitation Statement -->
+                <div class="formal-invitation-body">
+                  <p class="invite-lead" id="previewInviteBody">យើងខ្ញុំមានកិត្តិយសសូមគោរពអញ្ជើញ</p>
+                  <div class="guest-callout" id="previewFormalGuest">លោក រតនា និង ភរិយា</div>
+                </div>
+
+                <!-- Golden Khmer Floral Divider Ornament -->
+                <div class="divider-ornament">
+                  <img src="assets/divider.svg" alt="Gold Divider" class="divider-img">
+                </div>
+
+                <!-- Countdown Section -->
+                <div class="countdown-wrapper">
+                  <h4 class="countdown-heading">ចំនួនថ្ងៃរាប់ថយក្រោយ</h4>
+                  <p class="countdown-date-sub" id="previewCountdownDate">ថ្ងៃព្រហស្បតិ៍ ទី១០ ខែធ្នូ ឆ្នាំ២០២៦ វេលាម៉ោង ៥:០០ ល្ងាច</p>
+
+                  <!-- 4 Rounded Orange / Gold Countdown Badges -->
+                  <div class="countdown-boxes-row">
+                    <div class="cd-box">
+                      <span class="cd-number" id="cdDays">២៧</span>
+                      <span class="cd-unit">ថ្ងៃ</span>
+                    </div>
+                    <div class="cd-box">
+                      <span class="cd-number" id="cdHours">៦</span>
+                      <span class="cd-unit">ម៉ោង</span>
+                    </div>
+                    <div class="cd-box">
+                      <span class="cd-number" id="cdMinutes">៥៧</span>
+                      <span class="cd-unit">នាទី</span>
+                    </div>
+                    <div class="cd-box">
+                      <span class="cd-number" id="cdSeconds">៤៨</span>
+                      <span class="cd-unit">វិនាទី</span>
+                    </div>
+                  </div>
+
+                  <!-- Add to Calendar Golden Ribbon Button -->
+                  <button type="button" class="gold-ribbon-btn" id="btnAddToCalendar" title="កត់ចូលក្នុងប្រតិទិន">
+                    <span class="ribbon-arrow left"></span>
+                    <span class="ribbon-label">កត់ចូលក្នុងប្រតិទិនអ្នក</span>
+                    <span class="ribbon-arrow right"></span>
+                  </button>
+                </div>
+
+              </div>
+            </section>
+
+
+            <!-- ==============================================
+                 PAGE 3: LOCATION & MAP (ដូចរូបទី៣)
+                 ============================================== -->
+            <section class="invitation-section screen-location" id="section-map">
+              <div class="section-pattern-bg" id="previewBgSection3"></div>
+
+              <div class="section-inner-container">
+                <div class="location-header">
+                  <h3 class="gold-header-title">ទីតាំងកម្មវិធី</h3>
+                  <h4 class="venue-title-text" id="previewVenueName">ភោជនីយដ្ឋាន សេនរេប្រាយ យីង</h4>
+                </div>
+
+                <!-- Blueprint Venue Map Card -->
+                <div class="map-blueprint-card">
+                  <img src="assets/map.svg" alt="Venue Map" id="previewMapImage" class="map-card-img">
+                </div>
+
+                <!-- View on Google Map Golden Ribbon Button -->
+                <a href="https://maps.google.com" target="_blank" rel="noopener noreferrer" class="gold-ribbon-btn" id="previewGoogleMapBtn">
+                  <span class="ribbon-arrow left"></span>
+                  <span class="ribbon-label">មើលក្នុង Google Map</span>
+                  <span class="ribbon-arrow right"></span>
+                </a>
+              </div>
+            </section>
+
+
+            <!-- ==============================================
+                 PAGE 4: GALLERY 4 PHOTOS (ដូចរូបទី៤)
+                 ============================================== -->
+            <section class="invitation-section screen-gallery" id="section-gallery">
+              <div class="section-pattern-bg" id="previewBgSection4"></div>
+
+              <div class="section-inner-container">
+                <div class="gallery-header">
+                  <h3 class="gold-header-title">កម្រងរូបភាព</h3>
+                </div>
+
+                <!-- 2x2 Photo Grid -->
+                <div class="wedding-gallery-grid">
+                  <div class="gallery-photo-card" onclick="openLightbox(0)">
+                    <img src="assets/gallery1.jpg" alt="រូបថតមង្គលការ ១" id="previewGallery1" class="gallery-img">
+                  </div>
+                  <div class="gallery-photo-card" onclick="openLightbox(1)">
+                    <img src="assets/gallery2.jpg" alt="រូបថតមង្គលការ ២" id="previewGallery2" class="gallery-img">
+                  </div>
+                  <div class="gallery-photo-card" onclick="openLightbox(2)">
+                    <img src="assets/gallery3.jpg" alt="រូបថតមង្គលការ ៣" id="previewGallery3" class="gallery-img">
+                  </div>
+                  <div class="gallery-photo-card" onclick="openLightbox(3)">
+                    <img src="assets/gallery4.jpg" alt="រូបថតមង្គលការ ៤" id="previewGallery4" class="gallery-img">
+                  </div>
+                </div>
+              </div>
+            </section>
+
+
+            <!-- ==============================================
+                 PAGE 5: THANK YOU & APOLOGY (ដូចរូបទី៥)
+                 ============================================== -->
+            <section class="invitation-section screen-thanks" id="section-thanks">
+              <div class="section-pattern-bg" id="previewBgSection5"></div>
+
+              <div class="section-inner-container">
+                <!-- Golden Floral Divider Ornament -->
+                <div class="divider-ornament">
+                  <img src="assets/divider.svg" alt="Gold Divider" class="divider-img">
+                </div>
+
+                <div class="thanks-content-box">
+                  <h3 class="thanks-main-title">សូមអរគុណ និងសូមអភ័យទោស</h3>
+                  
+                  <p class="thanks-paragraph-text" id="previewThankYouText">
+                    យើងខ្ញុំទាំងពីរ សូមថ្លែងអំណរគុណ យ៉ាងជ្រាលជ្រៅ ចំពោះវត្តមាន ដ៏ឧត្តុង្គឧត្តមរបស់ សម្តេច ឯកឧត្តម លោកជំទាវ លោកអ្នកឧកញ៉ា អ្នកឧកញ៉ា ឧកញ៉ា លោក លោកស្រី អ្នកនាង កញ្ញា ដែលបាន អញ្ជើញចូលរួមជាកិត្តិយស ក្នុងពិធីសិរីសួស្តីអាពាហ៍ពិពាហ៍ របស់យើងខ្ញុំ នាពេលខាងមុខនេះ។ យើងខ្ញុំសូមការខន្តីអភ័យទោស ដែលពុំបានជូនលិខិតអញ្ជើញ ដោយផ្ទាល់ ។ ដោយការកិច្ចដ៏ខ្ពង់ខ្ពស់ពីយើងខ្ញុំ។
+                  </p>
+                </div>
+
+                <!-- Footer Wedding Seal -->
+                <div class="wedding-footer-seal">
+                  <div class="seal-icon">⚜️</div>
+                  <div class="seal-text">សិរីមង្គលអាពាហ៍ពិពាហ៍</div>
+                </div>
+              </div>
+            </section>
+
+          </div> <!-- /phone-screen -->
+        </div> <!-- /phone-device -->
+      </div> <!-- /phone-mockup-wrapper -->
+
+    </section>
+  </main>
+
+  <!-- Photo Lightbox Modal -->
+  <div class="lightbox-modal" id="lightboxModal" onclick="closeLightbox()">
+    <button class="lightbox-close" onclick="closeLightbox()">&times;</button>
+    <img src="" alt="Full view" id="lightboxImg" class="lightbox-content">
+  </div>
+
+  <!-- Share Link Modal -->
+  <div class="modal-backdrop" id="shareModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title">🔗 ចម្លង Link ធៀបការសម្រាប់ផ្ញើ</h3>
+        <button type="button" class="modal-close" onclick="closeShareModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-desc">អ្នកអាចវាយបញ្ចូលឈ្មោះភ្ញៀវ ដើម្បីបង្កើត Link ពិសេសដែលមានឈ្មោះគាត់ដោយស្វ័យប្រវត្តិ៖</p>
+        
+        <div class="form-group">
+          <label>ឈ្មោះភ្ញៀវកិត្តិយស (Guest Name):</label>
+          <input type="text" id="modalGuestInput" class="form-control" placeholder="ឧ. ឯកឧត្តម សុខា">
+        </div>
+
+        <div class="generated-link-box">
+          <input type="text" id="modalGeneratedLink" class="form-control link-input" readonly>
+          <button type="button" class="copy-action-btn" id="btnCopyGeneratedLink">
+            📋 ចម្លង Link
+          </button>
+        </div>
+
+        <div class="share-social-row">
+          <a href="#" id="shareTelegram" target="_blank" class="social-share-btn tg">
+            <span>✈️ Telegram</span>
+          </a>
+          <a href="#" id="shareFacebook" target="_blank" class="social-share-btn fb">
+            <span>🌐 Facebook</span>
+          </a>
+        </div>
+
+        <div class="form-group" style="margin-top: 14px;">
+          <label style="font-size: 12px; color: var(--gold-light);">សារអញ្ជើញពេញលេញសម្រាប់ផ្ញើ Telegram / Messenger:</label>
+          <textarea id="modalShareMessage" class="form-control" rows="4" readonly style="font-size: 12px; line-height: 1.5; color: #d1d5db;"></textarea>
+          <button type="button" class="copy-action-btn" id="btnCopyFullMessage" style="width: 100%; margin-top: 8px; justify-content: center; display: flex;">
+            ✉️ ចម្លងសារអញ្ជើញពេញលេញ (Copy Invitation Text)
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="toast-notification" id="toastNotice">
+    <span class="toast-icon">✨</span>
+    <span class="toast-text" id="toastText">បានចម្លងដោយជោគជ័យ!</span>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
