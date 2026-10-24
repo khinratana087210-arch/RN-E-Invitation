@@ -45,8 +45,11 @@ const defaultState = {
   guestColor: '#1a3250',
 
   // Images & Media (Fallback relative paths)
-  envelopeImage: 'assets/cover.jpg',
-  gateVideo: '',
+  envelopeImage: 'assets/cover.jpg',     // រូបកណ្ដាល ១ (Main)
+  envelopeImage2: 'assets/gallery1.jpg', // រូបកណ្ដាល ២ (បន្ថែម)
+  envelopeImage3: 'assets/gallery2.jpg', // រូបកណ្ដាល ៣ (បន្ថែម)
+  envelopeImage4: '',                    // រូបកណ្ដាល ៤ (បន្ថែម)
+  gateVideo: 'Video.mp4',
   coverImage: 'assets/cover.jpg',
   bgImage: 'assets/bg.jpg',
   bgImage1: 'assets/bg.jpg',
@@ -122,6 +125,19 @@ function loadSavedStateOrUrlParams() {
     }
   }
 
+  // Ensure gateVideo and new bg textures fallback to WEDDING_CONFIG if localStorage had empty values
+  if ((!appState.gateVideo || appState.gateVideo === '') && window.WEDDING_CONFIG && window.WEDDING_CONFIG.images && window.WEDDING_CONFIG.images.gateVideo) {
+    appState.gateVideo = window.WEDDING_CONFIG.images.gateVideo;
+  }
+  if (!appState.envelopeImage && window.WEDDING_CONFIG?.images?.envelopeImage) appState.envelopeImage = window.WEDDING_CONFIG.images.envelopeImage;
+  if (!appState.envelopeImage2 && window.WEDDING_CONFIG?.images?.envelopeImage2) appState.envelopeImage2 = window.WEDDING_CONFIG.images.envelopeImage2;
+  if (!appState.envelopeImage3 && window.WEDDING_CONFIG?.images?.envelopeImage3) appState.envelopeImage3 = window.WEDDING_CONFIG.images.envelopeImage3;
+  if (!appState.envelopeImage4 && window.WEDDING_CONFIG?.images?.envelopeImage4) appState.envelopeImage4 = window.WEDDING_CONFIG.images.envelopeImage4;
+  if (!appState.bgImage1 && window.WEDDING_CONFIG?.images?.bgImage1) appState.bgImage1 = window.WEDDING_CONFIG.images.bgImage1;
+  if (!appState.bgImage2 && window.WEDDING_CONFIG?.images?.bgImage2) appState.bgImage2 = window.WEDDING_CONFIG.images.bgImage2;
+  if (!appState.bgImage3 && window.WEDDING_CONFIG?.images?.bgImage3) appState.bgImage3 = window.WEDDING_CONFIG.images.bgImage3;
+  if (!appState.bgImage4 && window.WEDDING_CONFIG?.images?.bgImage4) appState.bgImage4 = window.WEDDING_CONFIG.images.bgImage4;
+
   // 3. If guest parameter is in URL or if on guest.html, activate Guest View Mode
   const isGuestPage = window.location.pathname.includes('guest.html');
   if (guestParam || isGuestPage || urlParams.get('mode') === 'guest' || urlParams.get('view') === 'guest') {
@@ -135,12 +151,11 @@ function loadSavedStateOrUrlParams() {
     const envOverlay = document.getElementById('envelopeOverlay');
     const envTitle = document.getElementById('envelopeEventTitle');
     const envGuest = document.getElementById('envelopeGuestName');
-    const envPhoto = document.getElementById('envelopePhotoImg');
     if (envOverlay) {
       envOverlay.style.display = 'flex';
       if (envTitle) envTitle.textContent = appState.eventTitle;
       if (envGuest) envGuest.textContent = appState.guestName;
-      if (envPhoto) envPhoto.src = appState.envelopeImage || appState.coverImage || 'assets/cover.jpg';
+      updateEnvelopePhotoPreview();
     }
   }
 
@@ -198,8 +213,10 @@ function populateFormFields() {
   if (numToggle) numToggle.checked = appState.useKhmerNumerals;
 
   // Thumbnails & Media
-  setVal('inputGateVideoUrl', appState.gateVideo || '');
   updateThumbnail('envelopeThumb', appState.envelopeImage);
+  updateThumbnail('envelopeThumb2', appState.envelopeImage2);
+  updateThumbnail('envelopeThumb3', appState.envelopeImage3);
+  updateThumbnail('envelopeThumb4', appState.envelopeImage4);
   updateThumbnail('coverThumb', appState.coverImage);
   updateThumbnail('bgThumb1', appState.bgImage1 || appState.bgImage || 'assets/bg.jpg');
   updateThumbnail('bgThumb2', appState.bgImage2 || appState.bgImage || 'assets/bg.jpg');
@@ -468,6 +485,9 @@ function applyTypographyStyles() {
 function bindImageUploads() {
   const fileInputs = [
     { inputId: 'envelopeImageInput', key: 'envelopeImage', thumbId: 'envelopeThumb', updateFn: updateEnvelopePhotoPreview },
+    { inputId: 'envelopeImageInput2', key: 'envelopeImage2', thumbId: 'envelopeThumb2', updateFn: updateEnvelopePhotoPreview },
+    { inputId: 'envelopeImageInput3', key: 'envelopeImage3', thumbId: 'envelopeThumb3', updateFn: updateEnvelopePhotoPreview },
+    { inputId: 'envelopeImageInput4', key: 'envelopeImage4', thumbId: 'envelopeThumb4', updateFn: updateEnvelopePhotoPreview },
     { inputId: 'coverImageInput', key: 'coverImage', thumbId: 'coverThumb', updateFn: updateCoverPreview },
     { inputId: 'bgImageInput1', key: 'bgImage1', thumbId: 'bgThumb1', updateFn: updateBgPreview },
     { inputId: 'bgImageInput2', key: 'bgImage2', thumbId: 'bgThumb2', updateFn: updateBgPreview },
@@ -534,10 +554,133 @@ function bindImageUploads() {
   }
 }
 
+/**
+ * Multi-photo Arch Showcase & Auto Slideshow for Entrance Card
+ */
+let currentEnvSlide = 0;
+let envSliderTimer = null;
+
+function getEnvelopePhotosList() {
+  const list = [
+    appState.envelopeImage,
+    appState.envelopeImage2,
+    appState.envelopeImage3,
+    appState.envelopeImage4
+  ].filter(src => src && typeof src === 'string' && src.trim() !== '');
+  
+  if (list.length === 0) {
+    return [appState.coverImage || 'assets/cover.jpg'];
+  }
+  return list;
+}
+
 function updateEnvelopePhotoPreview() {
-  const photo = document.getElementById('envelopePhotoImg');
-  if (photo) {
-    photo.src = appState.envelopeImage || appState.coverImage || 'assets/cover.jpg';
+  const track = document.getElementById('envelopeSlidesTrack');
+  const dotsWrap = document.getElementById('envelopeSliderDots');
+  const prevBtn = document.getElementById('btnEnvPrev');
+  const nextBtn = document.getElementById('btnEnvNext');
+  const legacyImg = document.getElementById('envelopePhotoImg');
+
+  const photos = getEnvelopePhotosList();
+  if (currentEnvSlide >= photos.length) currentEnvSlide = 0;
+
+  if (legacyImg) {
+    legacyImg.src = photos[currentEnvSlide] || photos[0];
+  }
+
+  if (track) {
+    track.innerHTML = photos.map((src, idx) => `
+      <img src="${src}" alt="កូនកំលោះកូនក្រមុំ ${idx + 1}" class="envelope-slide-img ${idx === currentEnvSlide ? 'active' : ''}" data-idx="${idx}">
+    `).join('');
+  }
+
+  if (dotsWrap) {
+    if (photos.length > 1) {
+      dotsWrap.innerHTML = photos.map((_, idx) => `
+        <button type="button" class="envelope-dot ${idx === currentEnvSlide ? 'active' : ''}" data-idx="${idx}" aria-label="រូបទី ${idx + 1}"></button>
+      `).join('');
+      dotsWrap.style.display = 'flex';
+
+      dotsWrap.querySelectorAll('.envelope-dot').forEach(dot => {
+        dot.onclick = (e) => {
+          e.stopPropagation();
+          setEnvelopeSlide(parseInt(dot.getAttribute('data-idx'), 10));
+        };
+      });
+    } else {
+      dotsWrap.innerHTML = '';
+      dotsWrap.style.display = 'none';
+    }
+  }
+
+  if (prevBtn && nextBtn) {
+    if (photos.length > 1) {
+      prevBtn.style.display = 'flex';
+      nextBtn.style.display = 'flex';
+      prevBtn.onclick = (e) => {
+        e.stopPropagation();
+        changeEnvelopeSlide(-1);
+      };
+      nextBtn.onclick = (e) => {
+        e.stopPropagation();
+        changeEnvelopeSlide(1);
+      };
+    } else {
+      prevBtn.style.display = 'none';
+      nextBtn.style.display = 'none';
+    }
+  }
+
+  const archFrame = document.getElementById('envelopeArchFrame');
+  if (archFrame) {
+    archFrame.onclick = (e) => {
+      if (e.target.closest('.env-nav-btn')) return;
+      if (photos.length > 1) changeEnvelopeSlide(1);
+    };
+  }
+
+  restartEnvelopeSliderTimer(photos.length);
+}
+
+function setEnvelopeSlide(index) {
+  const photos = getEnvelopePhotosList();
+  if (photos.length <= 1) return;
+  currentEnvSlide = (index + photos.length) % photos.length;
+
+  const slides = document.querySelectorAll('#envelopeSlidesTrack .envelope-slide-img');
+  slides.forEach((img, idx) => {
+    if (idx === currentEnvSlide) {
+      img.classList.add('active');
+    } else {
+      img.classList.remove('active');
+    }
+  });
+
+  const dots = document.querySelectorAll('#envelopeSliderDots .envelope-dot');
+  dots.forEach((dot, idx) => {
+    if (idx === currentEnvSlide) {
+      dot.classList.add('active');
+    } else {
+      dot.classList.remove('active');
+    }
+  });
+
+  const legacyImg = document.getElementById('envelopePhotoImg');
+  if (legacyImg) legacyImg.src = photos[currentEnvSlide];
+
+  restartEnvelopeSliderTimer(photos.length);
+}
+
+function changeEnvelopeSlide(step) {
+  setEnvelopeSlide(currentEnvSlide + step);
+}
+
+function restartEnvelopeSliderTimer(photoCount) {
+  if (envSliderTimer) clearInterval(envSliderTimer);
+  if (photoCount > 1) {
+    envSliderTimer = setInterval(() => {
+      changeEnvelopeSlide(1);
+    }, 3200);
   }
 }
 
@@ -788,8 +931,16 @@ function bindViewButtons() {
       const envTitle = document.getElementById('envelopeEventTitle');
       const envGuest = document.getElementById('envelopeGuestName');
       const video = document.getElementById('gateOpeningVideo');
+      const card = document.getElementById('envelopeCard');
+      const btnSkip = document.getElementById('btnSkipVideo');
       if (overlay) {
         overlay.classList.remove('opened', 'gate-opening');
+        if (card) {
+          card.style.opacity = '';
+          card.style.transform = '';
+          card.style.pointerEvents = '';
+        }
+        if (btnSkip) btnSkip.style.display = 'none';
         if (video) {
           video.classList.remove('playing');
           video.style.display = 'none';
@@ -824,6 +975,8 @@ function bindViewButtons() {
 function triggerWeddingGateOpening() {
   const overlay = document.getElementById('envelopeOverlay');
   const video = document.getElementById('gateOpeningVideo');
+  const card = document.getElementById('envelopeCard');
+  const btnSkip = document.getElementById('btnSkipVideo');
   if (!overlay) return;
 
   // Start romantic ambient wedding music
@@ -836,24 +989,46 @@ function triggerWeddingGateOpening() {
     video.src = appState.gateVideo;
     video.style.display = 'block';
     video.currentTime = 0;
+
+    // Dissolve card into video
+    if (card) {
+      card.style.opacity = '0';
+      card.style.transform = 'scale(0.85)';
+      card.style.pointerEvents = 'none';
+    }
+
     video.play().then(() => {
       video.classList.add('playing');
+      if (btnSkip) btnSkip.style.display = 'block';
     }).catch(err => {
       console.warn('Video auto-play blocked, using 3D gate fallback:', err);
       run3DGateAnimation(overlay);
     });
 
+    let hasEnded = false;
     const endVideo = () => {
+      if (hasEnded) return;
+      hasEnded = true;
       video.classList.remove('playing');
+      if (btnSkip) btnSkip.style.display = 'none';
       setTimeout(() => {
         video.style.display = 'none';
+        try { video.pause(); } catch (e) {}
         overlay.classList.add('opened');
-        setTimeout(() => { overlay.style.display = 'none'; }, 900);
-      }, 400);
+        setTimeout(() => {
+          overlay.style.display = 'none';
+          if (card) {
+            card.style.opacity = '';
+            card.style.transform = '';
+            card.style.pointerEvents = '';
+          }
+        }, 900);
+      }, 350);
     };
 
     video.onended = endVideo;
-    video.onclick = endVideo; // allow tap to skip
+    video.onclick = endVideo; // allow tap video to skip
+    if (btnSkip) btnSkip.onclick = endVideo; // allow tap skip button
     return;
   }
 
@@ -969,6 +1144,9 @@ window.WEDDING_CONFIG = {
 
   images: {
     envelopeImage: ${JSON.stringify(appState.envelopeImage || 'assets/cover.jpg')},
+    envelopeImage2: ${JSON.stringify(appState.envelopeImage2 || '')},
+    envelopeImage3: ${JSON.stringify(appState.envelopeImage3 || '')},
+    envelopeImage4: ${JSON.stringify(appState.envelopeImage4 || '')},
     gateVideo: ${JSON.stringify(appState.gateVideo || '')},
     coverImage: ${JSON.stringify(appState.coverImage)},
     bgImage: ${JSON.stringify(appState.bgImage || 'assets/bg.jpg')},
@@ -1173,30 +1351,18 @@ function exportInvitationHTML() {
   <div class="envelope-overlay" id="envelopeOverlay">
     <video id="gateOpeningVideo" class="gate-opening-video" playsinline preload="auto" style="display: none;"></video>
     <div class="gate-light-rays" id="gateLightRays"></div>
-    <div class="wedding-gate-doors" id="weddingGateDoors">
-      <div class="gate-leaf leaf-left">
-        <div class="door-inner-panel">
-          <div class="door-kbach-top"></div>
-          <div class="door-handle-wrap handle-right">
-            <img src="assets/door-handle.svg" alt="Handle" class="door-handle-img">
-          </div>
-          <div class="door-kbach-bottom"></div>
-        </div>
-      </div>
-      <div class="gate-leaf leaf-right">
-        <div class="door-inner-panel">
-          <div class="door-kbach-top"></div>
-          <div class="door-handle-wrap handle-left">
-            <img src="assets/door-handle.svg" alt="Handle" class="door-handle-img">
-          </div>
-          <div class="door-kbach-bottom"></div>
-        </div>
-      </div>
-    </div>
+    <!-- Center Grand Invitation Welcome Card -->
     <div class="envelope-card" id="envelopeCard">
-      <div class="envelope-photo-frame">
-        <img src="${appState.envelopeImage || appState.coverImage || 'assets/cover.jpg'}" alt="កូនកំលោះកូនក្រមុំ" id="envelopePhotoImg" class="envelope-photo-img">
-        <div class="frame-gold-border"></div>
+      <div class="envelope-showcase-container">
+        <div class="envelope-arch-frame" id="envelopeArchFrame">
+          <div class="envelope-slides-track" id="envelopeSlidesTrack">
+            <img src="${appState.envelopeImage || appState.coverImage || 'assets/cover.jpg'}" alt="កូនកំលោះកូនក្រមុំ" class="envelope-slide-img active" id="envelopePhotoImg">
+          </div>
+          <button type="button" class="env-nav-btn prev" id="btnEnvPrev" aria-label="Previous Photo">❮</button>
+          <button type="button" class="env-nav-btn next" id="btnEnvNext" aria-label="Next Photo">❯</button>
+          <div class="frame-gold-border"></div>
+        </div>
+        <div class="envelope-dots-wrap" id="envelopeSliderDots"></div>
       </div>
       <h2 class="envelope-title" id="envelopeEventTitle">${appState.eventTitle}</h2>
       <p class="envelope-subtitle">លិខិតអញ្ជើញឌីជីថល E-Invitation</p>

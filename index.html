@@ -17,43 +17,23 @@
 <body>
   <!-- Ceremonial Royal Wedding Gate & Entrance Overlay (ទ្វារមង្គលការ 3D & វីដេអូបើកទ្វារ) -->
   <div class="envelope-overlay" id="envelopeOverlay" style="display: none;">
-    <!-- Optional Fullscreen Video Effect -->
-    <video id="gateOpeningVideo" class="gate-opening-video" playsinline preload="auto" style="display: none;"></video>
-
-    <!-- Background Golden Light Burst -->
-    <div class="gate-light-rays" id="gateLightRays"></div>
-
-    <!-- 3D Double Royal Wedding Doors -->
-    <div class="wedding-gate-doors" id="weddingGateDoors">
-      <!-- Left Door Leaf -->
-      <div class="gate-leaf leaf-left">
-        <div class="door-inner-panel">
-          <div class="door-kbach-top"></div>
-          <div class="door-handle-wrap handle-right">
-            <img src="assets/door-handle.svg" alt="Handle" class="door-handle-img">
-          </div>
-          <div class="door-kbach-bottom"></div>
-        </div>
-      </div>
-
-      <!-- Right Door Leaf -->
-      <div class="gate-leaf leaf-right">
-        <div class="door-inner-panel">
-          <div class="door-kbach-top"></div>
-          <div class="door-handle-wrap handle-left">
-            <img src="assets/door-handle.svg" alt="Handle" class="door-handle-img">
-          </div>
-          <div class="door-kbach-bottom"></div>
-        </div>
-      </div>
-    </div>
+    <video id="gateOpeningVideo" class="gate-opening-video" playsinline webkit-playsinline preload="auto" style="display: none;"></video>
+    <button type="button" class="video-skip-btn" id="btnSkipVideo" style="display: none;">រំលង Skip ⏭️</button>
 
     <!-- Center Grand Invitation Welcome Card -->
     <div class="envelope-card" id="envelopeCard">
-      <!-- Couple Photo Frame on the card (កន្លែងដាក់រូបគូស្នេហ៍លើផ្ទាំងបើកធៀប) -->
-      <div class="envelope-photo-frame">
-        <img src="assets/cover.jpg" alt="កូនកំលោះកូនក្រមុំ" id="envelopePhotoImg" class="envelope-photo-img">
-        <div class="frame-gold-border"></div>
+      <!-- Couple Photos Arch Showcase (កន្លែងដាក់រូបគូស្នេហ៍កណ្ដាល - អាចដាក់បានច្រើនរូប) -->
+      <div class="envelope-showcase-container">
+        <div class="envelope-arch-frame" id="envelopeArchFrame">
+          <div class="envelope-slides-track" id="envelopeSlidesTrack">
+            <img src="assets/cover.jpg" alt="កូនកំលោះកូនក្រមុំ" class="envelope-slide-img active" id="envelopePhotoImg">
+          </div>
+          <button type="button" class="env-nav-btn prev" id="btnEnvPrev" aria-label="Previous Photo">❮</button>
+          <button type="button" class="env-nav-btn next" id="btnEnvNext" aria-label="Next Photo">❯</button>
+          <div class="frame-gold-border"></div>
+        </div>
+        <!-- Dot Indicators for multiple photos -->
+        <div class="envelope-dots-wrap" id="envelopeSliderDots"></div>
       </div>
 
       <h2 class="envelope-title" id="envelopeEventTitle">សិរីមង្គលអាពាហ៍ពិពាហ៍</h2>
@@ -156,36 +136,94 @@
             </button>
           </div>
 
-          <!-- Entrance Photo & Optional Gate Video -->
-          <div class="form-row">
-            <div class="form-group flex-1">
-              <label for="envelopeImageInput">
-                រូបភាពលើផ្ទាំងបើកធៀប (Entrance Photo)
-                <span class="label-hint">រូបគូស្នេហ៍ក្នុងស៊ុមមាសពេលបើកដំបូង</span>
+          <!-- Multiple Center Welcome Photos (កន្លែងដាក់រូបគូស្នេហ៍កណ្ដាល - អាចដាក់បានច្រើនរូប) -->
+          <div style="margin-bottom: 16px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+              <label style="font-weight: 600; color: #ffd875; font-size: 13.5px; margin: 0;">
+                📸 រូបភាពលើផ្ទាំងកណ្ដាលស្វាគមន៍ (Center Welcome Photos - អាចដាក់បន្ថែមបាន)
               </label>
-              <div class="file-upload-box">
-                <input type="file" id="envelopeImageInput" accept="image/*" class="file-input">
-                <div class="upload-placeholder">
-                  <span class="upload-icon">💍</span>
-                  <span class="upload-text">ជ្រើសរើសរូបផ្ទាំងបើកធៀប</span>
+              <span style="font-size: 11.5px; color: #10b981; background: rgba(16, 185, 129, 0.15); padding: 2px 8px; border-radius: 10px;">✨ Auto Slideshow</span>
+            </div>
+            <p style="font-size: 12px; color: #a0aec0; margin: 0 0 12px 0;">
+              អាចជ្រើសរើសរូបថតគូស្នេហ៍ច្រើនសន្លឹកដើម្បីបង្ហាញស្លាយ និងចុចប្ដូរមើលលើផ្ទាំងកណ្ដាលស្វាគមន៍
+            </p>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(105px, 1fr)); gap: 10px;">
+              <!-- Photo 1: Main -->
+              <div class="form-group" style="margin-bottom: 0;">
+                <label for="envelopeImageInput" style="font-size: 11.5px; color: #f7c75b; margin-bottom: 4px; display: block;">
+                  រូបកណ្ដាល ១ (មេ)
+                </label>
+                <div class="file-upload-box" style="padding: 10px 6px;">
+                  <input type="file" id="envelopeImageInput" accept="image/*" class="file-input">
+                  <div class="upload-placeholder">
+                    <span class="upload-icon" style="font-size: 18px;">💍</span>
+                    <span class="upload-text" style="font-size: 11px;">រូប ១ (មេ)</span>
+                  </div>
+                  <div class="img-preview-thumb" id="envelopeThumb"></div>
                 </div>
-                <div class="img-preview-thumb" id="envelopeThumb"></div>
+              </div>
+
+              <!-- Photo 2: Additional -->
+              <div class="form-group" style="margin-bottom: 0;">
+                <label for="envelopeImageInput2" style="font-size: 11.5px; color: #f7c75b; margin-bottom: 4px; display: block;">
+                  រូបកណ្ដាល ២ (បន្ថែម)
+                </label>
+                <div class="file-upload-box" style="padding: 10px 6px;">
+                  <input type="file" id="envelopeImageInput2" accept="image/*" class="file-input">
+                  <div class="upload-placeholder">
+                    <span class="upload-icon" style="font-size: 18px;">📸</span>
+                    <span class="upload-text" style="font-size: 11px;">រូប ២ (បន្ថែម)</span>
+                  </div>
+                  <div class="img-preview-thumb" id="envelopeThumb2"></div>
+                </div>
+              </div>
+
+              <!-- Photo 3: Additional -->
+              <div class="form-group" style="margin-bottom: 0;">
+                <label for="envelopeImageInput3" style="font-size: 11.5px; color: #f7c75b; margin-bottom: 4px; display: block;">
+                  រូបកណ្ដាល ៣ (បន្ថែម)
+                </label>
+                <div class="file-upload-box" style="padding: 10px 6px;">
+                  <input type="file" id="envelopeImageInput3" accept="image/*" class="file-input">
+                  <div class="upload-placeholder">
+                    <span class="upload-icon" style="font-size: 18px;">📸</span>
+                    <span class="upload-text" style="font-size: 11px;">រូប ៣ (បន្ថែម)</span>
+                  </div>
+                  <div class="img-preview-thumb" id="envelopeThumb3"></div>
+                </div>
+              </div>
+
+              <!-- Photo 4: Additional -->
+              <div class="form-group" style="margin-bottom: 0;">
+                <label for="envelopeImageInput4" style="font-size: 11.5px; color: #f7c75b; margin-bottom: 4px; display: block;">
+                  រូបកណ្ដាល ៤ (បន្ថែម)
+                </label>
+                <div class="file-upload-box" style="padding: 10px 6px;">
+                  <input type="file" id="envelopeImageInput4" accept="image/*" class="file-input">
+                  <div class="upload-placeholder">
+                    <span class="upload-icon" style="font-size: 18px;">📸</span>
+                    <span class="upload-text" style="font-size: 11px;">រូប ៤ (បន្ថែម)</span>
+                  </div>
+                  <div class="img-preview-thumb" id="envelopeThumb4"></div>
+                </div>
               </div>
             </div>
+          </div>
 
-            <div class="form-group flex-1">
-              <label for="gateVideoInput">
-                វីដេអូបើកទ្វារចូលរោងការ (Gate Video - Optional)
-                <span class="label-hint">MP4/WebM ឬទុកទំនេរប្រើទ្វារ 3D</span>
-              </label>
-              <div class="file-upload-box">
-                <input type="file" id="gateVideoInput" accept="video/mp4,video/webm" class="file-input">
-                <div class="upload-placeholder">
-                  <span class="upload-icon">🎬</span>
-                  <span class="upload-text" id="gateVideoLabelText">ជ្រើសរើសវីដេអូបើកទ្វារ (MP4)</span>
-                </div>
-                <div class="img-preview-thumb" id="gateVideoThumb" style="display: none; align-items: center; justify-content: center; font-size: 22px;">🎬</div>
+          <!-- Gate Opening Video -->
+          <div class="form-group" style="margin-bottom: 16px;">
+            <label for="gateVideoInput">
+              🎬 វីដេអូបើកទ្វារចូលរោងការ (Gate Video - Optional)
+              <span class="label-hint">វីដេអូ Video.mp4 ឬ MP4/WebM ពេលភ្ញៀវចុចបើក</span>
+            </label>
+            <div class="file-upload-box">
+              <input type="file" id="gateVideoInput" accept="video/mp4,video/webm" class="file-input">
+              <div class="upload-placeholder">
+                <span class="upload-icon">🎬</span>
+                <span class="upload-text" id="gateVideoLabelText">ជ្រើសរើសវីដេអូបើកទ្វារ (MP4)</span>
               </div>
+              <div class="img-preview-thumb" id="gateVideoThumb" style="display: none; align-items: center; justify-content: center; font-size: 22px;">🎬</div>
             </div>
           </div>
 

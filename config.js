@@ -55,8 +55,11 @@ window.WEDDING_CONFIG = {
 
   // ផ្លូវរូបភាព (Relative asset paths)
   images: {
-    envelopeImage: 'assets/cover.jpg',
-    gateVideo: '', // អាចដាក់ Video file ដូចជា video.mp4 ឬ URL
+    envelopeImage: 'assets/cover.jpg',     // រូបកណ្ដាល ១ (Main)
+    envelopeImage2: 'assets/gallery1.jpg', // រូបកណ្ដាល ២ (រូបបន្ថែម)
+    envelopeImage3: 'assets/gallery2.jpg', // រូបកណ្ដាល ៣ (រូបបន្ថែម)
+    envelopeImage4: '',                    // រូបកណ្ដាល ៤ (រូបបន្ថែម - ស្រេចចិត្ត)
+    gateVideo: 'Video.mp4', // វីដេអូបើកទ្វាររោងការ
     coverImage: 'assets/cover.jpg',
     bgImage: 'assets/bg.jpg',
     bgImage1: 'assets/bg.jpg', // ផ្ទៃ Background ផ្នែកទី ២ (រាប់ថយក្រោយ)

@@ -32,6 +32,8 @@ class KhmerInvitationHandler(SimpleHTTPRequestHandler):
             return 'text/css; charset=utf-8'
         if path.endswith('.html'):
             return 'text/html; charset=utf-8'
+        if path.endswith('.mp4'):
+            return 'video/mp4'
         return super().guess_type(path)
 
 

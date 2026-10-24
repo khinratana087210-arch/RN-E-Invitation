@@ -1515,7 +1515,9 @@ body.guest-view-mode .floating-admin-toggle {
   position: fixed;
   inset: 0;
   z-index: 999;
-  background: radial-gradient(circle at center, #242938 0%, #0d0f15 100%);
+  background: 
+    radial-gradient(circle at 50% 35%, rgba(184, 122, 20, 0.28) 0%, transparent 60%),
+    radial-gradient(circle at center, #1b202c 0%, #0b0d13 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1524,114 +1526,18 @@ body.guest-view-mode .floating-admin-toggle {
   transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1), transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Background Golden Light Burst Behind Doors */
+/* Background Golden Light Burst Behind Card */
 .gate-light-rays {
   position: absolute;
   inset: -60%;
   width: 220%;
   height: 220%;
-  background: radial-gradient(circle at center, rgba(255, 230, 140, 0.95) 0%, rgba(245, 175, 40, 0.6) 28%, rgba(212, 139, 17, 0.2) 50%, transparent 70%);
+  background: radial-gradient(circle at center, rgba(255, 230, 140, 0.85) 0%, rgba(245, 175, 40, 0.5) 28%, rgba(212, 139, 17, 0.15) 50%, transparent 70%);
   z-index: 1;
   opacity: 0;
   transform: scale(0.5) rotate(0deg);
   transition: opacity 1.2s ease, transform 2.2s cubic-bezier(0.2, 0.8, 0.2, 1);
   pointer-events: none;
-}
-
-/* 3D Double Royal Khmer Wedding Doors */
-.wedding-gate-doors {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  perspective: 1400px;
-  perspective-origin: 50% 50%;
-  display: flex;
-  pointer-events: none;
-  z-index: 5;
-  overflow: hidden;
-}
-
-.gate-leaf {
-  width: 50%;
-  height: 100%;
-  position: relative;
-  background: 
-    linear-gradient(180deg, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.65) 100%),
-    linear-gradient(90deg, #381a06 0%, #4e2409 35%, #2a1102 100%);
-  transform-style: preserve-3d;
-  transition: transform 1.8s cubic-bezier(0.25, 1, 0.35, 1);
-  box-shadow: inset 0 0 100px rgba(0,0,0,0.85), 0 20px 60px rgba(0,0,0,0.9);
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  padding: 30px;
-  box-sizing: border-box;
-}
-
-.gate-leaf.leaf-left {
-  transform-origin: left center;
-  border-right: 3px solid #b87a14;
-}
-
-.gate-leaf.leaf-right {
-  transform-origin: right center;
-  border-left: 3px solid #b87a14;
-}
-
-.door-inner-panel {
-  width: 88%;
-  height: 90%;
-  border: 4px solid #b87a14;
-  border-radius: 12px;
-  box-shadow: 
-    inset 0 0 40px rgba(0,0,0,0.9),
-    0 0 20px rgba(184, 122, 20, 0.4);
-  position: relative;
-  background: radial-gradient(circle at center, rgba(184, 122, 20, 0.15) 0%, rgba(0,0,0,0.45) 100%);
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  padding: 20px 10px;
-}
-
-.door-inner-panel::before {
-  content: '';
-  position: absolute;
-  inset: 10px;
-  border: 1.5px dashed rgba(247, 198, 86, 0.6);
-  border-radius: 8px;
-  pointer-events: none;
-}
-
-.door-kbach-top,
-.door-kbach-bottom {
-  height: 40px;
-  background-image: radial-gradient(circle at center, #ffd875 18%, transparent 65%);
-  opacity: 0.75;
-}
-
-.door-handle-wrap {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 8;
-  filter: drop-shadow(0 10px 20px rgba(0,0,0,0.8));
-}
-
-.door-handle-wrap.handle-right {
-  right: 15px;
-}
-
-.door-handle-wrap.handle-left {
-  left: 15px;
-}
-
-.door-handle-img {
-  width: 65px;
-  height: 105px;
-  display: block;
 }
 
 /* Optional Fullscreen Video Effect */
@@ -1653,16 +1559,42 @@ body.guest-view-mode .floating-admin-toggle {
   opacity: 1;
 }
 
+.video-skip-btn {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  z-index: 35;
+  background: rgba(0, 0, 0, 0.65);
+  border: 1px solid rgba(255, 216, 117, 0.6);
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-family: 'Kantumruy Pro', sans-serif;
+  font-size: 13px;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+}
+
+.video-skip-btn:hover {
+  background: rgba(223, 158, 40, 0.9);
+  color: #1a1005;
+  font-weight: 600;
+  transform: scale(1.05);
+}
+
 /* Grand Welcome Card */
 .envelope-card {
   width: 100%;
-  max-width: 400px;
+  max-width: 410px;
   background: linear-gradient(135deg, #fefcf7 0%, #f7f1e1 50%, #eee3c8 100%);
-  border-radius: 22px;
-  padding: 30px 24px 28px 24px;
+  border-radius: 24px;
+  padding: 28px 24px 26px 24px;
   box-shadow: 
-    0 25px 60px rgba(0, 0, 0, 0.7),
-    0 0 0 1px rgba(223, 158, 40, 0.5);
+    0 25px 60px rgba(0, 0, 0, 0.75),
+    0 0 0 1px rgba(223, 158, 40, 0.5),
+    0 0 35px rgba(212, 139, 17, 0.25);
   text-align: center;
   position: relative;
   overflow: hidden;
@@ -1676,22 +1608,149 @@ body.guest-view-mode .floating-admin-toggle {
   position: absolute;
   inset: 6px;
   border: 1.5px solid #d8a03c;
-  border-radius: 16px;
+  border-radius: 18px;
   pointer-events: none;
 }
 
-/* Couple Photo Frame on Entrance Card */
+/* Couple Multi-Photo Arch Showcase (កន្លែងដាក់រូបគូស្នេហ៍កណ្ដាល - អាចដាក់បានច្រើនរូប) */
+.envelope-showcase-container {
+  margin: 0 auto 16px auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+.envelope-arch-frame {
+  width: 140px;
+  height: 168px;
+  position: relative;
+  border-radius: 70px 70px 18px 18px;
+  padding: 4px;
+  background: linear-gradient(135deg, #ffe699 0%, #d89924 45%, #8c570b 100%);
+  box-shadow: 
+    0 12px 30px rgba(0, 0, 0, 0.38),
+    0 0 25px rgba(235, 180, 72, 0.5);
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.envelope-slides-track {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  border-radius: 66px 66px 14px 14px;
+  overflow: hidden;
+  background: #2a1603;
+}
+
+.envelope-slide-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 66px 66px 14px 14px;
+  opacity: 0;
+  transform: scale(1.06);
+  transition: opacity 0.7s ease-in-out, transform 0.7s ease-in-out;
+  pointer-events: none;
+}
+
+.envelope-slide-img.active {
+  opacity: 1;
+  transform: scale(1);
+  pointer-events: auto;
+}
+
+/* Left / Right Nav Arrows inside Arch */
+.env-nav-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.55);
+  border: 1px solid rgba(255, 216, 117, 0.7);
+  color: #ffd875;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s, background 0.2s;
+  z-index: 10;
+  backdrop-filter: blur(4px);
+  padding: 0;
+  line-height: 1;
+}
+
+.envelope-arch-frame:hover .env-nav-btn,
+.envelope-showcase-container:focus-within .env-nav-btn {
+  opacity: 0.9;
+}
+
+.env-nav-btn:hover {
+  background: rgba(223, 158, 40, 0.95);
+  color: #1a1005;
+  opacity: 1 !important;
+}
+
+.env-nav-btn.prev {
+  left: 6px;
+}
+
+.env-nav-btn.next {
+  right: 6px;
+}
+
+/* Arch Frame Gold Border Animation */
+.envelope-arch-frame .frame-gold-border {
+  position: absolute;
+  inset: -2px;
+  border-radius: 72px 72px 20px 20px;
+  border: 1.5px dashed rgba(255, 230, 150, 0.85);
+  pointer-events: none;
+}
+
+/* Dot Indicators */
+.envelope-dots-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 8px;
+  min-height: 10px;
+}
+
+.envelope-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 4px;
+  background: rgba(184, 122, 20, 0.35);
+  border: 1px solid rgba(247, 198, 86, 0.5);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.envelope-dot.active {
+  width: 22px;
+  background: linear-gradient(90deg, #f59e0b, #ffd875);
+  border-color: #ffe699;
+  box-shadow: 0 0 8px rgba(245, 158, 11, 0.8);
+}
+
+/* Legacy fallback frame compatibility */
 .envelope-photo-frame {
-  width: 124px;
-  height: 124px;
+  width: 130px;
+  height: 130px;
   margin: 0 auto 16px auto;
   position: relative;
   border-radius: 50%;
   padding: 4px;
   background: linear-gradient(135deg, #ffe699 0%, #d89924 45%, #8c570b 100%);
-  box-shadow: 
-    0 10px 25px rgba(0, 0, 0, 0.35),
-    0 0 20px rgba(235, 180, 72, 0.55);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1700,20 +1759,9 @@ body.guest-view-mode .floating-admin-toggle {
 .envelope-photo-img {
   width: 100%;
   height: 100%;
-  border-radius: 50%;
+  border-radius: inherit;
   object-fit: cover;
-  border: 2px solid #fffdf7;
   display: block;
-  background: #2a1603;
-}
-
-.frame-gold-border {
-  position: absolute;
-  inset: -4px;
-  border-radius: 50%;
-  border: 1.5px dashed rgba(255, 230, 150, 0.85);
-  pointer-events: none;
-  animation: rotateSlow 24s linear infinite;
 }
 
 @keyframes rotateSlow {
@@ -1801,16 +1849,6 @@ body.guest-view-mode .floating-admin-toggle {
   filter: blur(5px);
   pointer-events: none;
   transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1), transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), filter 0.5s;
-}
-
-.envelope-overlay.gate-opening .gate-leaf.leaf-left {
-  transform: perspective(1400px) rotateY(-112deg);
-  transition: transform 1.7s cubic-bezier(0.25, 1, 0.35, 1) 0.35s;
-}
-
-.envelope-overlay.gate-opening .gate-leaf.leaf-right {
-  transform: perspective(1400px) rotateY(112deg);
-  transition: transform 1.7s cubic-bezier(0.25, 1, 0.35, 1) 0.35s;
 }
 
 .envelope-overlay.gate-opening .gate-light-rays {
