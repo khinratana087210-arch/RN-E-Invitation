@@ -4,6 +4,13 @@
  * ឯកសារនេះត្រូវបានប្រើដោយស្វ័យប្រវត្តិទាំងលើ Admin និងទំព័រភ្ញៀវ (guest.html)
  */
 
+// Cloud Storage Configuration (Supabase Free Auto-Upload)
+window.SUPABASE_CONFIG = {
+  url: '',
+  anonKey: '',
+  bucket: 'wedding-invitations'
+};
+
 window.WEDDING_CONFIG = {
   // ព័ត៌មានកម្មវិធី
   eventTitle: 'សិរីមង្គលអាពាហ៍ពិពាហ៍',

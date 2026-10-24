@@ -12,6 +12,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Alex+Brush&family=Battambang:wght@400;700&family=Bayon&family=Bokor&family=Cinzel:wght@500;700&family=Great+Vibes&family=Kantumruy+Pro:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Koulen&family=Moul&family=Moulpali&family=Playfair+Display:ital,wght@0,600;1,500&family=Preahvihear&family=Siemreap&display=swap" rel="stylesheet">
   
   <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="config.js"></script>
 </head>
 <body>
@@ -77,6 +78,11 @@
         <span>ចម្លង Link ភ្ញៀវ</span>
       </button>
 
+      <button type="button" class="action-btn" id="btnOpenCloudModal" style="background: rgba(56, 189, 248, 0.2); border: 1px solid #38bdf8; color: #7dd3fc;" title="កំណត់ប្រព័ន្ធ Auto Cloud Database (Supabase Free)">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg>
+        <span>☁️ Auto Cloud</span>
+      </button>
+
       <button type="button" class="action-btn" id="btnSaveConfig" style="background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; color: #6ee7b7;" title="រក្សាទុកទិន្នន័យទាំងអស់ចូល config.js សម្រាប់ Upload ទៅ Render">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
         <span>💾 រក្សាទុក (Save)</span>
@@ -134,12 +140,15 @@
             </button>
           </div>
 
-          <!-- Cloud Upload Active Banner -->
-          <div style="background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.45); border-radius: 8px; padding: 10px 14px; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
-            <div style="display: flex; align-items: center; gap: 8px; color: #6ee7b7; font-size: 13px; font-weight: 600;">
-              <span style="font-size: 16px;">☁️</span>
-              <span><strong>Auto Cloud Upload៖</strong> បើកដំណើរការ (ជ្រើសរូបពីម៉ាស៊ីន វានឹងឡើង Cloud ស្វ័យប្រវត្តិ ភ្ញៀវមើលឃើញភ្លាម មិនបាច់ Upload GitHub ឡើយ!)</span>
+          <!-- Simple Friendly Guidance Box -->
+          <div style="background: rgba(223, 158, 40, 0.1); border: 1px solid rgba(223, 158, 40, 0.35); border-radius: 10px; padding: 12px 16px; margin-bottom: 16px;">
+            <div style="display: flex; align-items: center; gap: 8px; color: #ffd875; font-size: 13.5px; font-weight: 600; margin-bottom: 4px;">
+              <span>💡</span>
+              <span>របៀបដាក់រូបភាពងាយស្រួលបំផុត៖</span>
             </div>
+            <p style="font-size: 12px; color: #cbd5e1; margin: 0; line-height: 1.6;">
+              គ្រាន់តែយករូបថតអាពាហ៍ពិពាហ៍ (រូបអាវលឿង) ដាក់ឈ្មោះថា <strong>cover.jpg</strong> រួចយកទៅដាក់ជំនួសក្នុង Folder <strong>E-Invitation</strong> ហើយ Upload ចូល GitHub <strong>តែ ១ ដងគត់</strong>! បន្ទាប់មកលោកអ្នកគ្រាន់តែវាយឈ្មោះភ្ញៀវ ហើយចុចចម្លង Link ផ្ញើទៅភ្ញៀវរាប់រយនាក់បានភ្លាមៗ!
+            </p>
           </div>
 
           <!-- Multiple Center Welcome Photos (កន្លែងដាក់រូបគូស្នេហ៍កណ្ដាល - អាចដាក់បានច្រើនរូប) -->
@@ -897,15 +906,14 @@
         <h3 class="modal-title">🔗 ចម្លង Link ធៀបការសម្រាប់ផ្ញើ</h3>
         <button type="button" class="modal-close" onclick="closeShareModal()">&times;</button>
       </div>
-        <!-- Important Notice for publishing photos and edits to all guests -->
-        <div style="background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.45); border-radius: 8px; padding: 12px 14px; margin-bottom: 14px;">
-          <div style="display: flex; align-items: center; gap: 7px; font-weight: 600; color: #6ee7b7; font-size: 13px; margin-bottom: 6px;">
-            <span>💡</span> ព័ត៌មានសំខាន់សម្រាប់ការផ្ញើ Link ទៅភ្ញៀវ៖
+        <!-- Dynamic Photo & Publishing Status Alert -->
+        <div id="modalPhotoStatusAlert" style="background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.45); border-radius: 8px; padding: 12px 14px; margin-bottom: 14px;">
+          <div style="display: flex; align-items: center; gap: 7px; font-weight: 600; color: #6ee7b7; font-size: 13px; margin-bottom: 4px;">
+            <span>💡</span> ព័ត៌មាន Link ផ្ញើទៅភ្ញៀវ៖
           </div>
-          <ul style="font-size: 12px; color: #d1fae5; margin: 0; padding-left: 18px; line-height: 1.6;">
-            <li><strong>ឈ្មោះកូនកំលោះ-ក្រមុំ & ភ្ញៀវ៖</strong> ត្រូវបានបង្កប់ចូលក្នុង Link ខាងក្រោមដោយស្វ័យប្រវត្តិ ពេលភ្ញៀវបើក Link នឹងឃើញឈ្មោះភ្លាមៗ!</li>
-            <li><strong>រូបថត & Background៖</strong> សូមចុចប៊ូតុងពណ៌បៃតង <strong>"💾 រក្សាទុក (Save)"</strong> នៅរបារខាងលើ ដើម្បីទាញយក <code>config.js</code> រួច Upload ចូល GitHub នោះរូបថតទាំងអស់នឹងបង្ហាញលើទូរស័ព្ទភ្ញៀវគ្រប់គ្នា!</li>
-          </ul>
+          <p style="font-size: 12px; color: #d1fae5; margin: 0; line-height: 1.5;">
+            ឈ្មោះកូនកំលោះ-ក្រមុំ ឈ្មោះភ្ញៀវ និងរូបភាព Cover ត្រូវបានបង្កប់ចូលក្នុង Link ស្វ័យប្រវត្តិ!
+          </p>
         </div>
         
         <!-- Website Domain / Base Host input -->
@@ -1004,6 +1012,48 @@
       <button type="button" class="copy-action-btn" onclick="closeSaveGuideModal()" style="width: 100%; justify-content: center; display: flex; padding: 12px;">
         យល់ព្រម (OK)
       </button>
+    </div>
+  <!-- Cloud Database Setup Modal (Supabase Free Auto-Upload) -->
+  <div class="modal-backdrop" id="cloudModal">
+    <div class="modal-card" style="max-width: 520px; border-color: rgba(56, 189, 248, 0.4);">
+      <div class="modal-header">
+        <h3 class="modal-title" style="color: #7dd3fc; display: flex; align-items: center; gap: 8px;">
+          <span>☁️</span> កំណត់ប្រព័ន្ធ Auto Cloud Database (Supabase Free)
+        </h3>
+        <button type="button" class="modal-close" onclick="closeCloudModal()">&times;</button>
+      </div>
+
+      <div style="background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 10px; padding: 14px; margin-bottom: 16px;">
+        <p style="font-size: 13px; color: #e0f2fe; margin: 0 0 6px 0; font-weight: 600;">
+          ⚡ ធ្វើឱ្យកម្មវិធី Auto 100% ជារៀងរហូត (មិនបាច់ Upload GitHub ឡើយ)!
+        </p>
+        <p style="font-size: 12px; color: #bae6fd; margin: 0; line-height: 1.5;">
+          ពេលភ្ជាប់រួចរាល់ រាល់ពេលលោកអ្នកជ្រើសរើសរូបភាព វានឹងរត់ឡើង Cloud ស្វ័យប្រវត្តិ ហើយពេលចម្លង Link ផ្ញើទៅភ្ញៀវ ភ្ញៀវទាំងអស់នឹងឃើញរូបភាពភ្លាមៗ!
+        </p>
+      </div>
+
+      <div class="form-group" style="margin-bottom: 12px;">
+        <label style="color: #7dd3fc; font-size: 12.5px;">1. Supabase Project URL:</label>
+        <input type="text" id="inputSupabaseUrl" class="form-control" placeholder="https://xxxxxxxx.supabase.co" style="font-size: 12.5px;">
+      </div>
+
+      <div class="form-group" style="margin-bottom: 12px;">
+        <label style="color: #7dd3fc; font-size: 12.5px;">2. Supabase Anon Public Key:</label>
+        <input type="text" id="inputSupabaseKey" class="form-control" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6..." style="font-size: 12.5px;">
+      </div>
+
+      <div class="form-group" style="margin-bottom: 16px;">
+        <label style="color: #7dd3fc; font-size: 12.5px;">3. Storage Bucket Name:</label>
+        <input type="text" id="inputSupabaseBucket" class="form-control" value="wedding-invitations" style="font-size: 12.5px;">
+      </div>
+
+      <div style="display: flex; gap: 10px;">
+        <button type="button" class="copy-action-btn" id="btnSaveSupabaseConfig" style="flex: 1; justify-content: center; background: #0284c7; border: none; padding: 12px;">
+          💾 រក្សាទុក & ដំណើរការ Auto Cloud
+        </button>
+      </div>
+
+      <div id="cloudConnectionStatus" style="font-size: 12px; margin-top: 10px; text-align: center;"></div>
     </div>
   </div>
 

@@ -551,61 +551,100 @@ function compressImage(file, maxDimension, quality, callback) {
   reader.readAsDataURL(file);
 }
 
+let supabaseClient = null;
+
+function getSupabaseClient() {
+  if (supabaseClient) return supabaseClient;
+  const url = localStorage.getItem('wedding_supabase_url') || window.SUPABASE_CONFIG?.url;
+  const key = localStorage.getItem('wedding_supabase_key') || window.SUPABASE_CONFIG?.anonKey;
+  if (url && key && window.supabase) {
+    try {
+      supabaseClient = window.supabase.createClient(url.trim(), key.trim());
+      return supabaseClient;
+    } catch (e) {
+      console.warn('Could not initialize Supabase:', e);
+    }
+  }
+  return null;
+}
+
+function dataUrlToBlob(dataUrl) {
+  const arr = dataUrl.split(',');
+  const mime = arr[0].match(/:(.*?);/)[1];
+  const bstr = atob(arr[1]);
+  let n = bstr.length;
+  const u8arr = new Uint8Array(n);
+  while (n--) {
+    u8arr[n] = bstr.charCodeAt(n);
+  }
+  return new Blob([u8arr], { type: mime });
+}
+
 /**
  * Auto Cloud Upload Service
- * បង្ហោះរូបភាពឡើង Cloud ដោយស្វ័យប្រវត្តិ (Freeimage + ImgBB)
- * ដើម្បីឱ្យភ្ញៀវទាំងអស់ដែលបើក Link មើលឃើញរូបភាពភ្លាម ដោយមិនបាច់ Upload ចូល GitHub!
+ * បង្ហោះរូបភាពឡើង Cloud Database ដោយស្វ័យប្រវត្តិ (Supabase Storage)
+ * ដើម្បីឱ្យភ្ញៀវទាំងអស់ដែលបើក Link មើលឃើញរូបភាពភ្លាម ដោយមិនបាច់ Upload ចូល GitHub ឡើយ!
  */
 async function uploadImageToCloud(base64DataUrl) {
   if (!base64DataUrl || typeof base64DataUrl !== 'string') return null;
   if (base64DataUrl.startsWith('http://') || base64DataUrl.startsWith('https://')) {
     return base64DataUrl;
   }
+
+  // 1. Supabase Cloud Storage (Auto 100%)
+  const client = getSupabaseClient();
+  if (client) {
+    try {
+      const bucket = localStorage.getItem('wedding_supabase_bucket') || window.SUPABASE_CONFIG?.bucket || 'wedding-invitations';
+      const blob = dataUrlToBlob(base64DataUrl);
+      const ext = blob.type === 'image/png' ? 'png' : 'jpg';
+      const fileName = `cover_${Date.now()}_${Math.random().toString(36).substring(2, 7)}.${ext}`;
+
+      const { data, error } = await client.storage
+        .from(bucket)
+        .upload(fileName, blob, {
+          contentType: blob.type,
+          upsert: true
+        });
+
+      if (!error && data) {
+        const { data: pubData } = client.storage.from(bucket).getPublicUrl(fileName);
+        if (pubData && pubData.publicUrl) {
+          console.log('✅ Supabase Upload Success:', pubData.publicUrl);
+          return pubData.publicUrl;
+        }
+      } else if (error) {
+        console.warn('Supabase upload error:', error);
+      }
+    } catch (err) {
+      console.warn('Supabase upload exception:', err);
+    }
+  }
+
   const base64Clean = base64DataUrl.includes(',') ? base64DataUrl.split(',')[1] : base64DataUrl;
   if (!base64Clean) return null;
 
-  // Provider 1: Freeimage.host API (Chevereto CORS key)
-  try {
-    const formData = new FormData();
-    formData.append('key', '6d207e02198a847aa98d0a2a901485a5');
-    formData.append('action', 'upload');
-    formData.append('source', base64Clean);
-    formData.append('format', 'json');
+  // 2. ImgBB API Fallback
+  const apiKey = localStorage.getItem('wedding_imgbb_key');
+  if (apiKey && apiKey.trim()) {
+    try {
+      const formData = new FormData();
+      formData.append('image', base64Clean);
 
-    const res = await fetch('https://freeimage.host/api/1/upload', {
-      method: 'POST',
-      body: formData
-    });
-    if (res.ok) {
-      const data = await res.json();
-      if (data && data.image && data.image.url) {
-        console.log('Cloud Upload Success (Freeimage):', data.image.url);
-        return data.image.url;
+      const res = await fetch(`https://api.imgbb.com/1/upload?key=${apiKey.trim()}`, {
+        method: 'POST',
+        body: formData
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.data && data.data.url) {
+          console.log('Cloud Upload Success (ImgBB):', data.data.url);
+          return data.data.url;
+        }
       }
+    } catch (err) {
+      console.warn('ImgBB upload error:', err);
     }
-  } catch (err) {
-    console.warn('Freeimage upload failed, trying fallback:', err);
-  }
-
-  // Provider 2: ImgBB API
-  try {
-    const apiKey = localStorage.getItem('wedding_imgbb_key') || 'c0e86b460e1d71104e4c27fc74d47e45';
-    const formData = new FormData();
-    formData.append('image', base64Clean);
-
-    const res = await fetch(`https://api.imgbb.com/1/upload?key=${apiKey}`, {
-      method: 'POST',
-      body: formData
-    });
-    if (res.ok) {
-      const data = await res.json();
-      if (data && data.data && data.data.url) {
-        console.log('Cloud Upload Success (ImgBB):', data.data.url);
-        return data.data.url;
-      }
-    }
-  } catch (err) {
-    console.warn('ImgBB upload failed:', err);
   }
 
   return null;
@@ -642,6 +681,11 @@ function bindImageUploads() {
         if (!dataUrl) return;
         // 1. Instant local thumbnail & preview
         appState[item.key] = dataUrl;
+        if (item.key === 'coverImage') {
+          appState.envelopeImage = dataUrl;
+          updateThumbnail('envelopeThumb', dataUrl);
+          updateEnvelopePhotoPreview();
+        }
         updateThumbnail(item.thumbId, dataUrl);
         item.updateFn();
         saveStateDebounced();
@@ -654,6 +698,8 @@ function bindImageUploads() {
             appState[item.key] = cloudUrl;
             if (item.key === 'coverImage') {
               appState.envelopeImage = cloudUrl;
+              updateThumbnail('envelopeThumb', cloudUrl);
+              updateEnvelopePhotoPreview();
             }
             if (item.key === 'entranceBg') {
               appState.bgImage = cloudUrl;
@@ -668,7 +714,7 @@ function bindImageUploads() {
         } catch (err) {
           console.warn('Auto cloud upload error:', err);
         }
-        showToast('បានផ្លាស់ប្ដូររូបភាពក្នុងម៉ាស៊ីន (Offline)!');
+        showToast('✨ បានផ្លាស់ប្ដូររូបភាពគំរូ (Preview) ជោគជ័យ!');
       });
     });
   });
@@ -681,10 +727,19 @@ function bindImageUploads() {
       const url = e.target.value.trim();
       if (url.startsWith('http')) {
         appState[key] = url;
+        if (key === 'coverImage') {
+          appState.envelopeImage = url;
+          updateThumbnail('envelopeThumb', url);
+          updateEnvelopePhotoPreview();
+        }
+        if (key === 'entranceBg') {
+          appState.bgImage = url;
+          appState.bgImage1 = url;
+        }
         updateThumbnail(thumbId, url);
         updateFn();
         saveStateDebounced();
-        showToast('បានភ្ជាប់ Link រូបភាពជោគជ័យ!');
+        showToast('✅ បានភ្ជាប់ Link រូបភាពជោគជ័យ! ភ្ញៀវទាំងអស់នឹងឃើញរូបនេះភ្លាមៗ!');
       }
     });
   };
@@ -692,6 +747,41 @@ function bindImageUploads() {
   bindDirectUrlInput('inputEnvelopeImageUrl', 'envelopeImage', 'envelopeThumb', updateEnvelopePhotoPreview);
   bindDirectUrlInput('inputCoverImageUrl', 'coverImage', 'coverThumb', updateCoverPreview);
   bindDirectUrlInput('inputEntranceBgUrl', 'entranceBg', 'entranceBgThumb', updateEntranceBgPreview);
+
+  // ImgBB API Key UI Handler
+  const inputImgbbKey = document.getElementById('inputImgbbApiKey');
+  const btnSaveImgbb = document.getElementById('btnSaveImgbbKey');
+  const imgbbStatus = document.getElementById('imgbbKeyStatus');
+
+  const updateImgbbStatus = () => {
+    const key = localStorage.getItem('wedding_imgbb_key');
+    if (inputImgbbKey) inputImgbbKey.value = key || '';
+    if (imgbbStatus) {
+      if (key && key.trim()) {
+        imgbbStatus.innerHTML = '<span style="color: #6ee7b7; font-weight: 600;">✅ បានភ្ជាប់ ImgBB API Key រួចរាល់!</span> រូបភាពទាំងអស់ដែលជ្រើសពីកុំព្យូទ័រ នឹង Upload ឡើង Cloud ស្វ័យប្រវត្តិតែម្តង។';
+      } else {
+        imgbbStatus.innerHTML = '<span style="color: #fbbf24;">⚠️ មិនទាន់មាន Key៖</span> រូបដែលជ្រើសពីកុំព្យូទ័រនឹងដំណើរការតែក្នុងម៉ាស៊ីន (Offline)។ សូមយក Key ឬបិទភ្ជាប់ Link រូបភាព។';
+      }
+    }
+  };
+
+  updateImgbbStatus();
+
+  if (btnSaveImgbb) {
+    btnSaveImgbb.addEventListener('click', () => {
+      if (inputImgbbKey) {
+        const val = inputImgbbKey.value.trim();
+        if (val) {
+          localStorage.setItem('wedding_imgbb_key', val);
+          showToast('✅ បានរក្សាទុក ImgBB Key ជោគជ័យ!');
+        } else {
+          localStorage.removeItem('wedding_imgbb_key');
+          showToast('បានលុប ImgBB Key!');
+        }
+        updateImgbbStatus();
+      }
+    });
+  }
 }
 
 /**
@@ -939,6 +1029,35 @@ function bindViewButtons() {
     });
   });
 
+  // Cloud Database Modal
+  const btnOpenCloud = document.getElementById('btnOpenCloudModal');
+  if (btnOpenCloud) {
+    btnOpenCloud.addEventListener('click', openCloudModal);
+  }
+
+  const btnSaveSupabase = document.getElementById('btnSaveSupabaseConfig');
+  if (btnSaveSupabase) {
+    btnSaveSupabase.addEventListener('click', () => {
+      const urlInput = document.getElementById('inputSupabaseUrl');
+      const keyInput = document.getElementById('inputSupabaseKey');
+      const bucketInput = document.getElementById('inputSupabaseBucket');
+      const url = urlInput ? urlInput.value.trim() : '';
+      const key = keyInput ? keyInput.value.trim() : '';
+      const bucket = bucketInput ? bucketInput.value.trim() : 'wedding-invitations';
+
+      if (url && key) {
+        localStorage.setItem('wedding_supabase_url', url);
+        localStorage.setItem('wedding_supabase_key', key);
+        localStorage.setItem('wedding_supabase_bucket', bucket);
+        supabaseClient = null;
+        showToast('✅ បានភ្ជាប់ Cloud Database ជោគជ័យ! ប្រព័ន្ធដំណើរការ Auto 100%');
+        closeCloudModal();
+      } else {
+        showToast('⚠️ សូមបញ្ចូល URL និង Anon Key របស់ Supabase!');
+      }
+    });
+  }
+
   // Share Guest Link Modal
   const btnShare = document.getElementById('btnShareLink');
   if (btnShare) {
@@ -978,9 +1097,11 @@ function bindViewButtons() {
   if (copyLinkBtn) {
     copyLinkBtn.addEventListener('click', () => {
       const linkInput = document.getElementById('modalGeneratedLink');
-      linkInput.select();
-      navigator.clipboard.writeText(linkInput.value);
-      showToast('បានចម្លង Link ភ្ញៀវដោយជោគជ័យ!');
+      const textToCopy = (linkInput && linkInput.dataset.webUrl) ? linkInput.dataset.webUrl : (linkInput ? linkInput.value : '');
+      if (textToCopy) {
+        navigator.clipboard.writeText(textToCopy);
+        showToast('✅ បានចម្លង Link ភ្ញៀវដោយជោគជ័យ!');
+      }
     });
   }
 
@@ -1176,12 +1297,55 @@ function openShareModal() {
     guestInput.value = appState.guestName;
   }
 
+  // Simple Friendly Status in Share Modal
+  const alertBox = document.getElementById('modalPhotoStatusAlert');
+  if (alertBox) {
+    alertBox.style.background = 'rgba(16, 185, 129, 0.15)';
+    alertBox.style.borderColor = 'rgba(16, 185, 129, 0.45)';
+    alertBox.innerHTML = `
+      <div style="display: flex; align-items: center; gap: 7px; font-weight: 600; color: #6ee7b7; font-size: 13px; margin-bottom: 4px;">
+        <span>💍</span> Link ធៀបការរៀបចំរួចរាល់!
+      </div>
+      <p style="font-size: 12px; color: #d1fae5; margin: 0; line-height: 1.5;">
+        វាយឈ្មោះភ្ញៀវ រួចចុចប៊ូតុង <strong>"📋 ចម្លង Link"</strong> ផ្ញើតាម Telegram ឬ Messenger ភ្ញៀវបើកមកឃើញឈ្មោះ និងធៀបការភ្លាមៗ!
+      </p>
+    `;
+  }
+
   updateGeneratedLink(guestInput ? guestInput.value : appState.guestName);
   if (modal) modal.classList.add('active');
 }
 
 function closeShareModal() {
   const modal = document.getElementById('shareModal');
+  if (modal) modal.classList.remove('active');
+}
+
+function openCloudModal() {
+  const modal = document.getElementById('cloudModal');
+  const urlInput = document.getElementById('inputSupabaseUrl');
+  const keyInput = document.getElementById('inputSupabaseKey');
+  const bucketInput = document.getElementById('inputSupabaseBucket');
+  const statusEl = document.getElementById('cloudConnectionStatus');
+
+  if (urlInput) urlInput.value = localStorage.getItem('wedding_supabase_url') || window.SUPABASE_CONFIG?.url || '';
+  if (keyInput) keyInput.value = localStorage.getItem('wedding_supabase_key') || window.SUPABASE_CONFIG?.anonKey || '';
+  if (bucketInput) bucketInput.value = localStorage.getItem('wedding_supabase_bucket') || window.SUPABASE_CONFIG?.bucket || 'wedding-invitations';
+
+  const client = getSupabaseClient();
+  if (statusEl) {
+    if (client) {
+      statusEl.innerHTML = '<span style="color: #6ee7b7; font-weight: 600;">✅ បានភ្ជាប់ជាមួយ Cloud Database រួចរាល់! កម្មវិធីដំណើរការ Auto 100%</span>';
+    } else {
+      statusEl.innerHTML = '<span style="color: #fde68a;">⚠️ មិនទាន់ភ្ជាប់ Cloud Database ទេ។ សូមបំពេញ URL និង Key ដើម្បីដំណើរការ Auto។</span>';
+    }
+  }
+
+  if (modal) modal.classList.add('active');
+}
+
+function closeCloudModal() {
+  const modal = document.getElementById('cloudModal');
   if (modal) modal.classList.remove('active');
 }
 
@@ -1256,7 +1420,10 @@ function updateGeneratedLink(guestName) {
   const webLinkUrl = `${baseGuestUrl}?${queryEncoded}`;
 
   const linkInput = document.getElementById('modalGeneratedLink');
-  if (linkInput) linkInput.value = readableUrl;
+  if (linkInput) {
+    linkInput.value = readableUrl;
+    linkInput.dataset.webUrl = webLinkUrl;
+  }
 
   const fullMessage = `💍 ${appState.eventTitle} 💍\n` +
     `កូនកំលោះ៖ ${appState.groomKhmer} & កូនក្រមុំ៖ ${appState.brideKhmer}\n\n` +
