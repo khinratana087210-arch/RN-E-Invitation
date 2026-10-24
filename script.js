@@ -1,7 +1,6 @@
 /**
- * Khmer E-Invitation Builder - Interactive Application Logic
- * Supports real-time preview, Khmer numeral conversion, countdown timer,
- * file uploads, personalized guest URL params, and audio player.
+ * Khmer E-Invitation Builder & Live Preview Logic
+ * Version 2.0: Typography Studio, 3D Pop Shadows, Clean Links & Strict Guest Mode
  */
 
 // Khmer numeral character map
@@ -13,13 +12,7 @@ function toKhmerDigits(num) {
 
 // Initial Default State
 const defaultState = {
-  coverImage: 'assets/cover.jpg',
-  bgImage: 'assets/bg.jpg',
-  mapImage: 'assets/map.svg',
-  gallery1: 'assets/gallery1.jpg',
-  gallery2: 'assets/gallery2.jpg',
-  gallery3: 'assets/gallery3.jpg',
-  gallery4: 'assets/gallery4.jpg',
+  // Wedding details
   eventTitle: 'សិរីមង្គលអាពាហ៍ពិពាហ៍',
   groomKhmer: 'ប្រុស តូច',
   groomLatin: 'Pros Toch',
@@ -37,7 +30,34 @@ const defaultState = {
   phone2: '011 867 506',
   phone3: '089 483 683',
   useKhmerNumerals: true,
-  thankYouText: 'យើងខ្ញុំទាំងពីរ សូមថ្លែងអំណរគុណ យ៉ាងជ្រាលជ្រៅ ចំពោះវត្តមាន ដ៏ឧត្តុង្គឧត្តមរបស់ សម្តេច ឯកឧត្តម លោកជំទាវ លោកអ្នកឧកញ៉ា អ្នកឧកញ៉ា ឧកញ៉ា លោក លោកស្រី អ្នកនាង កញ្ញា ដែលបាន អញ្ជើញចូលរួមជាកិត្តិយស ក្នុងពិធីសិរីសួស្តីអាពាហ៍ពិពាហ៍ របស់យើងខ្ញុំ នាពេលខាងមុខនេះ។ យើងខ្ញុំសូមការខន្តីអភ័យទោស ដែលពុំបានជូនលិខិតអញ្ជើញ ដោយផ្ទាល់ ។ ដោយការកិច្ចដ៏ខ្ពង់ខ្ពស់ពីយើងខ្ញុំ។'
+  thankYouText: 'យើងខ្ញុំទាំងពីរ សូមថ្លែងអំណរគុណ យ៉ាងជ្រាលជ្រៅ ចំពោះវត្តមាន ដ៏ឧត្តុង្គឧត្តមរបស់ សម្តេច ឯកឧត្តម លោកជំទាវ លោកអ្នកឧកញ៉ា អ្នកឧកញ៉ា ឧកញ៉ា លោក លោកស្រី អ្នកនាង កញ្ញា ដែលបាន អញ្ជើញចូលរួមជាកិត្តិយស ក្នុងពិធីសិរីសួស្តីអាពាហ៍ពិពាហ៍ របស់យើងខ្ញុំ នាពេលខាងមុខនេះ។ យើងខ្ញុំសូមការខន្តីអភ័យទោស ដែលពុំបានជូនលិខិតអញ្ជើញ ដោយផ្ទាល់ ។ ដោយការកិច្ចដ៏ខ្ពង់ខ្ពស់ពីយើងខ្ញុំ។',
+
+  // Typography, Colors & 3D Pop Shadows
+  titleFont: 'Moul',
+  titleColor: '#f7a627',
+  titleShadow: 'shadow-3d-strong',
+  titleSize: '26',
+  coupleFont: 'Moul',
+  coupleLatinFont: 'Great Vibes',
+  coupleColor: '#f9b63a',
+  coupleShadow: 'shadow-3d-strong',
+  guestFont: 'Moul',
+  guestColor: '#1a3250',
+
+  // Images & Media (Fallback relative paths)
+  envelopeImage: 'assets/cover.jpg',
+  gateVideo: '',
+  coverImage: 'assets/cover.jpg',
+  bgImage: 'assets/bg.jpg',
+  bgImage1: 'assets/bg.jpg',
+  bgImage2: 'assets/bg.jpg',
+  bgImage3: 'assets/bg.jpg',
+  bgImage4: 'assets/bg.jpg',
+  mapImage: 'assets/map.svg',
+  gallery1: 'assets/gallery1.jpg',
+  gallery2: 'assets/gallery2.jpg',
+  gallery3: 'assets/gallery3.jpg',
+  gallery4: 'assets/gallery4.jpg'
 };
 
 // Current Active State
@@ -52,6 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
   loadSavedStateOrUrlParams();
   bindFormInputs();
   bindImageUploads();
+  bindTypographyControls();
   bindViewButtons();
   bindCalendarAction();
   bindAudio();
@@ -60,13 +81,37 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /**
- * Load state from localStorage or URL search params (?guest=...)
+ * Load state: priority = URL params (?guest=...) > localStorage > config.js > defaults
  */
 function loadSavedStateOrUrlParams() {
   const urlParams = new URLSearchParams(window.location.search);
   const guestParam = urlParams.get('guest') || urlParams.get('to');
   
-  // Try loading saved data from localStorage
+  // 1. Merge baseline from window.WEDDING_CONFIG if available
+  if (window.WEDDING_CONFIG) {
+    const c = window.WEDDING_CONFIG;
+    appState = {
+      ...appState,
+      eventTitle: c.eventTitle || appState.eventTitle,
+      groomKhmer: c.groomKhmer || appState.groomKhmer,
+      groomLatin: c.groomLatin || appState.groomLatin,
+      brideKhmer: c.brideKhmer || appState.brideKhmer,
+      brideLatin: c.brideLatin || appState.brideLatin,
+      weddingDate: c.weddingDate || appState.weddingDate,
+      weddingTime: c.weddingTime || appState.weddingTime,
+      dateFullKhmer: c.dateFullKhmer || appState.dateFullKhmer,
+      venueName: c.venueName || appState.venueName,
+      locationUrl: c.locationUrl || appState.locationUrl,
+      phone1: c.phone1 || appState.phone1,
+      phone2: c.phone2 || appState.phone2,
+      phone3: c.phone3 || appState.phone3,
+      thankYouText: c.thankYouText || appState.thankYouText,
+      ...(c.styles || {}),
+      ...(c.images || {})
+    };
+  }
+
+  // 2. Try loading local edits saved in browser localStorage
   const saved = localStorage.getItem('khmer_e_invitation_state');
   if (saved) {
     try {
@@ -77,10 +122,12 @@ function loadSavedStateOrUrlParams() {
     }
   }
 
-  // If URL has specific guest name or guest mode, automatically activate Guest View Mode!
-  if (guestParam || urlParams.get('mode') === 'guest' || urlParams.get('view') === 'guest') {
+  // 3. If guest parameter is in URL or if on guest.html, activate Guest View Mode
+  const isGuestPage = window.location.pathname.includes('guest.html');
+  if (guestParam || isGuestPage || urlParams.get('mode') === 'guest' || urlParams.get('view') === 'guest') {
     if (guestParam) {
-      appState.guestName = decodeURIComponent(guestParam);
+      // Replace underscores with spaces for clean URLs
+      appState.guestName = decodeURIComponent(guestParam).replace(/_/g, ' ');
     }
     document.body.classList.add('guest-view-mode');
     
@@ -88,48 +135,84 @@ function loadSavedStateOrUrlParams() {
     const envOverlay = document.getElementById('envelopeOverlay');
     const envTitle = document.getElementById('envelopeEventTitle');
     const envGuest = document.getElementById('envelopeGuestName');
+    const envPhoto = document.getElementById('envelopePhotoImg');
     if (envOverlay) {
       envOverlay.style.display = 'flex';
       if (envTitle) envTitle.textContent = appState.eventTitle;
       if (envGuest) envGuest.textContent = appState.guestName;
+      if (envPhoto) envPhoto.src = appState.envelopeImage || appState.coverImage || 'assets/cover.jpg';
     }
   }
 
-  // Populate Form Fields
+  // Populate Form Fields (if editor panel exists)
   populateFormFields();
 }
 
 /**
- * Sync form input values with current appState
+ * Populate input fields from appState
  */
 function populateFormFields() {
-  document.getElementById('inputEventTitle').value = appState.eventTitle;
-  document.getElementById('inputGroomKhmer').value = appState.groomKhmer;
-  document.getElementById('inputGroomLatin').value = appState.groomLatin;
-  document.getElementById('inputBrideKhmer').value = appState.brideKhmer;
-  document.getElementById('inputBrideLatin').value = appState.brideLatin;
-  document.getElementById('inputWeddingDate').value = appState.weddingDate;
-  document.getElementById('inputWeddingTime').value = appState.weddingTime;
-  document.getElementById('inputDateFullKhmer').value = appState.dateFullKhmer;
-  document.getElementById('inputGuestSalutation').value = appState.guestSalutation;
-  document.getElementById('inputGuestName').value = appState.guestName;
-  document.getElementById('inputInviteBody').value = appState.inviteBody;
-  document.getElementById('inputVenueName').value = appState.venueName;
-  document.getElementById('inputLocationUrl').value = appState.locationUrl;
-  document.getElementById('inputPhone1').value = appState.phone1;
-  document.getElementById('inputPhone2').value = appState.phone2;
-  document.getElementById('inputPhone3').value = appState.phone3;
-  document.getElementById('inputThankYouText').value = appState.thankYouText;
-  document.getElementById('toggleKhmerNumerals').checked = appState.useKhmerNumerals;
+  const setVal = (id, val) => {
+    const el = document.getElementById(id);
+    if (el && val !== undefined) el.value = val;
+  };
 
-  // Thumbnails
+  setVal('inputEventTitle', appState.eventTitle);
+  setVal('inputGroomKhmer', appState.groomKhmer);
+  setVal('inputGroomLatin', appState.groomLatin);
+  setVal('inputBrideKhmer', appState.brideKhmer);
+  setVal('inputBrideLatin', appState.brideLatin);
+  setVal('inputWeddingDate', appState.weddingDate);
+  setVal('inputWeddingTime', appState.weddingTime);
+  setVal('inputDateFullKhmer', appState.dateFullKhmer);
+  setVal('inputGuestSalutation', appState.guestSalutation);
+  setVal('inputGuestName', appState.guestName);
+  setVal('inputInviteBody', appState.inviteBody);
+  setVal('inputVenueName', appState.venueName);
+  setVal('inputLocationUrl', appState.locationUrl);
+  setVal('inputPhone1', appState.phone1);
+  setVal('inputPhone2', appState.phone2);
+  setVal('inputPhone3', appState.phone3);
+  setVal('inputThankYouText', appState.thankYouText);
+
+  // Typography controls
+  setVal('selectTitleFont', appState.titleFont);
+  setVal('selectTitleShadow', appState.titleShadow);
+  setVal('inputTitleColor', appState.titleColor);
+  setVal('inputTitleColorHex', appState.titleColor);
+  setVal('inputTitleSize', appState.titleSize);
+  const sizeDisp = document.getElementById('titleSizeDisplay');
+  if (sizeDisp) sizeDisp.textContent = `${appState.titleSize}px`;
+
+  setVal('selectCoupleFont', appState.coupleFont);
+  setVal('selectCoupleLatinFont', appState.coupleLatinFont);
+  setVal('inputCoupleColor', appState.coupleColor);
+  setVal('inputCoupleColorHex', appState.coupleColor);
+  setVal('selectCoupleShadow', appState.coupleShadow);
+
+  setVal('selectGuestFont', appState.guestFont);
+  setVal('inputGuestTextColor', appState.guestColor);
+  setVal('inputGuestTextColorHex', appState.guestColor);
+
+  const numToggle = document.getElementById('toggleKhmerNumerals');
+  if (numToggle) numToggle.checked = appState.useKhmerNumerals;
+
+  // Thumbnails & Media
+  setVal('inputGateVideoUrl', appState.gateVideo || '');
+  updateThumbnail('envelopeThumb', appState.envelopeImage);
   updateThumbnail('coverThumb', appState.coverImage);
-  updateThumbnail('bgThumb', appState.bgImage);
+  updateThumbnail('bgThumb1', appState.bgImage1 || appState.bgImage || 'assets/bg.jpg');
+  updateThumbnail('bgThumb2', appState.bgImage2 || appState.bgImage || 'assets/bg.jpg');
+  updateThumbnail('bgThumb3', appState.bgImage3 || appState.bgImage || 'assets/bg.jpg');
+  updateThumbnail('bgThumb4', appState.bgImage4 || appState.bgImage || 'assets/bg.jpg');
   updateThumbnail('mapThumb', appState.mapImage);
   updateThumbnail('galleryThumb1', appState.gallery1);
   updateThumbnail('galleryThumb2', appState.gallery2);
   updateThumbnail('galleryThumb3', appState.gallery3);
   updateThumbnail('galleryThumb4', appState.gallery4);
+
+  const vThumb = document.getElementById('gateVideoThumb');
+  if (vThumb) vThumb.style.display = appState.gateVideo ? 'flex' : 'none';
 }
 
 function updateThumbnail(elemId, imgUrl) {
@@ -141,18 +224,18 @@ function updateThumbnail(elemId, imgUrl) {
 }
 
 /**
- * Bind text & change inputs to update preview instantly
+ * Bind form text and info inputs
  */
 function bindFormInputs() {
   const mapping = [
-    { id: 'inputEventTitle', key: 'eventTitle', preview: ['previewCoverTitle'] },
+    { id: 'inputEventTitle', key: 'eventTitle', preview: ['previewCoverTitle', 'envelopeEventTitle'] },
     { id: 'inputGroomKhmer', key: 'groomKhmer', preview: ['previewCoverGroom', 'previewFormalGroom'] },
     { id: 'inputGroomLatin', key: 'groomLatin', preview: ['previewFormalGroomLatin'] },
     { id: 'inputBrideKhmer', key: 'brideKhmer', preview: ['previewCoverBride', 'previewFormalBride'] },
     { id: 'inputBrideLatin', key: 'brideLatin', preview: ['previewFormalBrideLatin'] },
     { id: 'inputDateFullKhmer', key: 'dateFullKhmer', preview: ['previewCoverDate', 'previewCountdownDate'] },
     { id: 'inputGuestSalutation', key: 'guestSalutation', preview: ['previewCoverSalutation'] },
-    { id: 'inputGuestName', key: 'guestName', preview: ['previewCoverGuest', 'previewFormalGuest'] },
+    { id: 'inputGuestName', key: 'guestName', preview: ['previewCoverGuest', 'previewFormalGuest', 'envelopeGuestName'] },
     { id: 'inputInviteBody', key: 'inviteBody', preview: ['previewInviteBody'] },
     { id: 'inputVenueName', key: 'venueName', preview: ['previewVenueName'] },
     { id: 'inputThankYouText', key: 'thankYouText', preview: ['previewThankYouText'] }
@@ -175,41 +258,206 @@ function bindFormInputs() {
   const dateInput = document.getElementById('inputWeddingDate');
   const timeInput = document.getElementById('inputWeddingTime');
 
-  dateInput.addEventListener('change', e => {
-    appState.weddingDate = e.target.value;
-    updateKhmerDateAuto();
-    saveStateDebounced();
-  });
+  if (dateInput) {
+    dateInput.addEventListener('change', e => {
+      appState.weddingDate = e.target.value;
+      updateKhmerDateAuto();
+      saveStateDebounced();
+    });
+  }
 
-  timeInput.addEventListener('change', e => {
-    appState.weddingTime = e.target.value;
-    updateKhmerDateAuto();
-    saveStateDebounced();
-  });
+  if (timeInput) {
+    timeInput.addEventListener('change', e => {
+      appState.weddingTime = e.target.value;
+      updateKhmerDateAuto();
+      saveStateDebounced();
+    });
+  }
 
   // Toggle Khmer Numerals
-  document.getElementById('toggleKhmerNumerals').addEventListener('change', e => {
-    appState.useKhmerNumerals = e.target.checked;
-    updateCountdownValues();
-    saveStateDebounced();
-  });
+  const numToggle = document.getElementById('toggleKhmerNumerals');
+  if (numToggle) {
+    numToggle.addEventListener('change', e => {
+      appState.useKhmerNumerals = e.target.checked;
+      updateCountdownValues();
+      saveStateDebounced();
+    });
+  }
 
   // Location URL
-  document.getElementById('inputLocationUrl').addEventListener('input', e => {
-    appState.locationUrl = e.target.value;
-    const btn = document.getElementById('previewGoogleMapBtn');
-    if (btn) btn.href = e.target.value || '#';
-    saveStateDebounced();
-  });
+  const locInput = document.getElementById('inputLocationUrl');
+  if (locInput) {
+    locInput.addEventListener('input', e => {
+      appState.locationUrl = e.target.value;
+      const btn = document.getElementById('previewGoogleMapBtn');
+      if (btn) btn.href = e.target.value || '#';
+      saveStateDebounced();
+    });
+  }
 
   // Reset to default button
-  document.getElementById('btnResetDefault').addEventListener('click', () => {
-    if (confirm('តើអ្នកពិតជាចង់កំណត់ទិន្នន័យទាំងអស់មកទម្រង់ដើមវិញមែនទេ?')) {
-      localStorage.removeItem('khmer_e_invitation_state');
-      appState = { ...defaultState };
-      populateFormFields();
-      updateFullPreview();
-      showToast('បានកំណត់មកទម្រង់ដើមវិញ!');
+  const resetBtn = document.getElementById('btnResetDefault');
+  if (resetBtn) {
+    resetBtn.addEventListener('click', () => {
+      if (confirm('តើអ្នកពិតជាចង់កំណត់ទិន្នន័យទាំងអស់មកទម្រង់ដើមវិញមែនទេ?')) {
+        localStorage.removeItem('khmer_e_invitation_state');
+        appState = { ...defaultState };
+        populateFormFields();
+        updateFullPreview();
+        showToast('បានកំណត់មកទម្រង់ដើមវិញ!');
+      }
+    });
+  }
+}
+
+/**
+ * Bind Typography & 3D Shadow Controls
+ */
+function bindTypographyControls() {
+  const syncColor = (pickerId, hexId, stateKey) => {
+    const picker = document.getElementById(pickerId);
+    const hex = document.getElementById(hexId);
+    if (!picker || !hex) return;
+
+    picker.addEventListener('input', e => {
+      hex.value = e.target.value;
+      appState[stateKey] = e.target.value;
+      applyTypographyStyles();
+      saveStateDebounced();
+    });
+
+    hex.addEventListener('input', e => {
+      picker.value = e.target.value;
+      appState[stateKey] = e.target.value;
+      applyTypographyStyles();
+      saveStateDebounced();
+    });
+  };
+
+  // Title controls
+  const titleFont = document.getElementById('selectTitleFont');
+  if (titleFont) {
+    titleFont.addEventListener('change', e => {
+      appState.titleFont = e.target.value;
+      applyTypographyStyles();
+      saveStateDebounced();
+    });
+  }
+
+  const titleShadow = document.getElementById('selectTitleShadow');
+  if (titleShadow) {
+    titleShadow.addEventListener('change', e => {
+      appState.titleShadow = e.target.value;
+      applyTypographyStyles();
+      saveStateDebounced();
+    });
+  }
+
+  const titleSize = document.getElementById('inputTitleSize');
+  if (titleSize) {
+    titleSize.addEventListener('input', e => {
+      appState.titleSize = e.target.value;
+      const sizeDisp = document.getElementById('titleSizeDisplay');
+      if (sizeDisp) sizeDisp.textContent = `${e.target.value}px`;
+      applyTypographyStyles();
+      saveStateDebounced();
+    });
+  }
+
+  syncColor('inputTitleColor', 'inputTitleColorHex', 'titleColor');
+
+  // Couple controls
+  const coupleFont = document.getElementById('selectCoupleFont');
+  if (coupleFont) {
+    coupleFont.addEventListener('change', e => {
+      appState.coupleFont = e.target.value;
+      applyTypographyStyles();
+      saveStateDebounced();
+    });
+  }
+
+  const coupleLatin = document.getElementById('selectCoupleLatinFont');
+  if (coupleLatin) {
+    coupleLatin.addEventListener('change', e => {
+      appState.coupleLatinFont = e.target.value;
+      applyTypographyStyles();
+      saveStateDebounced();
+    });
+  }
+
+  const coupleShadow = document.getElementById('selectCoupleShadow');
+  if (coupleShadow) {
+    coupleShadow.addEventListener('change', e => {
+      appState.coupleShadow = e.target.value;
+      applyTypographyStyles();
+      saveStateDebounced();
+    });
+  }
+
+  syncColor('inputCoupleColor', 'inputCoupleColorHex', 'coupleColor');
+
+  // Guest Badge controls
+  const guestFont = document.getElementById('selectGuestFont');
+  if (guestFont) {
+    guestFont.addEventListener('change', e => {
+      appState.guestFont = e.target.value;
+      applyTypographyStyles();
+      saveStateDebounced();
+    });
+  }
+
+  syncColor('inputGuestTextColor', 'inputGuestTextColorHex', 'guestColor');
+}
+
+/**
+ * Apply Typography & 3D Shadow Styles dynamically to Preview Elements
+ */
+function applyTypographyStyles() {
+  // Title
+  const titleEl = document.getElementById('previewCoverTitle');
+  if (titleEl) {
+    titleEl.style.fontFamily = `'${appState.titleFont}', serif`;
+    titleEl.style.color = appState.titleColor;
+    titleEl.style.fontSize = `${appState.titleSize}px`;
+    titleEl.className = `cover-title-khmer ${appState.titleShadow}`;
+  }
+
+  // Couple Khmer Names
+  const coupleTargets = [
+    document.getElementById('previewCoverGroom'),
+    document.getElementById('previewCoverBride'),
+    document.getElementById('previewFormalGroom'),
+    document.getElementById('previewFormalBride')
+  ];
+  coupleTargets.forEach(el => {
+    if (el) {
+      el.style.fontFamily = `'${appState.coupleFont}', serif`;
+      el.style.color = appState.coupleColor;
+      el.className = `${el.className.replace(/shadow-[a-z0-9-]+/g, '')} ${appState.coupleShadow}`.trim();
+    }
+  });
+
+  // Couple Latin Names
+  const latinTargets = [
+    document.getElementById('previewFormalGroomLatin'),
+    document.getElementById('previewFormalBrideLatin')
+  ];
+  latinTargets.forEach(el => {
+    if (el) {
+      el.style.fontFamily = `'${appState.coupleLatinFont}', cursive`;
+    }
+  });
+
+  // Guest Name Badge
+  const guestTargets = [
+    document.getElementById('previewCoverGuest'),
+    document.getElementById('previewFormalGuest'),
+    document.getElementById('envelopeGuestName')
+  ];
+  guestTargets.forEach(el => {
+    if (el) {
+      el.style.fontFamily = `'${appState.guestFont}', serif`;
+      el.style.color = appState.guestColor;
     }
   });
 }
@@ -219,8 +467,12 @@ function bindFormInputs() {
  */
 function bindImageUploads() {
   const fileInputs = [
+    { inputId: 'envelopeImageInput', key: 'envelopeImage', thumbId: 'envelopeThumb', updateFn: updateEnvelopePhotoPreview },
     { inputId: 'coverImageInput', key: 'coverImage', thumbId: 'coverThumb', updateFn: updateCoverPreview },
-    { inputId: 'bgImageInput', key: 'bgImage', thumbId: 'bgThumb', updateFn: updateBgPreview },
+    { inputId: 'bgImageInput1', key: 'bgImage1', thumbId: 'bgThumb1', updateFn: updateBgPreview },
+    { inputId: 'bgImageInput2', key: 'bgImage2', thumbId: 'bgThumb2', updateFn: updateBgPreview },
+    { inputId: 'bgImageInput3', key: 'bgImage3', thumbId: 'bgThumb3', updateFn: updateBgPreview },
+    { inputId: 'bgImageInput4', key: 'bgImage4', thumbId: 'bgThumb4', updateFn: updateBgPreview },
     { inputId: 'mapImageInput', key: 'mapImage', thumbId: 'mapThumb', updateFn: updateMapPreview },
     { inputId: 'galleryInput1', key: 'gallery1', thumbId: 'galleryThumb1', updateFn: () => updateGallerySlot(1) },
     { inputId: 'galleryInput2', key: 'gallery2', thumbId: 'galleryThumb2', updateFn: () => updateGallerySlot(2) },
@@ -247,6 +499,46 @@ function bindImageUploads() {
       reader.readAsDataURL(file);
     });
   });
+
+  // Gate Opening Video File Upload
+  const gateVideoInput = document.getElementById('gateVideoInput');
+  if (gateVideoInput) {
+    gateVideoInput.addEventListener('change', e => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = evt => {
+        appState.gateVideo = evt.target.result;
+        const vThumb = document.getElementById('gateVideoThumb');
+        if (vThumb) vThumb.style.display = 'flex';
+        const lbl = document.getElementById('gateVideoLabelText');
+        if (lbl) lbl.textContent = 'បានជ្រើសរើស Video រួចរាល់!';
+        const urlInput = document.getElementById('inputGateVideoUrl');
+        if (urlInput) urlInput.value = '';
+        saveStateDebounced();
+        showToast('បានផ្ទុកឡើងវីដេអូបើកទ្វាររួចរាល់!');
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  // Gate Opening Video URL input
+  const gateVideoUrl = document.getElementById('inputGateVideoUrl');
+  if (gateVideoUrl) {
+    gateVideoUrl.addEventListener('input', e => {
+      appState.gateVideo = e.target.value.trim();
+      const vThumb = document.getElementById('gateVideoThumb');
+      if (vThumb) vThumb.style.display = appState.gateVideo ? 'flex' : 'none';
+      saveStateDebounced();
+    });
+  }
+}
+
+function updateEnvelopePhotoPreview() {
+  const photo = document.getElementById('envelopePhotoImg');
+  if (photo) {
+    photo.src = appState.envelopeImage || appState.coverImage || 'assets/cover.jpg';
+  }
 }
 
 function updateCoverPreview() {
@@ -257,10 +549,15 @@ function updateCoverPreview() {
 }
 
 function updateBgPreview() {
-  const bgSections = ['previewBgSection2', 'previewBgSection3', 'previewBgSection4', 'previewBgSection5'];
-  bgSections.forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.style.backgroundImage = `url('${appState.bgImage}')`;
+  const bgConfigs = [
+    { id: 'previewBgSection2', img: appState.bgImage1 || appState.bgImage || 'assets/bg.jpg' },
+    { id: 'previewBgSection3', img: appState.bgImage2 || appState.bgImage || 'assets/bg.jpg' },
+    { id: 'previewBgSection4', img: appState.bgImage3 || appState.bgImage || 'assets/bg.jpg' },
+    { id: 'previewBgSection5', img: appState.bgImage4 || appState.bgImage || 'assets/bg.jpg' }
+  ];
+  bgConfigs.forEach(item => {
+    const el = document.getElementById(item.id);
+    if (el) el.style.backgroundImage = `url('${item.img}')`;
   });
 }
 
@@ -282,27 +579,33 @@ function updateGallerySlot(slotNum) {
  * Update the whole Preview Screen to match appState
  */
 function updateFullPreview() {
-  // Text Elements
-  document.getElementById('previewCoverTitle').textContent = appState.eventTitle;
-  document.getElementById('previewCoverGroom').textContent = appState.groomKhmer;
-  document.getElementById('previewCoverBride').textContent = appState.brideKhmer;
-  document.getElementById('previewCoverSalutation').textContent = appState.guestSalutation;
-  document.getElementById('previewCoverGuest').textContent = appState.guestName;
-  document.getElementById('previewCoverDate').textContent = appState.dateFullKhmer;
+  const setText = (id, val) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = val;
+  };
 
-  document.getElementById('previewFormalGroom').textContent = appState.groomKhmer;
-  document.getElementById('previewFormalGroomLatin').textContent = appState.groomLatin;
-  document.getElementById('previewFormalBride').textContent = appState.brideKhmer;
-  document.getElementById('previewFormalBrideLatin').textContent = appState.brideLatin;
-  document.getElementById('previewInviteBody').textContent = appState.inviteBody;
-  document.getElementById('previewFormalGuest').textContent = appState.guestName;
-  document.getElementById('previewCountdownDate').textContent = appState.dateFullKhmer;
+  setText('previewCoverTitle', appState.eventTitle);
+  setText('previewCoverGroom', appState.groomKhmer);
+  setText('previewCoverBride', appState.brideKhmer);
+  setText('previewCoverSalutation', appState.guestSalutation);
+  setText('previewCoverGuest', appState.guestName);
+  setText('previewCoverDate', appState.dateFullKhmer);
 
-  document.getElementById('previewVenueName').textContent = appState.venueName;
-  document.getElementById('previewGoogleMapBtn').href = appState.locationUrl || '#';
-  document.getElementById('previewThankYouText').textContent = appState.thankYouText;
+  setText('previewFormalGroom', appState.groomKhmer);
+  setText('previewFormalGroomLatin', appState.groomLatin);
+  setText('previewFormalBride', appState.brideKhmer);
+  setText('previewFormalBrideLatin', appState.brideLatin);
+  setText('previewInviteBody', appState.inviteBody);
+  setText('previewFormalGuest', appState.guestName);
+  setText('previewCountdownDate', appState.dateFullKhmer);
+
+  setText('previewVenueName', appState.venueName);
+  const mapBtn = document.getElementById('previewGoogleMapBtn');
+  if (mapBtn) mapBtn.href = appState.locationUrl || '#';
+  setText('previewThankYouText', appState.thankYouText);
 
   // Images
+  updateEnvelopePhotoPreview();
   updateCoverPreview();
   updateBgPreview();
   updateMapPreview();
@@ -310,6 +613,9 @@ function updateFullPreview() {
   updateGallerySlot(2);
   updateGallerySlot(3);
   updateGallerySlot(4);
+
+  // Typography & 3D Pop Shadows
+  applyTypographyStyles();
 
   // Countdown
   updateCountdownValues();
@@ -341,10 +647,15 @@ function updateCountdownValues() {
 
   const formatFn = appState.useKhmerNumerals ? toKhmerDigits : num => String(num).padStart(2, '0');
 
-  document.getElementById('cdDays').textContent = formatFn(days);
-  document.getElementById('cdHours').textContent = formatFn(hours);
-  document.getElementById('cdMinutes').textContent = formatFn(minutes);
-  document.getElementById('cdSeconds').textContent = formatFn(seconds);
+  const cdD = document.getElementById('cdDays');
+  const cdH = document.getElementById('cdHours');
+  const cdM = document.getElementById('cdMinutes');
+  const cdS = document.getElementById('cdSeconds');
+
+  if (cdD) cdD.textContent = formatFn(days);
+  if (cdH) cdH.textContent = formatFn(hours);
+  if (cdM) cdM.textContent = formatFn(minutes);
+  if (cdS) cdS.textContent = formatFn(seconds);
 }
 
 /**
@@ -380,29 +691,36 @@ function updateKhmerDateAuto() {
   const formattedKhmer = `ថ្ងៃ${dayOfWeek} ទី${day} ខែ${month} ឆ្នាំ${year} វេលាម៉ោង ${hourKhmer}:${minute} ${period}`;
   
   appState.dateFullKhmer = formattedKhmer;
-  document.getElementById('inputDateFullKhmer').value = formattedKhmer;
-  document.getElementById('previewCoverDate').textContent = formattedKhmer;
-  document.getElementById('previewCountdownDate').textContent = formattedKhmer;
+  const inputEl = document.getElementById('inputDateFullKhmer');
+  if (inputEl) inputEl.value = formattedKhmer;
+  const covDate = document.getElementById('previewCoverDate');
+  if (covDate) covDate.textContent = formattedKhmer;
+  const cdDate = document.getElementById('previewCountdownDate');
+  if (cdDate) cdDate.textContent = formattedKhmer;
 }
 
 /**
- * Bind View & Header Buttons (Split mode, Fullscreen, Share, Export)
+ * Bind View & Header Buttons
  */
 function bindViewButtons() {
   const btnSplit = document.getElementById('btnModeSplit');
   const btnFullscreen = document.getElementById('btnModeFullscreen');
 
-  btnSplit.addEventListener('click', () => {
-    document.body.classList.remove('fullscreen-mode');
-    btnSplit.classList.add('active');
-    btnFullscreen.classList.remove('active');
-  });
+  if (btnSplit) {
+    btnSplit.addEventListener('click', () => {
+      document.body.classList.remove('fullscreen-mode');
+      btnSplit.classList.add('active');
+      if (btnFullscreen) btnFullscreen.classList.remove('active');
+    });
+  }
 
-  btnFullscreen.addEventListener('click', () => {
-    document.body.classList.add('fullscreen-mode');
-    btnFullscreen.classList.add('active');
-    btnSplit.classList.remove('active');
-  });
+  if (btnFullscreen) {
+    btnFullscreen.addEventListener('click', () => {
+      document.body.classList.add('fullscreen-mode');
+      btnFullscreen.classList.add('active');
+      if (btnSplit) btnSplit.classList.remove('active');
+    });
+  }
 
   // Mobile Tabs
   const mobileTabBtns = document.querySelectorAll('.mobile-tab-btn');
@@ -421,21 +739,28 @@ function bindViewButtons() {
 
   // Share Guest Link Modal
   const btnShare = document.getElementById('btnShareLink');
-  btnShare.addEventListener('click', () => {
-    openShareModal();
-  });
+  if (btnShare) {
+    btnShare.addEventListener('click', () => {
+      openShareModal();
+    });
+  }
 
   const guestModalInput = document.getElementById('modalGuestInput');
-  guestModalInput.addEventListener('input', e => {
-    updateGeneratedLink(e.target.value);
-  });
+  if (guestModalInput) {
+    guestModalInput.addEventListener('input', e => {
+      updateGeneratedLink(e.target.value);
+    });
+  }
 
-  document.getElementById('btnCopyGeneratedLink').addEventListener('click', () => {
-    const linkInput = document.getElementById('modalGeneratedLink');
-    linkInput.select();
-    navigator.clipboard.writeText(linkInput.value);
-    showToast('បានចម្លង Link ភ្ញៀវដោយជោគជ័យ!');
-  });
+  const copyLinkBtn = document.getElementById('btnCopyGeneratedLink');
+  if (copyLinkBtn) {
+    copyLinkBtn.addEventListener('click', () => {
+      const linkInput = document.getElementById('modalGeneratedLink');
+      linkInput.select();
+      navigator.clipboard.writeText(linkInput.value);
+      showToast('បានចម្លង Link ភ្ញៀវដោយជោគជ័យ!');
+    });
+  }
 
   // Copy Full Invitation Message for Telegram / Messenger
   const btnCopyMsg = document.getElementById('btnCopyFullMessage');
@@ -448,72 +773,224 @@ function bindViewButtons() {
     });
   }
 
-  // Open Envelope Button in Guest Mode
+  // Open Envelope Button in Guest Mode / Gate Opening
   const btnOpenEnv = document.getElementById('btnOpenEnvelope');
   if (btnOpenEnv) {
-    btnOpenEnv.addEventListener('click', () => {
+    btnOpenEnv.addEventListener('click', triggerWeddingGateOpening);
+  }
+
+  // Quick Test Gate Effect Button in Admin Editor
+  const btnTestGate = document.getElementById('btnTestGateEffect');
+  if (btnTestGate) {
+    btnTestGate.addEventListener('click', () => {
       const overlay = document.getElementById('envelopeOverlay');
+      const envPhoto = document.getElementById('envelopePhotoImg');
+      const envTitle = document.getElementById('envelopeEventTitle');
+      const envGuest = document.getElementById('envelopeGuestName');
+      const video = document.getElementById('gateOpeningVideo');
       if (overlay) {
-        overlay.classList.add('opened');
-        // Start romantic ambient wedding music
-        if (!isAudioPlaying) {
-          toggleAudio();
+        overlay.classList.remove('opened', 'gate-opening');
+        if (video) {
+          video.classList.remove('playing');
+          video.style.display = 'none';
+          try { video.pause(); } catch (e) {}
         }
+        if (envTitle) envTitle.textContent = appState.eventTitle;
+        if (envGuest) envGuest.textContent = appState.guestName;
+        if (envPhoto) envPhoto.src = appState.envelopeImage || appState.coverImage || 'assets/cover.jpg';
+        overlay.style.display = 'flex';
       }
     });
   }
 
-  // Back to Admin / Editor Button
-  const btnAdmin = document.getElementById('btnBackToAdmin');
-  if (btnAdmin) {
-    btnAdmin.addEventListener('click', () => {
-      document.body.classList.remove('guest-view-mode');
-      const overlay = document.getElementById('envelopeOverlay');
-      if (overlay) overlay.style.display = 'none';
-      showToast('បានត្រឡប់មកផ្ទាំងកែសម្រួលព័ត៌មាន (Admin Mode)!');
-    });
+  // Save config.js button
+  const btnSave = document.getElementById('btnSaveConfig');
+  if (btnSave) {
+    btnSave.addEventListener('click', saveAndDownloadConfig);
   }
 
   // Export HTML Package
-  document.getElementById('btnExport').addEventListener('click', () => {
-    exportInvitationHTML();
-  });
+  const btnExp = document.getElementById('btnExport');
+  if (btnExp) {
+    btnExp.addEventListener('click', () => {
+      exportInvitationHTML();
+    });
+  }
+}
+
+/**
+ * Trigger Royal Wedding Gate Opening with 3D Doors Animation or Video Effect
+ */
+function triggerWeddingGateOpening() {
+  const overlay = document.getElementById('envelopeOverlay');
+  const video = document.getElementById('gateOpeningVideo');
+  if (!overlay) return;
+
+  // Start romantic ambient wedding music
+  if (!isAudioPlaying) {
+    toggleAudio();
+  }
+
+  // 1. If Video Effect is configured (MP4/WebM file or URL)
+  if (appState.gateVideo && video) {
+    video.src = appState.gateVideo;
+    video.style.display = 'block';
+    video.currentTime = 0;
+    video.play().then(() => {
+      video.classList.add('playing');
+    }).catch(err => {
+      console.warn('Video auto-play blocked, using 3D gate fallback:', err);
+      run3DGateAnimation(overlay);
+    });
+
+    const endVideo = () => {
+      video.classList.remove('playing');
+      setTimeout(() => {
+        video.style.display = 'none';
+        overlay.classList.add('opened');
+        setTimeout(() => { overlay.style.display = 'none'; }, 900);
+      }, 400);
+    };
+
+    video.onended = endVideo;
+    video.onclick = endVideo; // allow tap to skip
+    return;
+  }
+
+  // 2. Built-in Majestic 3D Double Khmer Doors Animation
+  run3DGateAnimation(overlay);
+}
+
+function run3DGateAnimation(overlay) {
+  overlay.classList.add('gate-opening');
+
+  // After doors swing open and light bursts, transition smoothly into invitation
+  setTimeout(() => {
+    overlay.classList.add('opened');
+    setTimeout(() => {
+      overlay.style.display = 'none';
+      overlay.classList.remove('gate-opening');
+    }, 900);
+  }, 2200);
 }
 
 function openShareModal() {
   const modal = document.getElementById('shareModal');
   const guestInput = document.getElementById('modalGuestInput');
-  guestInput.value = appState.guestName;
+  if (guestInput) guestInput.value = appState.guestName;
   updateGeneratedLink(appState.guestName);
-  modal.classList.add('active');
+  if (modal) modal.classList.add('active');
 }
 
 function closeShareModal() {
-  document.getElementById('shareModal').classList.remove('active');
+  const modal = document.getElementById('shareModal');
+  if (modal) modal.classList.remove('active');
 }
 
+/**
+ * Generate clean, human-readable guest invitation link & Telegram message
+ */
 function updateGeneratedLink(guestName) {
-  const baseUrl = window.location.origin + window.location.pathname;
-  const fullUrl = `${baseUrl}?guest=${encodeURIComponent(guestName || '')}`;
-  document.getElementById('modalGeneratedLink').value = fullUrl;
+  let baseUrl = window.location.origin + window.location.pathname;
+  
+  // Format clean link targeting guest.html or current path
+  if (!baseUrl.includes('guest.html') && !baseUrl.endsWith('/')) {
+    baseUrl = baseUrl.replace(/index\.html$/, 'guest.html');
+  }
 
-  // Format full message for Telegram / Messenger
+  const cleanGuest = (guestName || 'ភ្ញៀវកិត្តិយស').trim();
+  // Clean readable URL without %E1%9E... mess
+  const cleanUrl = `${baseUrl}?guest=${encodeURI(cleanGuest.replace(/\s+/g, '_'))}`;
+
+  const linkInput = document.getElementById('modalGeneratedLink');
+  if (linkInput) linkInput.value = cleanUrl;
+
   const fullMessage = `💍 ${appState.eventTitle} 💍\n` +
     `កូនកំលោះ៖ ${appState.groomKhmer} & កូនក្រមុំ៖ ${appState.brideKhmer}\n\n` +
-    `សូមគោរពអញ្ជើញ៖ ${guestName || 'ភ្ញៀវកិត្តិយស'}\n` +
+    `សូមគោរពអញ្ជើញ៖ ${cleanGuest}\n` +
     `ចូលរួមជាអធិបតី និងជាភ្ញៀវកិត្តិយស ក្នុងពិធីសិរីមង្គលអាពាហ៍ពិពាហ៍\n\n` +
     `📅 កាលបរិច្ឆេទ៖ ${appState.dateFullKhmer}\n` +
     `📍 ទីតាំង៖ ${appState.venueName}\n\n` +
-    `👉 សូមចុចតំណភ្ជាប់ខាងក្រោម ដើម្បីបើកមើលធៀបការឌីជីថល៖\n${fullUrl}`;
+    `👉 សូមចុចតំណភ្ជាប់ខាងក្រោម ដើម្បីបើកមើលធៀបការឌីជីថល៖\n${cleanUrl}`;
 
   const msgArea = document.getElementById('modalShareMessage');
   if (msgArea) msgArea.value = fullMessage;
 
-  const encodedUrl = encodeURIComponent(fullUrl);
+  const encodedUrl = encodeURIComponent(cleanUrl);
   const encodedText = encodeURIComponent(fullMessage);
   
-  document.getElementById('shareTelegram').href = `https://t.me/share/url?url=${encodedUrl}&text=${encodedText}`;
-  document.getElementById('shareFacebook').href = `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`;
+  const tgBtn = document.getElementById('shareTelegram');
+  const fbBtn = document.getElementById('shareFacebook');
+  if (tgBtn) tgBtn.href = `https://t.me/share/url?url=${encodedUrl}&text=${encodedText}`;
+  if (fbBtn) fbBtn.href = `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`;
+}
+
+/**
+ * Save configuration to downloadable config.js file
+ */
+function saveAndDownloadConfig() {
+  // Construct config.js content
+  const configContent = `/**
+ * Wedding E-Invitation Configuration
+ * រក្សាទុកដោយស្វ័យប្រវត្តិចេញពី E-Invitation Builder
+ */
+
+window.WEDDING_CONFIG = {
+  eventTitle: ${JSON.stringify(appState.eventTitle)},
+  groomKhmer: ${JSON.stringify(appState.groomKhmer)},
+  groomLatin: ${JSON.stringify(appState.groomLatin)},
+  brideKhmer: ${JSON.stringify(appState.brideKhmer)},
+  brideLatin: ${JSON.stringify(appState.brideLatin)},
+  weddingDate: ${JSON.stringify(appState.weddingDate)},
+  weddingTime: ${JSON.stringify(appState.weddingTime)},
+  dateFullKhmer: ${JSON.stringify(appState.dateFullKhmer)},
+  guestSalutation: ${JSON.stringify(appState.guestSalutation)},
+  inviteBody: ${JSON.stringify(appState.inviteBody)},
+  venueName: ${JSON.stringify(appState.venueName)},
+  locationUrl: ${JSON.stringify(appState.locationUrl)},
+  phone1: ${JSON.stringify(appState.phone1)},
+  phone2: ${JSON.stringify(appState.phone2)},
+  phone3: ${JSON.stringify(appState.phone3)},
+  useKhmerNumerals: ${appState.useKhmerNumerals},
+  thankYouText: ${JSON.stringify(appState.thankYouText)},
+
+  styles: {
+    titleFont: ${JSON.stringify(appState.titleFont)},
+    titleColor: ${JSON.stringify(appState.titleColor)},
+    titleShadow: ${JSON.stringify(appState.titleShadow)},
+    titleSize: ${JSON.stringify(appState.titleSize)},
+    coupleFont: ${JSON.stringify(appState.coupleFont)},
+    coupleLatinFont: ${JSON.stringify(appState.coupleLatinFont)},
+    coupleColor: ${JSON.stringify(appState.coupleColor)},
+    coupleShadow: ${JSON.stringify(appState.coupleShadow)},
+    guestFont: ${JSON.stringify(appState.guestFont)},
+    guestColor: ${JSON.stringify(appState.guestColor)}
+  },
+
+  images: {
+    envelopeImage: ${JSON.stringify(appState.envelopeImage || 'assets/cover.jpg')},
+    gateVideo: ${JSON.stringify(appState.gateVideo || '')},
+    coverImage: ${JSON.stringify(appState.coverImage)},
+    bgImage: ${JSON.stringify(appState.bgImage || 'assets/bg.jpg')},
+    bgImage1: ${JSON.stringify(appState.bgImage1 || appState.bgImage || 'assets/bg.jpg')},
+    bgImage2: ${JSON.stringify(appState.bgImage2 || appState.bgImage || 'assets/bg.jpg')},
+    bgImage3: ${JSON.stringify(appState.bgImage3 || appState.bgImage || 'assets/bg.jpg')},
+    bgImage4: ${JSON.stringify(appState.bgImage4 || appState.bgImage || 'assets/bg.jpg')},
+    mapImage: ${JSON.stringify(appState.mapImage)},
+    gallery1: ${JSON.stringify(appState.gallery1)},
+    gallery2: ${JSON.stringify(appState.gallery2)},
+    gallery3: ${JSON.stringify(appState.gallery3)},
+    gallery4: ${JSON.stringify(appState.gallery4)}
+  }
+};
+`;
+
+  const blob = new Blob([configContent], { type: 'application/javascript;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'config.js';
+  a.click();
+  showToast('បានទាញយក config.js! សូមយកវាទៅជំនួស config.js ក្នុង Folder រួច Upload ទៅ Render');
 }
 
 /**
@@ -539,8 +1016,7 @@ function bindCalendarAction() {
  */
 function scrollToPreviewSection(sectionId) {
   const el = document.getElementById(sectionId);
-  const container = document.getElementById('phoneScreen');
-  if (el && container) {
+  if (el) {
     el.scrollIntoView({ behavior: 'smooth' });
   }
 
@@ -557,12 +1033,15 @@ function openLightbox(index) {
   const modal = document.getElementById('lightboxModal');
   const imgEl = document.getElementById('lightboxImg');
   const targetKey = `gallery${index + 1}`;
-  imgEl.src = appState[targetKey];
-  modal.classList.add('active');
+  if (imgEl && modal) {
+    imgEl.src = appState[targetKey];
+    modal.classList.add('active');
+  }
 }
 
 function closeLightbox() {
-  document.getElementById('lightboxModal').classList.remove('active');
+  const modal = document.getElementById('lightboxModal');
+  if (modal) modal.classList.remove('active');
 }
 
 /**
@@ -573,23 +1052,25 @@ function bindAudio() {
   const testBtn = document.getElementById('btnTestMusic');
   const fileInput = document.getElementById('musicFileInput');
 
-  floatBtn.addEventListener('click', toggleAudio);
-  testBtn.addEventListener('click', toggleAudio);
+  if (floatBtn) floatBtn.addEventListener('click', toggleAudio);
+  if (testBtn) testBtn.addEventListener('click', toggleAudio);
 
-  fileInput.addEventListener('change', e => {
-    const file = e.target.files[0];
-    if (file) {
-      if (!customAudioEl) {
-        customAudioEl = new Audio();
-        customAudioEl.loop = true;
+  if (fileInput) {
+    fileInput.addEventListener('change', e => {
+      const file = e.target.files[0];
+      if (file) {
+        if (!customAudioEl) {
+          customAudioEl = new Audio();
+          customAudioEl.loop = true;
+        }
+        customAudioEl.src = URL.createObjectURL(file);
+        customAudioEl.play();
+        isAudioPlaying = true;
+        updateAudioVisuals();
+        showToast('កំពុងចាក់ចម្រៀងដែលបានជ្រើសរើស!');
       }
-      customAudioEl.src = URL.createObjectURL(file);
-      customAudioEl.play();
-      isAudioPlaying = true;
-      updateAudioVisuals();
-      showToast('កំពុងចាក់ចម្រៀងដែលបានជ្រើសរើស!');
-    }
-  });
+    });
+  }
 }
 
 function toggleAudio() {
@@ -605,7 +1086,7 @@ function toggleAudio() {
     return;
   }
 
-  // Use Web Audio API synthesizer for serene traditional flute/harp tones
+  // Web Audio API synthesizer for serene traditional flute/harp tones
   if (!audioContext) {
     audioContext = new (window.AudioContext || window.webkitAudioContext)();
   }
@@ -628,15 +1109,14 @@ function updateAudioVisuals() {
   const btn = document.getElementById('btnTestMusic');
   const floatBtn = document.getElementById('floatingMusicBtn');
   if (isAudioPlaying) {
-    btn.textContent = '⏸️ ផ្អាកតន្ត្រី';
-    floatBtn.style.borderColor = '#10b981';
+    if (btn) btn.textContent = '⏸️ ផ្អាកតន្ត្រី';
+    if (floatBtn) floatBtn.style.borderColor = '#10b981';
   } else {
-    btn.textContent = '▶️ ចាក់ភ្លេងតេស្ត';
-    floatBtn.style.borderColor = 'rgba(223, 158, 40, 0.7)';
+    if (btn) btn.textContent = '▶️ ចាក់ភ្លេងតេស្ត';
+    if (floatBtn) floatBtn.style.borderColor = 'rgba(223, 158, 40, 0.7)';
   }
 }
 
-// Gentle Khmer pentatonic scale notes (Flute / Roneat frequencies)
 function playWeddingPentatonicMelody() {
   if (!audioContext) return;
   const notes = [261.63, 293.66, 329.63, 392.00, 440.00, 523.25, 587.33, 659.25];
@@ -680,14 +1160,56 @@ function exportInvitationHTML() {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${appState.eventTitle} - ${appState.groomKhmer} & ${appState.brideKhmer}</title>
-  <link href="https://fonts.googleapis.com/css2?family=Battambang:wght@400;700&family=Cinzel:wght@500;700&family=Great+Vibes&family=Kantumruy+Pro:wght@400;600;700&family=Moul&family=Playfair+Display:ital,wght@0,600;1,500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Alex+Brush&family=Battambang:wght@400;700&family=Bayon&family=Bokor&family=Cinzel:wght@500;700&family=Great+Vibes&family=Kantumruy+Pro:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Koulen&family=Moul&family=Moulpali&family=Playfair+Display:ital,wght@0,600;1,500&family=Preahvihear&family=Siemreap&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+  <script src="config.js"><\/script>
   <style>
     body { background: #12141a; display: flex; justify-content: center; min-height: 100vh; margin: 0; }
     .invitation-container { width: 100%; max-width: 440px; background: #fffdfa; min-height: 100vh; position: relative; }
   </style>
 </head>
-<body>
+<body class="guest-view-mode">
+  <!-- Ceremonial Royal Wedding Gate & Entrance Overlay -->
+  <div class="envelope-overlay" id="envelopeOverlay">
+    <video id="gateOpeningVideo" class="gate-opening-video" playsinline preload="auto" style="display: none;"></video>
+    <div class="gate-light-rays" id="gateLightRays"></div>
+    <div class="wedding-gate-doors" id="weddingGateDoors">
+      <div class="gate-leaf leaf-left">
+        <div class="door-inner-panel">
+          <div class="door-kbach-top"></div>
+          <div class="door-handle-wrap handle-right">
+            <img src="assets/door-handle.svg" alt="Handle" class="door-handle-img">
+          </div>
+          <div class="door-kbach-bottom"></div>
+        </div>
+      </div>
+      <div class="gate-leaf leaf-right">
+        <div class="door-inner-panel">
+          <div class="door-kbach-top"></div>
+          <div class="door-handle-wrap handle-left">
+            <img src="assets/door-handle.svg" alt="Handle" class="door-handle-img">
+          </div>
+          <div class="door-kbach-bottom"></div>
+        </div>
+      </div>
+    </div>
+    <div class="envelope-card" id="envelopeCard">
+      <div class="envelope-photo-frame">
+        <img src="${appState.envelopeImage || appState.coverImage || 'assets/cover.jpg'}" alt="កូនកំលោះកូនក្រមុំ" id="envelopePhotoImg" class="envelope-photo-img">
+        <div class="frame-gold-border"></div>
+      </div>
+      <h2 class="envelope-title" id="envelopeEventTitle">${appState.eventTitle}</h2>
+      <p class="envelope-subtitle">លិខិតអញ្ជើញឌីជីថល E-Invitation</p>
+      <div class="envelope-guest-badge">
+        <span style="font-size: 13px; color: #83561a; display: block; margin-bottom: 2px;">សូមគោរពអញ្ជើញ</span>
+        <strong class="envelope-guest-name" id="envelopeGuestName">${appState.guestName}</strong>
+      </div>
+      <button type="button" class="envelope-open-btn" id="btnOpenEnvelope">
+        <span>🚪✨ ចុចបើកទ្វារចូលរោងការ</span>
+      </button>
+    </div>
+  </div>
+
   <div class="invitation-container" id="phoneScreen">
     ${phoneScreenHtml}
   </div>
@@ -710,13 +1232,14 @@ let toastTimeout = null;
 function showToast(msg) {
   const toast = document.getElementById('toastNotice');
   const text = document.getElementById('toastText');
-  text.textContent = msg;
-  toast.classList.add('show');
-
-  if (toastTimeout) clearTimeout(toastTimeout);
-  toastTimeout = setTimeout(() => {
-    toast.classList.remove('show');
-  }, 2800);
+  if (text) text.textContent = msg;
+  if (toast) {
+    toast.classList.add('show');
+    if (toastTimeout) clearTimeout(toastTimeout);
+    toastTimeout = setTimeout(() => {
+      toast.classList.remove('show');
+    }, 3200);
+  }
 }
 
 /**

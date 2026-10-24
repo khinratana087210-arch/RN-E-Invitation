@@ -6,18 +6,56 @@
   <title>Khmer E-Invitation Builder - បង្កើតធៀបការឌីជីថលបែបខ្មែរ</title>
   <meta name="description" content="កម្មវិធីបង្កើតធៀបការអាពាហ៍ពិពាហ៍ឌីជីថលបែបខ្មែរ E-Invitation ប្រកបដោយភាពប្រណិត សោភ័ណភាព និងទាន់សម័យ">
   
-  <!-- Google Fonts: Moul for Khmer Royal Headings, Kantumruy Pro & Battambang for Elegant Text, Playfair Display for Latin Names -->
+  <!-- Google Fonts: Complete Royal Khmer & Latin Calligraphy Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Battambang:wght@400;700&family=Cinzel:wght@500;700&family=Great+Vibes&family=Kantumruy+Pro:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Moul&family=Playfair+Display:ital,wght@0,600;1,500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Alex+Brush&family=Battambang:wght@400;700&family=Bayon&family=Bokor&family=Cinzel:wght@500;700&family=Great+Vibes&family=Kantumruy+Pro:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Koulen&family=Moul&family=Moulpali&family=Playfair+Display:ital,wght@0,600;1,500&family=Preahvihear&family=Siemreap&display=swap" rel="stylesheet">
   
   <link rel="stylesheet" href="style.css">
+  <script src="config.js"></script>
 </head>
 <body>
-  <!-- Ceremonial Envelope Opening Screen (បង្ហាញពេលភ្ញៀវបើក Link) -->
+  <!-- Ceremonial Royal Wedding Gate & Entrance Overlay (ទ្វារមង្គលការ 3D & វីដេអូបើកទ្វារ) -->
   <div class="envelope-overlay" id="envelopeOverlay" style="display: none;">
-    <div class="envelope-card">
-      <div class="envelope-kbach">💍</div>
+    <!-- Optional Fullscreen Video Effect -->
+    <video id="gateOpeningVideo" class="gate-opening-video" playsinline preload="auto" style="display: none;"></video>
+
+    <!-- Background Golden Light Burst -->
+    <div class="gate-light-rays" id="gateLightRays"></div>
+
+    <!-- 3D Double Royal Wedding Doors -->
+    <div class="wedding-gate-doors" id="weddingGateDoors">
+      <!-- Left Door Leaf -->
+      <div class="gate-leaf leaf-left">
+        <div class="door-inner-panel">
+          <div class="door-kbach-top"></div>
+          <div class="door-handle-wrap handle-right">
+            <img src="assets/door-handle.svg" alt="Handle" class="door-handle-img">
+          </div>
+          <div class="door-kbach-bottom"></div>
+        </div>
+      </div>
+
+      <!-- Right Door Leaf -->
+      <div class="gate-leaf leaf-right">
+        <div class="door-inner-panel">
+          <div class="door-kbach-top"></div>
+          <div class="door-handle-wrap handle-left">
+            <img src="assets/door-handle.svg" alt="Handle" class="door-handle-img">
+          </div>
+          <div class="door-kbach-bottom"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Center Grand Invitation Welcome Card -->
+    <div class="envelope-card" id="envelopeCard">
+      <!-- Couple Photo Frame on the card (កន្លែងដាក់រូបគូស្នេហ៍លើផ្ទាំងបើកធៀប) -->
+      <div class="envelope-photo-frame">
+        <img src="assets/cover.jpg" alt="កូនកំលោះកូនក្រមុំ" id="envelopePhotoImg" class="envelope-photo-img">
+        <div class="frame-gold-border"></div>
+      </div>
+
       <h2 class="envelope-title" id="envelopeEventTitle">សិរីមង្គលអាពាហ៍ពិពាហ៍</h2>
       <p class="envelope-subtitle">លិខិតអញ្ជើញឌីជីថល E-Invitation</p>
       
@@ -27,17 +65,12 @@
       </div>
 
       <button type="button" class="envelope-open-btn" id="btnOpenEnvelope">
-        <span>💌 ចុចបើកធៀបការ</span>
+        <span>🚪✨ ចុចបើកទ្វារចូលរោងការ</span>
       </button>
     </div>
   </div>
 
-  <!-- Discreet Floating Admin / Editor Button (in Guest Mode) -->
-  <button type="button" class="floating-admin-toggle" id="btnBackToAdmin" title="ចូលផ្ទាំងកែសម្រួល">
-    <span>✏️ កែសម្រួលព័ត៌មាន</span>
-  </button>
-
-  <!-- Top App Bar / Header -->
+  <!-- Top App Bar / Header (Admin Only) -->
   <header class="app-header">
     <div class="header-brand">
       <div class="brand-logo">💍</div>
@@ -64,6 +97,11 @@
       <button type="button" class="action-btn share-btn" id="btnShareLink" title="ចម្លងតំណភ្ជាប់ផ្ញើឱ្យភ្ញៀវ">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
         <span>ចម្លង Link ភ្ញៀវ</span>
+      </button>
+
+      <button type="button" class="action-btn" id="btnSaveConfig" style="background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; color: #6ee7b7;" title="រក្សាទុកទិន្នន័យទាំងអស់ចូល config.js សម្រាប់ Upload ទៅ Render">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        <span>💾 រក្សាទុក (Save)</span>
       </button>
 
       <button type="button" class="action-btn export-btn" id="btnExport" title="ទាញយកធៀបការជា HTML">
@@ -100,43 +138,159 @@
 
       <form id="invitationForm" class="editor-form" onsubmit="return false;">
         
-        <!-- SECTION 1: រូបភាពចម្បង (Images) -->
+        <!-- SECTION 1: រូបភាពចម្បង & ផ្ទៃ Background ទាំង ៥ (Cover Photo 1 + Background Textures 4) -->
         <div class="form-card">
           <div class="card-title">
             <span class="card-icon">🖼️</span>
-            <h3>រូបភាពក្រប & ផ្ទៃខាងក្រោយ (Images)</h3>
+            <h3>រូបភាពក្រប ១ & ផ្ទៃខាងក្រោយ ៤ (Cover 1 + Background Textures 4)</h3>
           </div>
-          
+
+          <!-- Quick Test & Entrance Gate Controls -->
+          <div style="margin-bottom: 18px; padding: 12px 16px; background: rgba(223, 158, 40, 0.12); border: 1px solid rgba(223, 158, 40, 0.4); border-radius: 12px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
+            <div>
+              <strong style="color: #ffd875; font-size: 14px; display: block;">🚪 Effect បើកទ្វាររោងការ & ផ្ទាំងស្វាគមន៍ (3D Wedding Gate & Entrance)</strong>
+              <span style="font-size: 12px; color: #a0aec0;">រូបគូស្នេហ៍លើផ្ទាំងបើកធៀប និងចលនាទ្វាររោងការ 3D ពេលភ្ញៀវចុចបើក</span>
+            </div>
+            <button type="button" id="btnTestGateEffect" class="action-btn" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: #fff; font-weight: 600; padding: 8px 16px; border-radius: 20px; white-space: nowrap; border: 1px solid #fde68a;">
+              <span>🚪 តេស្តមើល Effect</span>
+            </button>
+          </div>
+
+          <!-- Entrance Photo & Optional Gate Video -->
           <div class="form-row">
             <div class="form-group flex-1">
-              <label for="coverImageInput">
-                រូបភាពក្របខាងមុខ (Cover Photo)
-                <span class="label-hint">រូបធំទំព័រមុខ</span>
+              <label for="envelopeImageInput">
+                រូបភាពលើផ្ទាំងបើកធៀប (Entrance Photo)
+                <span class="label-hint">រូបគូស្នេហ៍ក្នុងស៊ុមមាសពេលបើកដំបូង</span>
               </label>
               <div class="file-upload-box">
-                <input type="file" id="coverImageInput" accept="image/*" class="file-input">
+                <input type="file" id="envelopeImageInput" accept="image/*" class="file-input">
                 <div class="upload-placeholder">
-                  <span class="upload-icon">📷</span>
-                  <span class="upload-text">ជ្រើសរើសរូបភាព Cover</span>
+                  <span class="upload-icon">💍</span>
+                  <span class="upload-text">ជ្រើសរើសរូបផ្ទាំងបើកធៀប</span>
                 </div>
-                <div class="img-preview-thumb" id="coverThumb"></div>
+                <div class="img-preview-thumb" id="envelopeThumb"></div>
               </div>
             </div>
 
             <div class="form-group flex-1">
-              <label for="bgImageInput">
-                ផ្ទៃខាងក្រោម (Background Texture)
-                <span class="label-hint">ក្បាច់ភ្ញីផ្កាខ្មែរ</span>
+              <label for="gateVideoInput">
+                វីដេអូបើកទ្វារចូលរោងការ (Gate Video - Optional)
+                <span class="label-hint">MP4/WebM ឬទុកទំនេរប្រើទ្វារ 3D</span>
               </label>
               <div class="file-upload-box">
-                <input type="file" id="bgImageInput" accept="image/*" class="file-input">
+                <input type="file" id="gateVideoInput" accept="video/mp4,video/webm" class="file-input">
                 <div class="upload-placeholder">
-                  <span class="upload-icon">✨</span>
-                  <span class="upload-text">ជ្រើសរើសរូបផ្ទៃ Background</span>
+                  <span class="upload-icon">🎬</span>
+                  <span class="upload-text" id="gateVideoLabelText">ជ្រើសរើសវីដេអូបើកទ្វារ (MP4)</span>
                 </div>
-                <div class="img-preview-thumb" id="bgThumb"></div>
+                <div class="img-preview-thumb" id="gateVideoThumb" style="display: none; align-items: center; justify-content: center; font-size: 22px;">🎬</div>
               </div>
             </div>
+          </div>
+
+          <!-- Section Divider for 5 Images -->
+          <div style="margin: 20px 0 14px 0; border-top: 1px dashed rgba(223, 158, 40, 0.35); padding-top: 14px;">
+            <h4 style="color: #ffd875; font-size: 15px; margin-bottom: 4px; display: flex; align-items: center; gap: 8px;">
+              <span>📸</span> រូបភាពទាំង ៥ ក្នុងទំព័រធៀប (Cover Photo ១ + ផ្ទៃ Background ៤)
+            </h4>
+            <p style="font-size: 12.5px; color: #a0aec0; margin: 0 0 14px 0;">
+              អាចជ្រើសរើសរូបភាពក្របមុខ និងផ្ទៃ Texture Background ដាច់ដោយឡែកពីគ្នាសម្រាប់ផ្នែកនីមួយៗ
+            </p>
+          </div>
+
+          <!-- 1. COVER PHOTO -->
+          <div class="form-group" style="margin-bottom: 18px;">
+            <label for="coverImageInput">
+              <strong style="color: #f7c75b; font-size: 14px;">១. រូបភាពក្របខាងមុខ (Cover Photo)</strong>
+              <span class="label-hint">រូបថតធំទំព័រមុខកូនកំលោះកូនក្រមុំ</span>
+            </label>
+            <div class="file-upload-box">
+              <input type="file" id="coverImageInput" accept="image/*" class="file-input">
+              <div class="upload-placeholder">
+                <span class="upload-icon">📷</span>
+                <span class="upload-text">ជ្រើសរើសរូបភាព Cover ខាងមុខ</span>
+              </div>
+              <div class="img-preview-thumb" id="coverThumb"></div>
+            </div>
+          </div>
+
+          <!-- 4 BACKGROUND TEXTURES (2x2 GRID) -->
+          <div class="form-row">
+            <!-- Background Texture 1 -->
+            <div class="form-group flex-1">
+              <label for="bgImageInput1">
+                <strong style="color: #f7c75b; font-size: 13.5px;">២. ផ្ទៃ Background ១ (រាប់ថយក្រោយ)</strong>
+                <span class="label-hint">សម្រាប់ផ្នែកទី ២ ឈ្មោះផ្លូវការ & Countdown</span>
+              </label>
+              <div class="file-upload-box">
+                <input type="file" id="bgImageInput1" accept="image/*" class="file-input">
+                <div class="upload-placeholder">
+                  <span class="upload-icon">✨</span>
+                  <span class="upload-text">ជ្រើសរូប Background ១</span>
+                </div>
+                <div class="img-preview-thumb" id="bgThumb1"></div>
+              </div>
+            </div>
+
+            <!-- Background Texture 2 -->
+            <div class="form-group flex-1">
+              <label for="bgImageInput2">
+                <strong style="color: #f7c75b; font-size: 13.5px;">៣. ផ្ទៃ Background ២ (កម្មវិធី & ទីតាំង)</strong>
+                <span class="label-hint">សម្រាប់ផ្នែកទី ៣ ព័ត៌មានកម្មវិធី & Location</span>
+              </label>
+              <div class="file-upload-box">
+                <input type="file" id="bgImageInput2" accept="image/*" class="file-input">
+                <div class="upload-placeholder">
+                  <span class="upload-icon">✨</span>
+                  <span class="upload-text">ជ្រើសរូប Background ២</span>
+                </div>
+                <div class="img-preview-thumb" id="bgThumb2"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <!-- Background Texture 3 -->
+            <div class="form-group flex-1">
+              <label for="bgImageInput3">
+                <strong style="color: #f7c75b; font-size: 13.5px;">៤. ផ្ទៃ Background ៣ (កម្រងរូបភាព & ផែនទី)</strong>
+                <span class="label-hint">សម្រាប់ផ្នែកទី ៤ រូបថត ៤ សន្លឹក & Map</span>
+              </label>
+              <div class="file-upload-box">
+                <input type="file" id="bgImageInput3" accept="image/*" class="file-input">
+                <div class="upload-placeholder">
+                  <span class="upload-icon">✨</span>
+                  <span class="upload-text">ជ្រើសរូប Background ៣</span>
+                </div>
+                <div class="img-preview-thumb" id="bgThumb3"></div>
+              </div>
+            </div>
+
+            <!-- Background Texture 4 -->
+            <div class="form-group flex-1">
+              <label for="bgImageInput4">
+                <strong style="color: #f7c75b; font-size: 13.5px;">៥. ផ្ទៃ Background ៤ (ថ្លែងអំណរគុណ)</strong>
+                <span class="label-hint">សម្រាប់ផ្នែកទី ៥ សារថ្លែងអំណរគុណ & ជម្រាបលា</span>
+              </label>
+              <div class="file-upload-box">
+                <input type="file" id="bgImageInput4" accept="image/*" class="file-input">
+                <div class="upload-placeholder">
+                  <span class="upload-icon">✨</span>
+                  <span class="upload-text">ជ្រើសរូប Background ៤</span>
+                </div>
+                <div class="img-preview-thumb" id="bgThumb4"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Video URL input as alternative -->
+          <div class="form-group" style="margin-top: 14px;">
+            <label for="inputGateVideoUrl" style="font-size: 13px;">
+              Link វីដេអូបើកទ្វារពីក្រៅ (Video URL - Optional)
+              <span class="label-hint">ប្រសិនបើមាន Link វីដេអូស្រាប់ (MP4)</span>
+            </label>
+            <input type="url" id="inputGateVideoUrl" class="form-control" placeholder="https://example.com/wedding-gate.mp4" style="font-size: 13px;">
           </div>
         </div>
 
@@ -173,6 +327,134 @@
               <input type="text" id="inputBrideLatin" class="form-control" value="Khiev Pich Chorai" placeholder="ឧ. Khiev Pich Chorai">
             </div>
           </div>
+        </div>
+
+        <!-- SECTION: រចនាបថអក្សរ ពណ៌ និងស្រមោលផុស (Typography & 3D Shadow Studio) -->
+        <div class="form-card" style="border: 1px solid rgba(223, 158, 40, 0.5); background: linear-gradient(180deg, #181d28 0%, #131620 100%);">
+          <div class="card-title">
+            <span class="card-icon">🎨</span>
+            <h3 style="color: #ffd875;">រចនាអក្សរ ពណ៌ & ស្រមោលផុស (Typography Studio)</h3>
+          </div>
+          <p class="form-hint-text" style="color: #d1d5db; margin-bottom: 14px;">
+            កែប្រែពុម្ពអក្សរ ពណ៌ និងជ្រើសរើសម៉ូដស្រមោល 3D ដើម្បីឱ្យអក្សរផុសដាច់ស្អាតលើគ្រប់ផ្ទាំងរូបភាព
+          </p>
+
+          <!-- 1. Event Title Styling -->
+          <div class="typo-control-group" style="background: #0f1218; padding: 12px; border-radius: 8px; margin-bottom: 12px; border: 1px solid #283042;">
+            <label style="font-weight: 700; color: #ffd875; display: block; margin-bottom: 8px;">
+              👑 ចំណងជើងធំ «សិរីមង្គលអាពាហ៍ពិពាហ៍» (Cover Title)
+            </label>
+            <div class="form-row">
+              <div class="form-group flex-1">
+                <label for="selectTitleFont">ពុម្ពអក្សរ (Font):</label>
+                <select id="selectTitleFont" class="form-control">
+                  <option value="Moul" selected>Moul (អក្សរមូលស្តេចប្រពៃណី)</option>
+                  <option value="Moulpali">Moulpali (មូលបាលី)</option>
+                  <option value="Bayon">Bayon (បាយ័ន)</option>
+                  <option value="Koulen">Koulen (គូលែន - មាំច្បាស់)</option>
+                  <option value="Bokor">Bokor (បូកគោ)</option>
+                  <option value="Kantumruy Pro">Kantumruy Pro (កន្ទុំរុយ)</option>
+                  <option value="Battambang">Battambang (បាត់ដំបង)</option>
+                </select>
+              </div>
+              <div class="form-group flex-1">
+                <label for="selectTitleShadow">ម៉ូដស្រមោល (Shadow & 3D Pop):</label>
+                <select id="selectTitleShadow" class="form-control">
+                  <option value="shadow-3d-strong" selected>✨ ស្រមោល 3D ផុសដាច់ខ្លាំង (Pop 3D)</option>
+                  <option value="shadow-glow-gold">🌟 ពន្លឺមាសចែងចាំង (Golden Glow)</option>
+                  <option value="shadow-dark-crisp">🖤 ស្រមោលខ្មៅដិតច្បាស់ (Dark Crisp)</option>
+                  <option value="shadow-soft">☁️ ស្រមោលទន់ល្មម (Soft Shadow)</option>
+                  <option value="shadow-none">🚫 គ្មានស្រមោល</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row" style="margin-bottom: 0;">
+              <div class="form-group flex-1">
+                <label for="inputTitleColor">ពណ៌អក្សរ (Color):</label>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                  <input type="color" id="inputTitleColor" value="#f7a627" style="width: 44px; height: 38px; border: none; border-radius: 6px; cursor: pointer; background: transparent;">
+                  <input type="text" id="inputTitleColorHex" class="form-control" value="#f7a627" style="font-family: monospace; font-size: 13px;">
+                </div>
+              </div>
+              <div class="form-group flex-1">
+                <label for="inputTitleSize">ទំហំអក្សរ (<span id="titleSizeDisplay">26px</span>):</label>
+                <input type="range" id="inputTitleSize" min="20" max="38" value="26" style="width: 100%; margin-top: 10px;">
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. Couple Names Styling -->
+          <div class="typo-control-group" style="background: #0f1218; padding: 12px; border-radius: 8px; margin-bottom: 12px; border: 1px solid #283042;">
+            <label style="font-weight: 700; color: #ffd875; display: block; margin-bottom: 8px;">
+              💑 ឈ្មោះកូនកំលោះ & ក្រមុំ (Couple Names)
+            </label>
+            <div class="form-row">
+              <div class="form-group flex-1">
+                <label for="selectCoupleFont">ពុម្ពអក្សរខ្មែរ (Khmer):</label>
+                <select id="selectCoupleFont" class="form-control">
+                  <option value="Moul" selected>Moul (អក្សរមូល)</option>
+                  <option value="Moulpali">Moulpali (មូលបាលី)</option>
+                  <option value="Bayon">Bayon (បាយ័ន)</option>
+                  <option value="Koulen">Koulen (គូលែន)</option>
+                  <option value="Siemreap">Siemreap (សៀមរាប)</option>
+                  <option value="Kantumruy Pro">Kantumruy Pro</option>
+                </select>
+              </div>
+              <div class="form-group flex-1">
+                <label for="selectCoupleLatinFont">ពុម្ពអក្សរឡាតាំង (Latin):</label>
+                <select id="selectCoupleLatinFont" class="form-control">
+                  <option value="Great Vibes" selected>Great Vibes (ស្គ្រីបក្បាច់ផ្កា)</option>
+                  <option value="Alex Brush">Alex Brush (ស្គ្រីបទន់ភ្លន់)</option>
+                  <option value="Cinzel">Cinzel (រាជវាំង Classic)</option>
+                  <option value="Playfair Display">Playfair Display (ប្រណិត)</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row" style="margin-bottom: 0;">
+              <div class="form-group flex-1">
+                <label for="inputCoupleColor">ពណ៌អក្សរខ្មែរ:</label>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                  <input type="color" id="inputCoupleColor" value="#f9b63a" style="width: 44px; height: 38px; border: none; border-radius: 6px; cursor: pointer; background: transparent;">
+                  <input type="text" id="inputCoupleColorHex" class="form-control" value="#f9b63a" style="font-family: monospace; font-size: 13px;">
+                </div>
+              </div>
+              <div class="form-group flex-1">
+                <label for="selectCoupleShadow">ស្រមោលផុស (Shadow):</label>
+                <select id="selectCoupleShadow" class="form-control">
+                  <option value="shadow-3d-strong" selected>✨ ស្រមោល 3D ផុសដាច់</option>
+                  <option value="shadow-glow-gold">🌟 ពន្លឺមាស Glow</option>
+                  <option value="shadow-dark-crisp">🖤 ស្រមោលខ្មៅដិត Dark</option>
+                  <option value="shadow-soft">☁️ ស្រមោលទន់</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. Guest Badge Styling -->
+          <div class="typo-control-group" style="background: #0f1218; padding: 12px; border-radius: 8px; margin-bottom: 6px; border: 1px solid #283042;">
+            <label style="font-weight: 700; color: #ffd875; display: block; margin-bottom: 8px;">
+              🏷️ ស៊ុម និងអក្សរឈ្មោះភ្ញៀវកិត្តិយស (Guest Badge)
+            </label>
+            <div class="form-row">
+              <div class="form-group flex-1">
+                <label for="selectGuestFont">ពុម្ពអក្សរឈ្មោះភ្ញៀវ:</label>
+                <select id="selectGuestFont" class="form-control">
+                  <option value="Moul" selected>Moul (អក្សរមូលផ្លូវការ)</option>
+                  <option value="Kantumruy Pro">Kantumruy Pro (ស្រឡះស្អាត)</option>
+                  <option value="Battambang">Battambang</option>
+                  <option value="Siemreap">Siemreap</option>
+                </select>
+              </div>
+              <div class="form-group flex-1">
+                <label for="inputGuestTextColor">ពណ៌អក្សរឈ្មោះភ្ញៀវ:</label>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                  <input type="color" id="inputGuestTextColor" value="#1a3250" style="width: 44px; height: 38px; border: none; border-radius: 6px; cursor: pointer; background: transparent;">
+                  <input type="text" id="inputGuestTextColorHex" class="form-control" value="#1a3250" style="font-family: monospace; font-size: 13px;">
+                </div>
+              </div>
+            </div>
+          </div>
+
         </div>
 
         <!-- SECTION 3: កាលបរិច្ឆេទ & ម៉ោងកម្មវិធី (Date, Time & Countdown) -->
