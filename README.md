@@ -24,9 +24,14 @@
    - ព័ត៌មានផ្លាស់ប្ដូរភ្លាមៗពេលលោកអ្នកវាយអក្សរ ឬផ្ទុកឡើងរូបភាព (Real-time Live Binding)
    - មានប៊ូតុងចុច **"មើលពេញអេក្រង់"** ដូចភ្ញៀវបើកមើលក្នុងទូរស័ព្ទពិតៗ
 
-3. **ការចែករំលែក & នាំចេញ (Share & Export)**:
+3. **ប្រព័ន្ធ Auto Rename & Auto Upload ចូល GitHub (100% Automatic)**:
+   - ⚡ **Auto Rename ស្វ័យប្រវត្តិ**: រាល់ពេលជ្រើសរើសរូបភាព ឬវីដេអូ កម្មវិធីនឹង Rename ជាស្ដង់ដា (`cover.jpg`, `bg.jpg`, `gallery1.jpg` ដល់ `gallery4.jpg`, `map.jpg`, `Video.mp4`, `music.mp3`) ដោយមិនបាច់ប្តូរឈ្មោះដោយដៃឡើយ។
+   - 🐙 **Auto Upload ចូល GitHub**: រូបភាព និងឯកសារដែលបានជ្រើស នឹងត្រូវ Upload ចូលទៅកាន់ GitHub Repository ដោយស្វ័យប្រវត្តិតាមរយៈ GitHub Contents API។
+   - 💾 **Auto Sync config.js**: រាល់ពេល Upload រូបភាព ឬកែប្រែព័ត៌មាន កម្មវិធីនឹង Update `config.js` ចូល GitHub ភ្លាមៗ ធ្វើឱ្យគេហទំព័រលើ GitHub Pages / Render ដំណើរការ Update ទៅកាន់ភ្ញៀវទាំងអស់ដោយស្វ័យប្រវត្តិ។
+
+4. **ការចែករំលែក & នាំចេញ (Share & Export)**:
    - ចម្លង Link ផ្ញើឱ្យភ្ញៀវតាម Telegram ឬ Facebook
-   - ទាញយកជាឯកសារ HTML ពេញលេញ (Download Standalone HTML) សម្រាប់ Upload ទៅកាន់ Host ឬចែករំលែក
+   - ទាញយកជាឯកសារ HTML ពេញលេញ (Download Standalone HTML) ឬទាញយក `config.js` សម្រាប់ Backup ទុកក្នុងកុំព្យូទ័រ
 
 ---
 

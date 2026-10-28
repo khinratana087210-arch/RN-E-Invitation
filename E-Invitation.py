@@ -12,6 +12,9 @@ import webbrowser
 import socket
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 
+import json
+import base64
+
 PORT = 8000
 
 class KhmerInvitationHandler(SimpleHTTPRequestHandler):
@@ -20,7 +23,71 @@ class KhmerInvitationHandler(SimpleHTTPRequestHandler):
         self.send_header('Cache-Control', 'no-cache, no-store, must-revalidate')
         self.send_header('Pragma', 'no-cache')
         self.send_header('Expires', '0')
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+        self.send_header('Access-Control-Allow-Headers', 'Content-Type, Authorization')
         super().end_headers()
+
+    def do_OPTIONS(self):
+        self.send_response(200)
+        self.end_headers()
+
+    def do_POST(self):
+        if self.path in ('/api/upload', '/api/save-file'):
+            try:
+                content_length = int(self.headers.get('Content-Length', 0))
+                post_data = self.rfile.read(content_length)
+                payload = json.loads(post_data.decode('utf-8'))
+
+                filename = payload.get('filename')
+                data = payload.get('content')
+                if not filename or data is None:
+                    self.send_response(400)
+                    self.send_header('Content-Type', 'application/json; charset=utf-8')
+                    self.end_headers()
+                    self.wfile.write(json.dumps({'error': 'Missing filename or content'}).encode('utf-8'))
+                    return
+
+                # Security: prevent path traversal out of workspace
+                clean_filename = os.path.basename(filename)
+                
+                # Check if data URL format (e.g. data:image/jpeg;base64,...)
+                if isinstance(data, str) and ',' in data and data.startswith('data:'):
+                    data = data.split(',', 1)[1]
+
+                # Decode base64 or encode text
+                if isinstance(data, str):
+                    try:
+                        file_bytes = base64.b64decode(data)
+                    except Exception:
+                        file_bytes = data.encode('utf-8')
+                else:
+                    file_bytes = bytes(data)
+
+                with open(clean_filename, 'wb') as f:
+                    f.write(file_bytes)
+
+                print(f" [✓] បានរក្សាទុកឯកសារ {clean_filename} ចូល Folder ដោយជោគជ័យ ({len(file_bytes)} bytes)")
+
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json; charset=utf-8')
+                self.end_headers()
+                self.wfile.write(json.dumps({
+                    'success': True,
+                    'filename': clean_filename,
+                    'size': len(file_bytes),
+                    'message': f'Saved {clean_filename} successfully'
+                }).encode('utf-8'))
+                return
+            except Exception as e:
+                self.send_response(500)
+                self.send_header('Content-Type', 'application/json; charset=utf-8')
+                self.end_headers()
+                self.wfile.write(json.dumps({'error': str(e)}).encode('utf-8'))
+                return
+
+        self.send_response(404)
+        self.end_headers()
 
     def guess_type(self, path):
         # Ensure correct MIME type for SVG and Fonts
@@ -34,6 +101,8 @@ class KhmerInvitationHandler(SimpleHTTPRequestHandler):
             return 'text/html; charset=utf-8'
         if path.endswith('.mp4'):
             return 'video/mp4'
+        if path.endswith('.mp3'):
+            return 'audio/mpeg'
         return super().guess_type(path)
 
 

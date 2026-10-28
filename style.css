@@ -416,6 +416,18 @@ textarea.form-control {
   color: var(--text-muted);
 }
 
+.upload-subtext {
+  font-size: 10px;
+  font-weight: 600;
+  color: #c084fc;
+  background: rgba(168, 85, 247, 0.12);
+  border: 1px solid rgba(168, 85, 247, 0.3);
+  padding: 1px 8px;
+  border-radius: 10px;
+  margin-top: 3px;
+  display: inline-block;
+}
+
 .img-preview-thumb {
   position: absolute;
   inset: 0;
@@ -1996,7 +2008,7 @@ body.guest-view-mode .floating-admin-toggle {
     padding: 16px 8px;
   }
   
-  /* Toggle via mobile tabs */
+  /* Toggle via mobile tabs in Admin mode */
   body.show-preview-mobile .editor-panel {
     display: none;
   }
@@ -2014,3 +2026,75 @@ body.guest-view-mode .floating-admin-toggle {
     border-radius: 36px;
   }
 }
+
+/* ==========================================================================
+   GUEST VIEW MODE (100% Mobile & Desktop Compatibility)
+   Ensures the invitation ALWAYS displays seamlessly on all phones & guests
+   ========================================================================== */
+body.guest-view-mode {
+  background: #0d0f15;
+  overflow-x: hidden;
+}
+
+body.guest-view-mode .app-header,
+body.guest-view-mode .editor-panel,
+body.guest-view-mode .mobile-tabs {
+  display: none !important;
+}
+
+body.guest-view-mode .app-main {
+  display: block !important;
+  grid-template-columns: 1fr !important;
+  height: auto !important;
+  min-height: 100vh !important;
+  overflow: visible !important;
+  background: transparent !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+body.guest-view-mode .preview-panel {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  height: auto !important;
+  min-height: 100vh !important;
+  padding: 0 !important;
+  background: transparent !important;
+  overflow: visible !important;
+}
+
+body.guest-view-mode .phone-mockup-wrapper {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  display: flex !important;
+  justify-content: center !important;
+}
+
+body.guest-view-mode .phone-device {
+  width: 100% !important;
+  max-width: 480px !important;
+  height: auto !important;
+  min-height: 100vh !important;
+  border-radius: 0 !important;
+  border: none !important;
+  box-shadow: 0 0 50px rgba(0, 0, 0, 0.8) !important;
+  background: #fffdfa !important;
+  overflow: visible !important;
+}
+
+body.guest-view-mode .phone-island {
+  display: none !important;
+}
+
+body.guest-view-mode .phone-screen {
+  height: auto !important;
+  min-height: 100vh !important;
+  overflow: visible !important;
+  background: #fffdfa !important;
+}
+

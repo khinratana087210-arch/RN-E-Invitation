@@ -11,6 +11,15 @@ window.SUPABASE_CONFIG = {
   bucket: 'wedding-invitations'
 };
 
+// GitHub Configuration (Auto Rename & Auto Upload to GitHub Repository)
+window.GITHUB_CONFIG = {
+  token: '',       // GitHub Personal Access Token (PAT) ជាមួយសិទ្ធិ 'repo'
+  repo: '',        // ឈ្មោះ Repository ឧ. 'K-RaTaNa/E-Invitation'
+  branch: 'main',  // Branch មេ
+  autoRename: 'standard', // 'standard' (cover.jpg, bg.jpg...) ឬ 'timestamp'
+  autoSyncConfig: true    // Auto update config.js ចូល GitHub ពេល Upload រូប
+};
+
 window.WEDDING_CONFIG = {
   // ព័ត៌មានកម្មវិធី
   eventTitle: 'សិរីមង្គលអាពាហ៍ពិពាហ៍',

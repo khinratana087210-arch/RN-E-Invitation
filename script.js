@@ -75,6 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
   bindImageUploads();
   bindTypographyControls();
   bindViewButtons();
+  initGitHubIntegration();
   bindCalendarAction();
   bindAudio();
   startCountdownTimer();
@@ -181,6 +182,7 @@ function loadSavedStateOrUrlParams() {
       appState.guestName = decodeURIComponent(guestParam).replace(/_/g, ' ');
     }
     document.body.classList.add('guest-view-mode');
+    document.body.classList.add('show-preview-mobile');
     
     // Show Envelope Opening Overlay
     const envOverlay = document.getElementById('envelopeOverlay');
@@ -583,77 +585,385 @@ function dataUrlToBlob(dataUrl) {
 }
 
 /**
- * Auto Cloud Upload Service
- * បង្ហោះរូបភាពឡើង Cloud Database ដោយស្វ័យប្រវត្តិ (Supabase Storage)
- * ដើម្បីឱ្យភ្ញៀវទាំងអស់ដែលបើក Link មើលឃើញរូបភាពភ្លាម ដោយមិនបាច់ Upload ចូល GitHub ឡើយ!
+ * =============================================================================
+ * GitHub Auto-Upload & Auto-Rename System
+ * =============================================================================
  */
-async function uploadImageToCloud(base64DataUrl) {
-  if (!base64DataUrl || typeof base64DataUrl !== 'string') return null;
-  if (base64DataUrl.startsWith('http://') || base64DataUrl.startsWith('https://')) {
-    return base64DataUrl;
+
+const GITHUB_UPLOAD_SLOTS = {
+  envelopeImage: { defaultName: 'cover.jpg', label: 'រូបក្នុងរង្វង់លើធៀប' },
+  entranceBg:    { defaultName: 'bg.jpg', label: 'រូប Background ខាងក្រោយ' },
+  coverImage:    { defaultName: 'cover.jpg', label: 'រូបក្របមុខ Cover' },
+  bgImage1:      { defaultName: 'bg.jpg', label: 'រូប Background ១' },
+  bgImage2:      { defaultName: 'bg2.jpg', label: 'រូប Background ២' },
+  bgImage3:      { defaultName: 'bg3.jpg', label: 'រូប Background ៣' },
+  bgImage4:      { defaultName: 'bg4.jpg', label: 'រូប Background ៤' },
+  mapImage:      { defaultName: 'map.jpg', label: 'រូបផែនទី Map' },
+  gallery1:      { defaultName: 'gallery1.jpg', label: 'កម្រងរូបភាពទី ១' },
+  gallery2:      { defaultName: 'gallery2.jpg', label: 'កម្រងរូបភាពទី ២' },
+  gallery3:      { defaultName: 'gallery3.jpg', label: 'កម្រងរូបភាពទី ៣' },
+  gallery4:      { defaultName: 'gallery4.jpg', label: 'កម្រងរូបភាពទី ៤' },
+  gateVideo:     { defaultName: 'Video.mp4', label: 'វីដេអូបើកទ្វាររោងការ' },
+  musicFile:     { defaultName: 'music.mp3', label: 'បទចម្រៀង MP3' }
+};
+
+let pendingGitHubUpload = null;
+
+function getGitHubConfig() {
+  const token = localStorage.getItem('wedding_github_token') || window.GITHUB_CONFIG?.token || '';
+  const repo = localStorage.getItem('wedding_github_repo') || window.GITHUB_CONFIG?.repo || '';
+  const branch = localStorage.getItem('wedding_github_branch') || window.GITHUB_CONFIG?.branch || 'main';
+  const autoRename = localStorage.getItem('wedding_github_rename_mode') || window.GITHUB_CONFIG?.autoRename || 'standard';
+  const autoSyncConfig = localStorage.getItem('wedding_github_sync_config') !== 'false';
+  return {
+    token: (token || '').trim(),
+    repo: (repo || '').trim().replace(/^https?:\/\/github\.com\//, '').replace(/\.git$/, '').replace(/\/+$/, ''),
+    branch: (branch || 'main').trim(),
+    autoRename,
+    autoSyncConfig
+  };
+}
+
+function saveGitHubConfig(token, repo, branch, autoRename, autoSyncConfig) {
+  if (token !== undefined) localStorage.setItem('wedding_github_token', token.trim());
+  if (repo !== undefined) {
+    const cleanRepo = repo.trim().replace(/^https?:\/\/github\.com\//, '').replace(/\.git$/, '').replace(/\/+$/, '');
+    localStorage.setItem('wedding_github_repo', cleanRepo);
+  }
+  if (branch !== undefined) localStorage.setItem('wedding_github_branch', (branch || 'main').trim());
+  if (autoRename !== undefined) localStorage.setItem('wedding_github_rename_mode', autoRename);
+  if (autoSyncConfig !== undefined) localStorage.setItem('wedding_github_sync_config', autoSyncConfig ? 'true' : 'false');
+  updateGitHubUI();
+}
+
+function updateGitHubUI() {
+  const cfg = getGitHubConfig();
+  const label = document.getElementById('btnGitHubLabel');
+  const btn = document.getElementById('btnOpenGitHubModal');
+  if (label && btn) {
+    if (cfg.token && cfg.repo) {
+      const shortName = cfg.repo.includes('/') ? cfg.repo.split('/')[1] : cfg.repo;
+      label.textContent = `✅ GitHub (${shortName})`;
+      btn.style.borderColor = '#10b981';
+      btn.style.color = '#6ee7b7';
+      btn.style.background = 'rgba(16, 185, 129, 0.2)';
+    } else {
+      label.textContent = '🐙 Auto GitHub';
+      btn.style.borderColor = '#a855f7';
+      btn.style.color = '#d8b4fe';
+      btn.style.background = 'rgba(168, 85, 247, 0.2)';
+    }
+  }
+}
+
+async function testGitHubConnection(token, repo, branch = 'main') {
+  if (!token || !repo) {
+    return { ok: false, error: '⚠️ សូមបញ្ចូល GitHub Token និង Repository ជាមុនសិន!' };
+  }
+  const cleanRepo = repo.trim().replace(/^https?:\/\/github\.com\//, '').replace(/\.git$/, '').replace(/\/+$/, '');
+  try {
+    const res = await fetch(`https://api.github.com/repos/${cleanRepo}`, {
+      headers: {
+        'Authorization': `token ${token.trim()}`,
+        'Accept': 'application/vnd.github.v3+json'
+      }
+    });
+    if (res.status === 401) {
+      return { ok: false, error: '❌ Token មិនត្រឹមត្រូវ (Bad credentials)។ សូមពិនិត្យ Token ម្តងទៀត!' };
+    }
+    if (res.status === 404) {
+      return { ok: false, error: `❌ រកមិនឃើញ Repository "${cleanRepo}" ឬ Token គ្មានសិទ្ធិមើល Repository នេះទេ!` };
+    }
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      return { ok: false, error: err.message || `កំហុស GitHub (${res.status})` };
+    }
+    const data = await res.json();
+    return {
+      ok: true,
+      repo: data.full_name,
+      defaultBranch: data.default_branch || branch,
+      hasPush: data.permissions ? data.permissions.push : true
+    };
+  } catch (err) {
+    return { ok: false, error: `មិនអាចភ្ជាប់ទៅកាន់ GitHub API បានទេ៖ ${err.message}` };
+  }
+}
+
+async function uploadFileToGitHub(filePath, base64OrDataUrl, commitMsg) {
+  const cfg = getGitHubConfig();
+  if (!cfg.token || !cfg.repo) {
+    throw new Error('MISSING_GITHUB_CONFIG');
   }
 
-  // 1. Supabase Cloud Storage (Auto 100%)
-  const client = getSupabaseClient();
-  if (client) {
-    try {
-      const bucket = localStorage.getItem('wedding_supabase_bucket') || window.SUPABASE_CONFIG?.bucket || 'wedding-invitations';
-      const blob = dataUrlToBlob(base64DataUrl);
-      const ext = blob.type === 'image/png' ? 'png' : 'jpg';
-      const fileName = `cover_${Date.now()}_${Math.random().toString(36).substring(2, 7)}.${ext}`;
+  const cleanRepo = cfg.repo;
+  const branch = cfg.branch || 'main';
 
-      const { data, error } = await client.storage
-        .from(bucket)
-        .upload(fileName, blob, {
-          contentType: blob.type,
-          upsert: true
-        });
+  // Extract pure base64
+  let cleanBase64 = base64OrDataUrl;
+  if (typeof base64OrDataUrl === 'string' && base64OrDataUrl.includes(',')) {
+    cleanBase64 = base64OrDataUrl.split(',')[1];
+  }
 
-      if (!error && data) {
-        const { data: pubData } = client.storage.from(bucket).getPublicUrl(fileName);
-        if (pubData && pubData.publicUrl) {
-          console.log('✅ Supabase Upload Success:', pubData.publicUrl);
-          return pubData.publicUrl;
-        }
-      } else if (error) {
-        console.warn('Supabase upload error:', error);
+  // 1. Fetch existing file SHA if updating
+  let existingSha = null;
+  try {
+    const checkRes = await fetch(`https://api.github.com/repos/${cleanRepo}/contents/${filePath}?ref=${branch}`, {
+      headers: {
+        'Authorization': `token ${cfg.token}`,
+        'Accept': 'application/vnd.github.v3+json'
       }
-    } catch (err) {
-      console.warn('Supabase upload exception:', err);
+    });
+    if (checkRes.ok) {
+      const fileData = await checkRes.json();
+      existingSha = fileData.sha;
+    }
+  } catch (e) {
+    console.warn('Could not fetch existing file SHA:', e);
+  }
+
+  // 2. PUT to GitHub API
+  const payload = {
+    message: commitMsg || `Auto upload: update ${filePath}`,
+    content: cleanBase64,
+    branch: branch
+  };
+  if (existingSha) {
+    payload.sha = existingSha;
+  }
+
+  const putRes = await fetch(`https://api.github.com/repos/${cleanRepo}/contents/${filePath}`, {
+    method: 'PUT',
+    headers: {
+      'Authorization': `token ${cfg.token}`,
+      'Accept': 'application/vnd.github.v3+json',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(payload)
+  });
+
+  if (!putRes.ok) {
+    const err = await putRes.json().catch(() => ({}));
+    throw new Error(err.message || `GitHub error ${putRes.status}`);
+  }
+
+  const putData = await putRes.json();
+  return putData;
+}
+
+async function saveFileToLocalServer(filename, base64OrDataUrl) {
+  try {
+    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    const targetUrl = isLocal ? '/api/upload' : 'http://localhost:8000/api/upload';
+    const res = await fetch(targetUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json; charset=utf-8' },
+      body: JSON.stringify({ filename, content: base64OrDataUrl })
+    });
+    if (res.ok) {
+      console.log(`[Local Server] Saved ${filename} successfully`);
+      return true;
+    }
+  } catch (e) {
+    // Local server offline or not running, ignore
+  }
+  return false;
+}
+
+function generateConfigJsCode() {
+  const cfg = getGitHubConfig();
+  return `/**
+ * Wedding E-Invitation Configuration
+ * រក្សាទុកដោយស្វ័យប្រវត្តិចេញពី E-Invitation Builder
+ */
+
+// Cloud Storage Configuration
+window.SUPABASE_CONFIG = {
+  url: ${JSON.stringify(localStorage.getItem('wedding_supabase_url') || window.SUPABASE_CONFIG?.url || '')},
+  anonKey: ${JSON.stringify(localStorage.getItem('wedding_supabase_key') || window.SUPABASE_CONFIG?.anonKey || '')},
+  bucket: ${JSON.stringify(localStorage.getItem('wedding_supabase_bucket') || window.SUPABASE_CONFIG?.bucket || 'wedding-invitations')}
+};
+
+// GitHub Configuration (Auto Rename & Auto Upload)
+window.GITHUB_CONFIG = {
+  token: ${JSON.stringify(cfg.token)},
+  repo: ${JSON.stringify(cfg.repo)},
+  branch: ${JSON.stringify(cfg.branch || 'main')},
+  autoRename: ${JSON.stringify(cfg.autoRename || 'standard')},
+  autoSyncConfig: ${cfg.autoSyncConfig}
+};
+
+window.WEDDING_CONFIG = {
+  eventTitle: ${JSON.stringify(appState.eventTitle)},
+  groomKhmer: ${JSON.stringify(appState.groomKhmer)},
+  groomLatin: ${JSON.stringify(appState.groomLatin)},
+  brideKhmer: ${JSON.stringify(appState.brideKhmer)},
+  brideLatin: ${JSON.stringify(appState.brideLatin)},
+  weddingDate: ${JSON.stringify(appState.weddingDate)},
+  weddingTime: ${JSON.stringify(appState.weddingTime)},
+  dateFullKhmer: ${JSON.stringify(appState.dateFullKhmer)},
+  guestSalutation: ${JSON.stringify(appState.guestSalutation)},
+  inviteBody: ${JSON.stringify(appState.inviteBody)},
+  venueName: ${JSON.stringify(appState.venueName)},
+  locationUrl: ${JSON.stringify(appState.locationUrl)},
+  phone1: ${JSON.stringify(appState.phone1)},
+  phone2: ${JSON.stringify(appState.phone2)},
+  phone3: ${JSON.stringify(appState.phone3)},
+  useKhmerNumerals: ${appState.useKhmerNumerals},
+  thankYouText: ${JSON.stringify(appState.thankYouText)},
+
+  styles: {
+    titleFont: ${JSON.stringify(appState.titleFont)},
+    titleColor: ${JSON.stringify(appState.titleColor)},
+    titleShadow: ${JSON.stringify(appState.titleShadow)},
+    titleSize: ${JSON.stringify(appState.titleSize)},
+    coupleFont: ${JSON.stringify(appState.coupleFont)},
+    coupleLatinFont: ${JSON.stringify(appState.coupleLatinFont)},
+    coupleColor: ${JSON.stringify(appState.coupleColor)},
+    coupleShadow: ${JSON.stringify(appState.coupleShadow)},
+    guestFont: ${JSON.stringify(appState.guestFont)},
+    guestColor: ${JSON.stringify(appState.guestColor)}
+  },
+
+  images: {
+    envelopeImage: ${JSON.stringify(appState.envelopeImage || 'cover.jpg')},
+    entranceBg: ${JSON.stringify(appState.entranceBg || 'bg.jpg')},
+    gateVideo: 'Video.mp4',
+    coverImage: ${JSON.stringify(appState.coverImage || 'cover.jpg')},
+    bgImage: ${JSON.stringify(appState.bgImage || 'bg.jpg')},
+    bgImage1: ${JSON.stringify(appState.bgImage1 || 'bg.jpg')},
+    bgImage2: ${JSON.stringify(appState.bgImage2 || 'bg.jpg')},
+    bgImage3: ${JSON.stringify(appState.bgImage3 || 'bg.jpg')},
+    bgImage4: ${JSON.stringify(appState.bgImage4 || 'bg.jpg')},
+    mapImage: ${JSON.stringify(appState.mapImage || 'map.svg')},
+    gallery1: ${JSON.stringify(appState.gallery1 || 'gallery1.jpg')},
+    gallery2: ${JSON.stringify(appState.gallery2 || 'gallery2.jpg')},
+    gallery3: ${JSON.stringify(appState.gallery3 || 'gallery3.jpg')},
+    gallery4: ${JSON.stringify(appState.gallery4 || 'gallery4.jpg')}
+  }
+};
+`;
+}
+
+async function syncConfigToGitHub() {
+  const code = generateConfigJsCode();
+  const base64Code = btoa(unescape(encodeURIComponent(code)));
+  saveFileToLocalServer('config.js', base64Code);
+  return await uploadFileToGitHub('config.js', base64Code, 'Auto update config.js');
+}
+
+function downloadConfigJsBlob(code) {
+  const content = code || generateConfigJsCode();
+  const blob = new Blob([content], { type: 'application/javascript;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'config.js';
+  a.click();
+}
+
+async function uploadAndAutoRenameFile(file, slotKey, updateFn, thumbId) {
+  if (!file) return;
+
+  const slotInfo = GITHUB_UPLOAD_SLOTS[slotKey] || { defaultName: file.name, label: 'ឯកសារ' };
+  const cfg = getGitHubConfig();
+
+  // 1. Determine target filename
+  let targetFilename = slotInfo.defaultName;
+  if (cfg.autoRename === 'timestamp') {
+    const ext = file.name.includes('.') ? file.name.split('.').pop() : 'jpg';
+    const prefix = slotInfo.defaultName.replace(/\.[^.]+$/, '');
+    targetFilename = `${prefix}_${Date.now()}.${ext}`;
+  } else {
+    if (slotKey === 'mapImage' && file.name.endsWith('.svg')) {
+      targetFilename = 'map.svg';
+    } else if (slotKey === 'mapImage' && file.name.endsWith('.png')) {
+      targetFilename = 'map.png';
     }
   }
 
-  const base64Clean = base64DataUrl.includes(',') ? base64DataUrl.split(',')[1] : base64DataUrl;
-  if (!base64Clean) return null;
+  showToast(`🔄 កំពុង Auto Rename ទៅជា "${targetFilename}"...`);
 
-  // 2. ImgBB API Fallback
-  const apiKey = localStorage.getItem('wedding_imgbb_key');
-  if (apiKey && apiKey.trim()) {
-    try {
-      const formData = new FormData();
-      formData.append('image', base64Clean);
+  // Helper to read file as Data URL
+  const readFileAsDataUrl = f => new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(f);
+  });
 
-      const res = await fetch(`https://api.imgbb.com/1/upload?key=${apiKey.trim()}`, {
-        method: 'POST',
-        body: formData
-      });
-      if (res.ok) {
-        const data = await res.json();
-        if (data && data.data && data.data.url) {
-          console.log('Cloud Upload Success (ImgBB):', data.data.url);
-          return data.data.url;
-        }
-      }
-    } catch (err) {
-      console.warn('ImgBB upload error:', err);
-    }
+  let dataUrl = null;
+  if (file.type.startsWith('image/')) {
+    dataUrl = await new Promise(resolve => {
+      compressImage(file, 1200, 0.82, res => resolve(res || null));
+    });
+  } else {
+    dataUrl = await readFileAsDataUrl(file);
   }
 
-  return null;
+  if (!dataUrl) {
+    showToast('❌ មិនអាចដំណើរការឯកសារបានឡើយ!');
+    return;
+  }
+
+  // 2. Instant local preview
+  appState[slotKey] = dataUrl;
+  if (slotKey === 'coverImage') {
+    appState.envelopeImage = dataUrl;
+    updateThumbnail('envelopeThumb', dataUrl);
+    updateEnvelopePhotoPreview();
+  }
+  if (slotKey === 'entranceBg') {
+    appState.bgImage = dataUrl;
+    appState.bgImage1 = dataUrl;
+  }
+  if (thumbId) updateThumbnail(thumbId, dataUrl);
+  if (updateFn) updateFn();
+  saveStateDebounced();
+
+  // 3. Save to local folder via Python server if running
+  saveFileToLocalServer(targetFilename, dataUrl);
+
+  // 4. Upload to GitHub
+  if (cfg.token && cfg.repo) {
+    showToast(`🐙 កំពុង Auto Upload "${targetFilename}" ចូល GitHub...`);
+    try {
+      await uploadFileToGitHub(targetFilename, dataUrl, `Auto upload ${targetFilename} (${slotInfo.label})`);
+
+      // Update appState with relative filename
+      appState[slotKey] = targetFilename;
+      if (slotKey === 'coverImage') appState.envelopeImage = targetFilename;
+      if (slotKey === 'entranceBg') {
+        appState.bgImage = targetFilename;
+        appState.bgImage1 = targetFilename;
+      }
+      saveStateDebounced();
+
+      // Auto update config.js on GitHub
+      if (cfg.autoSyncConfig) {
+        try {
+          await syncConfigToGitHub();
+          console.log('✅ config.js synced to GitHub');
+        } catch (confErr) {
+          console.warn('Could not auto-sync config.js:', confErr);
+        }
+      }
+
+      showToast(`✅ បាន Auto Rename ជា "${targetFilename}" និង Upload ចូល GitHub ជោគជ័យ! 🎉`);
+      return;
+    } catch (err) {
+      console.error('GitHub upload error:', err);
+      showToast(`⚠️ Upload ចូល GitHub មិនបានសម្រេច៖ ${err.message}`);
+    }
+  } else {
+    // GitHub not configured: prompt user
+    pendingGitHubUpload = { file, slotKey, updateFn, thumbId, targetFilename, dataUrl };
+    showToast(`💡 សូមភ្ជាប់ GitHub ដើម្បីឱ្យឯកសារ "${targetFilename}" រត់ចូល GitHub ដោយស្វ័យប្រវត្តិ!`);
+    openGitHubModal({ targetFilename });
+  }
 }
 
 /**
- * Handle File Uploads with instant Base64 preview & auto-compression & Auto Cloud Upload
+ * Handle File Uploads with Auto Rename & Auto GitHub Upload
  */
 function bindImageUploads() {
   const fileInputs = [
@@ -674,52 +984,26 @@ function bindImageUploads() {
   fileInputs.forEach(item => {
     const inputEl = document.getElementById(item.inputId);
     if (!inputEl) return;
-    inputEl.addEventListener('change', e => {
+    inputEl.addEventListener('change', async e => {
       const file = e.target.files[0];
       if (!file) return;
-
-      showToast('កំពុងដំណើរការរូបភាព...');
-      compressImage(file, 900, 0.75, async dataUrl => {
-        if (!dataUrl) return;
-        // 1. Instant local thumbnail & preview
-        appState[item.key] = dataUrl;
-        if (item.key === 'coverImage') {
-          appState.envelopeImage = dataUrl;
-          updateThumbnail('envelopeThumb', dataUrl);
-          updateEnvelopePhotoPreview();
-        }
-        updateThumbnail(item.thumbId, dataUrl);
-        item.updateFn();
-        saveStateDebounced();
-
-        // 2. Auto Cloud Upload in Background
-        showToast('☁️ កំពុង Auto Upload ឡើង Cloud...');
-        try {
-          const cloudUrl = await uploadImageToCloud(dataUrl);
-          if (cloudUrl) {
-            appState[item.key] = cloudUrl;
-            if (item.key === 'coverImage') {
-              appState.envelopeImage = cloudUrl;
-              updateThumbnail('envelopeThumb', cloudUrl);
-              updateEnvelopePhotoPreview();
-            }
-            if (item.key === 'entranceBg') {
-              appState.bgImage = cloudUrl;
-              appState.bgImage1 = cloudUrl;
-            }
-            updateThumbnail(item.thumbId, cloudUrl);
-            item.updateFn();
-            saveStateDebounced();
-            showToast('✅ Upload ឡើង Cloud ជោគជ័យ! ភ្ញៀវទាំងអស់អាចមើលឃើញ!');
-            return;
-          }
-        } catch (err) {
-          console.warn('Auto cloud upload error:', err);
-        }
-        showToast('✨ បានផ្លាស់ប្ដូររូបភាពគំរូ (Preview) ជោគជ័យ!');
-      });
+      await uploadAndAutoRenameFile(file, item.key, item.updateFn, item.thumbId);
     });
   });
+
+  // Gate Video file input handler
+  const gateVideoInput = document.getElementById('gateVideoFileInput');
+  if (gateVideoInput) {
+    gateVideoInput.addEventListener('change', async e => {
+      const file = e.target.files[0];
+      if (file) {
+        await uploadAndAutoRenameFile(file, 'gateVideo', () => {
+          const video = document.getElementById('gateOpeningVideo');
+          if (video) video.src = 'Video.mp4';
+        }, null);
+      }
+    });
+  }
 
   // Direct Image URL inputs (optional quick paste)
   const bindDirectUrlInput = (inputId, key, thumbId, updateFn) => {
@@ -741,7 +1025,7 @@ function bindImageUploads() {
         updateThumbnail(thumbId, url);
         updateFn();
         saveStateDebounced();
-        showToast('✅ បានភ្ជាប់ Link រូបភាពជោគជ័យ! ភ្ញៀវទាំងអស់នឹងឃើញរូបនេះភ្លាមៗ!');
+        showToast('✅ បានភ្ជាប់ Link រូបភាពជោគជ័យ!');
       }
     });
   };
@@ -749,6 +1033,19 @@ function bindImageUploads() {
   bindDirectUrlInput('inputEnvelopeImageUrl', 'envelopeImage', 'envelopeThumb', updateEnvelopePhotoPreview);
   bindDirectUrlInput('inputCoverImageUrl', 'coverImage', 'coverThumb', updateCoverPreview);
   bindDirectUrlInput('inputEntranceBgUrl', 'entranceBg', 'entranceBgThumb', updateEntranceBgPreview);
+
+  // Gate Video URL input
+  const videoUrlInput = document.getElementById('inputGateVideoUrl');
+  if (videoUrlInput) {
+    videoUrlInput.addEventListener('input', e => {
+      const url = e.target.value.trim();
+      if (url.startsWith('http')) {
+        const video = document.getElementById('gateOpeningVideo');
+        if (video) video.src = url;
+        showToast('✅ បានភ្ជាប់ Link វីដេអូបើកទ្វារជោគជ័យ!');
+      }
+    });
+  }
 
   // ImgBB API Key UI Handler
   const inputImgbbKey = document.getElementById('inputImgbbApiKey');
@@ -1107,6 +1404,18 @@ function bindViewButtons() {
     });
   }
 
+  // Test Open Generated Link in New Tab
+  const btnTestOpenLink = document.getElementById('btnTestOpenGeneratedLink');
+  if (btnTestOpenLink) {
+    btnTestOpenLink.addEventListener('click', () => {
+      const linkInput = document.getElementById('modalGeneratedLink');
+      const urlToOpen = (linkInput && linkInput.dataset.webUrl) ? linkInput.dataset.webUrl : (linkInput ? linkInput.value : '');
+      if (urlToOpen) {
+        window.open(urlToOpen, '_blank');
+      }
+    });
+  }
+
   // Copy Full Invitation Message for Telegram / Messenger
   const btnCopyMsg = document.getElementById('btnCopyFullMessage');
   if (btnCopyMsg) {
@@ -1186,57 +1495,24 @@ function triggerWeddingGateOpening() {
     toggleAudio();
   }
 
-  // Directly use Video.mp4 as requested
+  // Directly use Video.mp4 if supported and responsive
   if (video) {
+    video.muted = true; // Essential for mobile browser autoplay policy
+    video.playsInline = true;
+    video.setAttribute('playsinline', '');
+    video.setAttribute('webkit-playsinline', '');
     video.src = 'Video.mp4';
-    video.style.display = 'block';
     video.currentTime = 0;
-
-    // Dissolve card into video
-    if (card) {
-      card.style.opacity = '0';
-      card.style.transform = 'scale(0.85)';
-      card.style.pointerEvents = 'none';
-    }
-
-    const tryPlay = () => {
-      video.play().then(() => {
-        video.classList.add('playing');
-        if (btnSkip) btnSkip.style.display = 'block';
-      }).catch(err => {
-        console.warn('Video auto-play blocked, trying fallback assets/Video.mp4:', err);
-        if (!video.src.includes('assets/')) {
-          video.src = 'assets/Video.mp4';
-          video.play().then(() => {
-            video.classList.add('playing');
-            if (btnSkip) btnSkip.style.display = 'block';
-          }).catch(e => {
-            console.warn('Fallback video blocked, running doors fallback:', e);
-            run3DGateAnimation(overlay);
-          });
-        } else {
-          run3DGateAnimation(overlay);
-        }
-      });
-    };
-
-    video.onerror = () => {
-      if (!video.src.includes('assets/')) {
-        video.src = 'assets/Video.mp4';
-        tryPlay();
-      } else {
-        run3DGateAnimation(overlay);
-      }
-    };
-
-    tryPlay();
 
     let hasEnded = false;
     let safetyTimer = null;
+    let fallbackTimer = null;
+
     const endVideo = () => {
       if (hasEnded) return;
       hasEnded = true;
       if (safetyTimer) clearTimeout(safetyTimer);
+      if (fallbackTimer) clearTimeout(fallbackTimer);
       video.classList.remove('playing');
       if (btnSkip) btnSkip.style.display = 'none';
       setTimeout(() => {
@@ -1250,15 +1526,66 @@ function triggerWeddingGateOpening() {
             card.style.transform = '';
             card.style.pointerEvents = '';
           }
-        }, 900);
-      }, 350);
+        }, 800);
+      }, 300);
     };
 
-    safetyTimer = setTimeout(endVideo, 3200);
+    const onPlayStarted = () => {
+      if (fallbackTimer) clearTimeout(fallbackTimer);
+      video.style.display = 'block';
+      video.classList.add('playing');
+      if (btnSkip) btnSkip.style.display = 'block';
+      if (card) {
+        card.style.opacity = '0';
+        card.style.transform = 'scale(0.85)';
+        card.style.pointerEvents = 'none';
+      }
+    };
 
+    video.onplaying = onPlayStarted;
     video.onended = endVideo;
-    video.onclick = endVideo; // allow tap video to skip
-    if (btnSkip) btnSkip.onclick = endVideo; // allow tap skip button
+    video.onclick = endVideo;
+    if (btnSkip) btnSkip.onclick = endVideo;
+
+    // If video cannot buffer/play within 1000ms on mobile connection, smoothly run 3D Gate Animation
+    fallbackTimer = setTimeout(() => {
+      if (!video.classList.contains('playing')) {
+        console.log('Mobile network slow or video delayed, running 3D Gate animation fallback');
+        run3DGateAnimation(overlay);
+      }
+    }, 1000);
+
+    safetyTimer = setTimeout(endVideo, 3600);
+
+    const tryPlay = () => {
+      const playPromise = video.play();
+      if (playPromise !== undefined) {
+        playPromise.then(() => {
+          onPlayStarted();
+        }).catch(err => {
+          console.warn('Video play blocked or buffering:', err);
+          if (!video.src.includes('assets/')) {
+            video.src = 'assets/Video.mp4';
+            video.play().then(onPlayStarted).catch(() => {
+              run3DGateAnimation(overlay);
+            });
+          } else {
+            run3DGateAnimation(overlay);
+          }
+        });
+      }
+    };
+
+    video.onerror = () => {
+      if (!video.src.includes('assets/')) {
+        video.src = 'assets/Video.mp4';
+        tryPlay();
+      } else {
+        run3DGateAnimation(overlay);
+      }
+    };
+
+    tryPlay();
     return;
   }
 
@@ -1447,69 +1774,26 @@ function updateGeneratedLink(guestName) {
 /**
  * Save configuration to downloadable config.js file
  */
-function saveAndDownloadConfig() {
-  // Construct config.js content
-  const configContent = `/**
- * Wedding E-Invitation Configuration
- * រក្សាទុកដោយស្វ័យប្រវត្តិចេញពី E-Invitation Builder
+/**
+ * Save configuration to downloadable config.js file & Auto-Sync to GitHub
  */
+async function saveAndDownloadConfig() {
+  const cfg = getGitHubConfig();
+  const code = generateConfigJsCode();
+  downloadConfigJsBlob(code);
 
-window.WEDDING_CONFIG = {
-  eventTitle: ${JSON.stringify(appState.eventTitle)},
-  groomKhmer: ${JSON.stringify(appState.groomKhmer)},
-  groomLatin: ${JSON.stringify(appState.groomLatin)},
-  brideKhmer: ${JSON.stringify(appState.brideKhmer)},
-  brideLatin: ${JSON.stringify(appState.brideLatin)},
-  weddingDate: ${JSON.stringify(appState.weddingDate)},
-  weddingTime: ${JSON.stringify(appState.weddingTime)},
-  dateFullKhmer: ${JSON.stringify(appState.dateFullKhmer)},
-  guestSalutation: ${JSON.stringify(appState.guestSalutation)},
-  inviteBody: ${JSON.stringify(appState.inviteBody)},
-  venueName: ${JSON.stringify(appState.venueName)},
-  locationUrl: ${JSON.stringify(appState.locationUrl)},
-  phone1: ${JSON.stringify(appState.phone1)},
-  phone2: ${JSON.stringify(appState.phone2)},
-  phone3: ${JSON.stringify(appState.phone3)},
-  useKhmerNumerals: ${appState.useKhmerNumerals},
-  thankYouText: ${JSON.stringify(appState.thankYouText)},
-
-  styles: {
-    titleFont: ${JSON.stringify(appState.titleFont)},
-    titleColor: ${JSON.stringify(appState.titleColor)},
-    titleShadow: ${JSON.stringify(appState.titleShadow)},
-    titleSize: ${JSON.stringify(appState.titleSize)},
-    coupleFont: ${JSON.stringify(appState.coupleFont)},
-    coupleLatinFont: ${JSON.stringify(appState.coupleLatinFont)},
-    coupleColor: ${JSON.stringify(appState.coupleColor)},
-    coupleShadow: ${JSON.stringify(appState.coupleShadow)},
-    guestFont: ${JSON.stringify(appState.guestFont)},
-    guestColor: ${JSON.stringify(appState.guestColor)}
-  },
-
-  images: {
-    envelopeImage: ${JSON.stringify(appState.envelopeImage || 'cover.jpg')},
-    entranceBg: ${JSON.stringify(appState.entranceBg || 'bg.jpg')},
-    gateVideo: 'Video.mp4',
-    coverImage: ${JSON.stringify(appState.coverImage || 'cover.jpg')},
-    bgImage: ${JSON.stringify(appState.bgImage || 'bg.jpg')},
-    bgImage1: ${JSON.stringify(appState.bgImage1 || 'bg.jpg')},
-    bgImage2: ${JSON.stringify(appState.bgImage2 || 'bg.jpg')},
-    bgImage3: ${JSON.stringify(appState.bgImage3 || 'bg.jpg')},
-    bgImage4: ${JSON.stringify(appState.bgImage4 || 'bg.jpg')},
-    mapImage: ${JSON.stringify(appState.mapImage || 'map.svg')},
-    gallery1: ${JSON.stringify(appState.gallery1 || 'gallery1.jpg')},
-    gallery2: ${JSON.stringify(appState.gallery2 || 'gallery2.jpg')},
-    gallery3: ${JSON.stringify(appState.gallery3 || 'gallery3.jpg')},
-    gallery4: ${JSON.stringify(appState.gallery4 || 'gallery4.jpg')}
+  if (cfg.token && cfg.repo) {
+    showToast('🚀 កំពុង Upload config.js ចូល GitHub...');
+    try {
+      await syncConfigToGitHub();
+      showToast('✅ បានរក្សាទុក និង Auto Upload config.js ចូល GitHub ជោគជ័យ! 🎉');
+      return;
+    } catch (e) {
+      console.warn('GitHub auto sync failed:', e);
+      showToast(`⚠️ Upload ចូល GitHub មិនបានសម្រេច៖ ${e.message}`);
+    }
   }
-};
-`;
 
-  const blob = new Blob([configContent], { type: 'application/javascript;charset=utf-8' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'config.js';
-  a.click();
   showToast('បានទាញយក config.js! សូមយកវាទៅ Upload ចូល GitHub');
   openSaveGuideModal();
 }
@@ -1522,6 +1806,226 @@ function openSaveGuideModal() {
 function closeSaveGuideModal() {
   const modal = document.getElementById('saveGuideModal');
   if (modal) modal.classList.remove('active');
+}
+
+/**
+ * GitHub Modal UI & Bindings
+ */
+function openGitHubModal(opts = {}) {
+  const modal = document.getElementById('githubModal');
+  const tokenInput = document.getElementById('inputGitHubToken');
+  const repoInput = document.getElementById('inputGitHubRepo');
+  const branchInput = document.getElementById('inputGitHubBranch');
+  const renameSelect = document.getElementById('selectGitHubAutoRename');
+  const syncCheck = document.getElementById('toggleGitHubSyncConfig');
+  const statusEl = document.getElementById('githubConnectionStatus');
+
+  const cfg = getGitHubConfig();
+  if (tokenInput) tokenInput.value = cfg.token || '';
+  if (repoInput) repoInput.value = cfg.repo || '';
+  if (branchInput) branchInput.value = cfg.branch || 'main';
+  if (renameSelect) renameSelect.value = cfg.autoRename || 'standard';
+  if (syncCheck) syncCheck.checked = cfg.autoSyncConfig;
+
+  if (statusEl) {
+    if (cfg.token && cfg.repo) {
+      statusEl.style.display = 'block';
+      statusEl.style.background = 'rgba(16, 185, 129, 0.15)';
+      statusEl.style.border = '1px solid rgba(16, 185, 129, 0.35)';
+      statusEl.style.color = '#a7f3d0';
+      statusEl.innerHTML = `✅ បានភ្ជាប់ទៅកាន់ <strong>${cfg.repo}</strong> (${cfg.branch}) រួចរាល់! ប្រព័ន្ធដំណើរការ Auto 100%។`;
+    } else if (opts.targetFilename) {
+      statusEl.style.display = 'block';
+      statusEl.style.background = 'rgba(245, 158, 11, 0.15)';
+      statusEl.style.border = '1px solid rgba(245, 158, 11, 0.35)';
+      statusEl.style.color = '#fde68a';
+      statusEl.innerHTML = `💡 សូមបំពេញ Token & Repo ម្តង ដើម្បីឱ្យប្រព័ន្ធ Auto Upload ឯកសារ <strong>${opts.targetFilename}</strong> ចូល GitHub!`;
+    } else {
+      statusEl.style.display = 'none';
+    }
+  }
+
+  if (modal) modal.classList.add('active');
+}
+
+function closeGitHubModal() {
+  const modal = document.getElementById('githubModal');
+  if (modal) modal.classList.remove('active');
+}
+
+function initGitHubIntegration() {
+  updateGitHubUI();
+
+  // Header button to open modal
+  const btnOpen = document.getElementById('btnOpenGitHubModal');
+  if (btnOpen) btnOpen.addEventListener('click', () => openGitHubModal());
+
+  // Password visibility toggle
+  const btnToggleToken = document.getElementById('btnToggleTokenVisibility');
+  const inputToken = document.getElementById('inputGitHubToken');
+  if (btnToggleToken && inputToken) {
+    btnToggleToken.addEventListener('click', () => {
+      if (inputToken.type === 'password') {
+        inputToken.type = 'text';
+        btnToggleToken.textContent = '🙈';
+      } else {
+        inputToken.type = 'password';
+        btnToggleToken.textContent = '👁️';
+      }
+    });
+  }
+
+  // Test Connection Button
+  const btnTestConn = document.getElementById('btnTestGitHubConn');
+  if (btnTestConn) {
+    btnTestConn.addEventListener('click', async () => {
+      const token = (document.getElementById('inputGitHubToken')?.value || '').trim();
+      const repo = (document.getElementById('inputGitHubRepo')?.value || '').trim();
+      const branch = (document.getElementById('inputGitHubBranch')?.value || '').trim() || 'main';
+      const statusEl = document.getElementById('githubConnectionStatus');
+
+      if (!token || !repo) {
+        showToast('⚠️ សូមបញ្ចូល GitHub Token និង Repo ជាមុនសិន!');
+        return;
+      }
+
+      btnTestConn.disabled = true;
+      btnTestConn.innerHTML = '⏳ កំពុងតេស្ត...';
+      const result = await testGitHubConnection(token, repo, branch);
+      btnTestConn.disabled = false;
+      btnTestConn.innerHTML = '🔍 តេស្តការតភ្ជាប់';
+
+      if (statusEl) {
+        statusEl.style.display = 'block';
+        if (result.ok) {
+          statusEl.style.background = 'rgba(16, 185, 129, 0.15)';
+          statusEl.style.border = '1px solid rgba(16, 185, 129, 0.35)';
+          statusEl.style.color = '#a7f3d0';
+          statusEl.innerHTML = `✅ ភ្ជាប់ជោគជ័យ! Repository: <strong>${result.repo}</strong> (Branch: ${result.defaultBranch})`;
+          showToast('✅ ភ្ជាប់ជោគជ័យទៅកាន់ GitHub!');
+        } else {
+          statusEl.style.background = 'rgba(239, 68, 68, 0.15)';
+          statusEl.style.border = '1px solid rgba(239, 68, 68, 0.35)';
+          statusEl.style.color = '#fca5a5';
+          statusEl.innerHTML = result.error;
+          showToast('❌ មិនអាចភ្ជាប់បានទេ សូមពិនិត្យព័ត៌មាន!');
+        }
+      }
+    });
+  }
+
+  // Save Config Button
+  const btnSaveGitHub = document.getElementById('btnSaveGitHubConfig');
+  if (btnSaveGitHub) {
+    btnSaveGitHub.addEventListener('click', async () => {
+      const token = (document.getElementById('inputGitHubToken')?.value || '').trim();
+      const repo = (document.getElementById('inputGitHubRepo')?.value || '').trim();
+      const branch = (document.getElementById('inputGitHubBranch')?.value || '').trim() || 'main';
+      const renameMode = document.getElementById('selectGitHubAutoRename')?.value || 'standard';
+      const syncConfig = document.getElementById('toggleGitHubSyncConfig')?.checked !== false;
+
+      if (!token || !repo) {
+        showToast('⚠️ សូមបញ្ចូល GitHub Token និង Repo!');
+        return;
+      }
+
+      saveGitHubConfig(token, repo, branch, renameMode, syncConfig);
+      showToast('💾 បានរក្សាទុកការកំណត់ GitHub ជោគជ័យ!');
+      closeGitHubModal();
+
+      // If there was a pending upload waiting, execute it now!
+      if (pendingGitHubUpload) {
+        const p = pendingGitHubUpload;
+        pendingGitHubUpload = null;
+        uploadAndAutoRenameFile(p.file, p.slotKey, p.updateFn, p.thumbId);
+      }
+    });
+  }
+
+  // Sync All Button in GitHub modal
+  const btnSyncAll = document.getElementById('btnSyncAllToGitHub');
+  if (btnSyncAll) {
+    btnSyncAll.addEventListener('click', async () => {
+      const cfg = getGitHubConfig();
+      if (!cfg.token || !cfg.repo) {
+        showToast('⚠️ សូមកំណត់ GitHub Token និង Repo ជាមុនសិន!');
+        return;
+      }
+
+      btnSyncAll.disabled = true;
+      btnSyncAll.innerHTML = '⏳ កំពុង Sync ឯកសារទាំងអស់ទៅ GitHub...';
+      showToast('🚀 ចាប់ផ្តើម Sync ឯកសារទាំងអស់ចូល GitHub...');
+
+      try {
+        // 1. Sync config.js
+        await syncConfigToGitHub();
+        showToast('✅ បាន Upload config.js ជោគជ័យ!');
+
+        // 2. Upload any local base64 images that haven't been pushed
+        const imageKeys = [
+          { key: 'coverImage', name: 'cover.jpg' },
+          { key: 'entranceBg', name: 'bg.jpg' },
+          { key: 'mapImage', name: 'map.jpg' },
+          { key: 'gallery1', name: 'gallery1.jpg' },
+          { key: 'gallery2', name: 'gallery2.jpg' },
+          { key: 'gallery3', name: 'gallery3.jpg' },
+          { key: 'gallery4', name: 'gallery4.jpg' }
+        ];
+
+        let uploadedCount = 1;
+        for (const item of imageKeys) {
+          const val = appState[item.key];
+          if (val && typeof val === 'string' && val.startsWith('data:')) {
+            await uploadFileToGitHub(item.name, val, `Auto Sync ${item.name}`);
+            uploadedCount++;
+          }
+        }
+
+        showToast(`🎉 Sync ជោគជ័យ! បាន Upload ${uploadedCount} ឯកសារទៅកាន់ GitHub (${cfg.repo})`);
+        closeGitHubModal();
+      } catch (err) {
+        showToast(`❌ Sync បរាជ័យ៖ ${err.message}`);
+      } finally {
+        btnSyncAll.disabled = false;
+        btnSyncAll.innerHTML = '🚀 Sync រូបភាព & config.js ទាំងអស់ទៅ GitHub ឥឡូវនេះ';
+      }
+    });
+  }
+
+  // Quick 1-click sync button in saveGuideModal
+  const btnSyncConf = document.getElementById('btnSyncConfigOnlyToGitHub');
+  if (btnSyncConf) {
+    btnSyncConf.addEventListener('click', async () => {
+      const cfg = getGitHubConfig();
+      if (!cfg.token || !cfg.repo) {
+        showToast('⚠️ សូមកំណត់ GitHub ជាមុនសិន!');
+        closeSaveGuideModal();
+        openGitHubModal();
+        return;
+      }
+      btnSyncConf.disabled = true;
+      btnSyncConf.innerHTML = '⏳ កំពុង Upload...';
+      try {
+        await syncConfigToGitHub();
+        showToast('✅ បាន Upload config.js ចូល GitHub ដោយជោគជ័យ! 🎉');
+        closeSaveGuideModal();
+      } catch (err) {
+        showToast(`❌ Upload មិនបានសម្រេច៖ ${err.message}`);
+      } finally {
+        btnSyncConf.disabled = false;
+        btnSyncConf.innerHTML = '⚡ Sync config.js ចូល GitHub ឥឡូវនេះ';
+      }
+    });
+  }
+
+  // Download config again button in saveGuideModal
+  const btnDlAgain = document.getElementById('btnDownloadConfigAgain');
+  if (btnDlAgain) {
+    btnDlAgain.addEventListener('click', () => {
+      downloadConfigJsBlob();
+      showToast('💾 បានទាញយក config.js រួចរាល់!');
+    });
+  }
 }
 
 /**
@@ -1587,7 +2091,7 @@ function bindAudio() {
   if (testBtn) testBtn.addEventListener('click', toggleAudio);
 
   if (fileInput) {
-    fileInput.addEventListener('change', e => {
+    fileInput.addEventListener('change', async e => {
       const file = e.target.files[0];
       if (file) {
         if (!customAudioEl) {
@@ -1598,7 +2102,8 @@ function bindAudio() {
         customAudioEl.play();
         isAudioPlaying = true;
         updateAudioVisuals();
-        showToast('កំពុងចាក់ចម្រៀងដែលបានជ្រើសរើស!');
+        showToast('កំពុងចាក់ចម្រៀង និង Auto Rename ទៅជា music.mp3...');
+        await uploadAndAutoRenameFile(file, 'musicFile', null, null);
       }
     });
   }

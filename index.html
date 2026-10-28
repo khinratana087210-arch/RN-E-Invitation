@@ -21,7 +21,7 @@
     <!-- Entrance Background Photo (ផ្ទៃ Background ខាងក្រោយ អាចដាក់រូបបាន) -->
     <div class="envelope-bg-backdrop" id="envelopeBgBackdrop"></div>
 
-    <video id="gateOpeningVideo" class="gate-opening-video" playsinline webkit-playsinline preload="auto" style="display: none;"></video>
+    <video id="gateOpeningVideo" class="gate-opening-video" playsinline webkit-playsinline muted preload="auto" style="display: none;"></video>
     <button type="button" class="video-skip-btn" id="btnSkipVideo" style="display: none;">រំលង Skip ⏭️</button>
 
     <!-- Center Grand Invitation Welcome Card -->
@@ -78,12 +78,19 @@
         <span>ចម្លង Link ភ្ញៀវ</span>
       </button>
 
+      <button type="button" class="action-btn" id="btnOpenGitHubModal" style="background: rgba(168, 85, 247, 0.2); border: 1px solid #a855f7; color: #d8b4fe;" title="កំណត់ប្រព័ន្ធ Auto Rename & Upload ចូល GitHub">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor">
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
+        </svg>
+        <span id="btnGitHubLabel">🐙 Auto GitHub</span>
+      </button>
+
       <button type="button" class="action-btn" id="btnOpenCloudModal" style="background: rgba(56, 189, 248, 0.2); border: 1px solid #38bdf8; color: #7dd3fc;" title="កំណត់ប្រព័ន្ធ Auto Cloud Database (Supabase Free)">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg>
         <span>☁️ Auto Cloud</span>
       </button>
 
-      <button type="button" class="action-btn" id="btnSaveConfig" style="background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; color: #6ee7b7;" title="រក្សាទុកទិន្នន័យទាំងអស់ចូល config.js សម្រាប់ Upload ទៅ Render">
+      <button type="button" class="action-btn" id="btnSaveConfig" style="background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; color: #6ee7b7;" title="រក្សាទុកទិន្នន័យទាំងអស់ចូល config.js ឬ Upload ចូល GitHub ភ្លាមៗ">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
         <span>💾 រក្សាទុក (Save)</span>
       </button>
@@ -141,13 +148,18 @@
           </div>
 
           <!-- Simple Friendly Guidance Box -->
-          <div style="background: rgba(223, 158, 40, 0.1); border: 1px solid rgba(223, 158, 40, 0.35); border-radius: 10px; padding: 12px 16px; margin-bottom: 16px;">
-            <div style="display: flex; align-items: center; gap: 8px; color: #ffd875; font-size: 13.5px; font-weight: 600; margin-bottom: 4px;">
-              <span>💡</span>
-              <span>របៀបដាក់រូបភាពងាយស្រួលបំផុត៖</span>
+          <div style="background: rgba(168, 85, 247, 0.12); border: 1px solid rgba(168, 85, 247, 0.4); border-radius: 10px; padding: 12px 16px; margin-bottom: 16px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 6px; flex-wrap: wrap;">
+              <div style="display: flex; align-items: center; gap: 8px; color: #d8b4fe; font-size: 13.5px; font-weight: 600;">
+                <span>⚡</span>
+                <span>ប្រព័ន្ធ Auto Rename & Upload ចូល GitHub ស្វ័យប្រវត្តិ៖</span>
+              </div>
+              <button type="button" onclick="openGitHubModal()" style="background: rgba(168, 85, 247, 0.3); border: 1px solid #c084fc; color: #f3e8ff; border-radius: 14px; font-size: 11.5px; padding: 3px 10px; cursor: pointer;">
+                ⚙️ កំណត់ GitHub
+              </button>
             </div>
-            <p style="font-size: 12px; color: #cbd5e1; margin: 0; line-height: 1.6;">
-              គ្រាន់តែយករូបថតអាពាហ៍ពិពាហ៍ (រូបអាវលឿង) ដាក់ឈ្មោះថា <strong>cover.jpg</strong> រួចយកទៅដាក់ជំនួសក្នុង Folder <strong>E-Invitation</strong> ហើយ Upload ចូល GitHub <strong>តែ ១ ដងគត់</strong>! បន្ទាប់មកលោកអ្នកគ្រាន់តែវាយឈ្មោះភ្ញៀវ ហើយចុចចម្លង Link ផ្ញើទៅភ្ញៀវរាប់រយនាក់បានភ្លាមៗ!
+            <p style="font-size: 12px; color: #e9d5ff; margin: 0; line-height: 1.6;">
+              រាល់ពេលលោកអ្នកជ្រើសរើសរូបភាពពីទូរស័ព្ទ ឬកុំព្យូទ័រ កម្មវិធីនឹង <strong>Auto Rename</strong> ឈ្មោះឯកសារជាស្ដង់ដា (<code>cover.jpg</code>, <code>bg.jpg</code>, <code>gallery...</code>) និង Upload ចូល GitHub Repository ដោយស្វ័យប្រវត្តិតែម្តង! ភ្ញៀវទាំងអស់ដែលបើក Link នឹងមើលឃើញរូបភាពភ្លាមៗ!
             </p>
           </div>
 
@@ -164,7 +176,8 @@
                 <input type="file" id="envelopeImageInput" accept="image/*" class="file-input">
                 <div class="upload-placeholder">
                   <span class="upload-icon">💍</span>
-                  <span class="upload-text">ជ្រើសរើសរូបក្នុងរង្វង់ (Auto Cloud)</span>
+                  <span class="upload-text">ជ្រើសរើសរូបក្នុងរង្វង់</span>
+                  <span class="upload-subtext" style="font-size: 10.5px; color: #c084fc; margin-top: 2px;">⚡ Auto: cover.jpg ➡️ GitHub</span>
                 </div>
                 <div class="img-preview-thumb" id="envelopeThumb"></div>
               </div>
@@ -182,6 +195,7 @@
                 <div class="upload-placeholder">
                   <span class="upload-icon">✨</span>
                   <span class="upload-text">ជ្រើសរូប Background ខាងក្រោយ</span>
+                  <span class="upload-subtext" style="font-size: 10.5px; color: #c084fc; margin-top: 2px;">⚡ Auto: bg.jpg ➡️ GitHub</span>
                 </div>
                 <div class="img-preview-thumb" id="entranceBgThumb"></div>
               </div>
@@ -209,7 +223,8 @@
               <input type="file" id="coverImageInput" accept="image/*" class="file-input">
               <div class="upload-placeholder">
                 <span class="upload-icon">📷</span>
-                <span class="upload-text">ជ្រើសរើសរូបភាព Cover (Auto Cloud)</span>
+                <span class="upload-text">ជ្រើសរើសរូបភាព Cover</span>
+                <span class="upload-subtext" style="font-size: 11px; color: #c084fc; margin-top: 3px;">⚡ Auto Rename ➡️ cover.jpg ➡️ GitHub</span>
               </div>
               <div class="img-preview-thumb" id="coverThumb"></div>
             </div>
@@ -229,6 +244,7 @@
                 <div class="upload-placeholder">
                   <span class="upload-icon">✨</span>
                   <span class="upload-text">ជ្រើសរូប Background ១</span>
+                  <span class="upload-subtext" style="font-size: 10.5px; color: #c084fc; margin-top: 2px;">⚡ Auto: bg.jpg ➡️ GitHub</span>
                 </div>
                 <div class="img-preview-thumb" id="bgThumb1"></div>
               </div>
@@ -245,6 +261,7 @@
                 <div class="upload-placeholder">
                   <span class="upload-icon">✨</span>
                   <span class="upload-text">ជ្រើសរូប Background ២</span>
+                  <span class="upload-subtext" style="font-size: 10.5px; color: #c084fc; margin-top: 2px;">⚡ Auto: bg2.jpg ➡️ GitHub</span>
                 </div>
                 <div class="img-preview-thumb" id="bgThumb2"></div>
               </div>
@@ -263,6 +280,7 @@
                 <div class="upload-placeholder">
                   <span class="upload-icon">✨</span>
                   <span class="upload-text">ជ្រើសរូប Background ៣</span>
+                  <span class="upload-subtext" style="font-size: 10.5px; color: #c084fc; margin-top: 2px;">⚡ Auto: bg3.jpg ➡️ GitHub</span>
                 </div>
                 <div class="img-preview-thumb" id="bgThumb3"></div>
               </div>
@@ -279,19 +297,28 @@
                 <div class="upload-placeholder">
                   <span class="upload-icon">✨</span>
                   <span class="upload-text">ជ្រើសរូប Background ៤</span>
+                  <span class="upload-subtext" style="font-size: 10.5px; color: #c084fc; margin-top: 2px;">⚡ Auto: bg4.jpg ➡️ GitHub</span>
                 </div>
                 <div class="img-preview-thumb" id="bgThumb4"></div>
               </div>
             </div>
           </div>
 
-          <!-- Video URL input as alternative -->
+          <!-- Gate Video Options: File Upload or Direct URL -->
           <div class="form-group" style="margin-top: 14px;">
-            <label for="inputGateVideoUrl" style="font-size: 13px;">
-              Link វីដេអូបើកទ្វារពីក្រៅ (Video URL - Optional)
-              <span class="label-hint">ប្រសិនបើមាន Link វីដេអូស្រាប់ (MP4)</span>
+            <label for="gateVideoFileInput" style="font-size: 13px;">
+              🎬 វីដេអូបើកទ្វាររោងការ 3D (Entrance Gate Video)
+              <span class="label-hint">អាចរើសឯកសារ MP4 ឬបិទភ្ជាប់ Link</span>
             </label>
-            <input type="url" id="inputGateVideoUrl" class="form-control" placeholder="https://example.com/wedding-gate.mp4" style="font-size: 13px;">
+            <div class="file-upload-box" style="padding: 12px; margin-bottom: 8px;">
+              <input type="file" id="gateVideoFileInput" accept="video/mp4,video/*" class="file-input">
+              <div class="upload-placeholder">
+                <span class="upload-icon">🎥</span>
+                <span class="upload-text">ជ្រើសរើសវីដេអូទ្វាររោងការ (MP4)</span>
+                <span class="upload-subtext" style="font-size: 10.5px; color: #c084fc; margin-top: 2px;">⚡ Auto Rename ➡️ Video.mp4 ➡️ GitHub</span>
+              </div>
+            </div>
+            <input type="url" id="inputGateVideoUrl" class="form-control" placeholder="🔗 ឬបិទភ្ជាប់ Video URL ផ្ទាល់ (https://.../Video.mp4)" style="font-size: 12px;">
           </div>
         </div>
 
@@ -551,6 +578,7 @@
               <div class="upload-placeholder">
                 <span class="upload-icon">🗺️</span>
                 <span class="upload-text">ជ្រើសរើសរូបភាពផែនទី</span>
+                <span class="upload-subtext" style="font-size: 10.5px; color: #c084fc; margin-top: 2px;">⚡ Auto: map.jpg ➡️ GitHub</span>
               </div>
               <div class="img-preview-thumb" id="mapThumb"></div>
             </div>
@@ -579,12 +607,12 @@
             <h3>កម្រងរូបភាពកូនកំលោះកូនក្រមុំ ៤ រូប (Gallery 4 Photos)</h3>
           </div>
 
-          <p class="form-hint-text">ជ្រើសរើសរូបភាពស្អាតៗចំនួន ៤ សន្លឹក ដើម្បីបង្ហាញលើក្រឡា ២x២ ក្នុងទំព័រធៀប</p>
+          <p class="form-hint-text">ជ្រើសរើសរូបភាពស្អាតៗចំនួន ៤ សន្លឹក (ប្រព័ន្ធនឹង Auto Rename ទៅជា gallery1.jpg ដល់ gallery4.jpg និង Upload ចូល GitHub ស្វ័យប្រវត្តិ)</p>
 
           <div class="gallery-slots-grid">
             <!-- Slot 1 -->
             <div class="gallery-slot">
-              <span class="slot-label">រូបភាពទី ១</span>
+              <span class="slot-label">រូបភាពទី ១ <small style="color: #c084fc; font-size: 10px; display: block;">⚡ gallery1.jpg</small></span>
               <div class="slot-thumb" id="galleryThumb1"></div>
               <input type="file" id="galleryInput1" accept="image/*" class="file-input">
               <button type="button" class="slot-btn" onclick="document.getElementById('galleryInput1').click()">ជ្រើសរូប</button>
@@ -592,7 +620,7 @@
             
             <!-- Slot 2 -->
             <div class="gallery-slot">
-              <span class="slot-label">រូបភាពទី ២</span>
+              <span class="slot-label">រូបភាពទី ២ <small style="color: #c084fc; font-size: 10px; display: block;">⚡ gallery2.jpg</small></span>
               <div class="slot-thumb" id="galleryThumb2"></div>
               <input type="file" id="galleryInput2" accept="image/*" class="file-input">
               <button type="button" class="slot-btn" onclick="document.getElementById('galleryInput2').click()">ជ្រើសរូប</button>
@@ -600,7 +628,7 @@
 
             <!-- Slot 3 -->
             <div class="gallery-slot">
-              <span class="slot-label">រូបភាពទី ៣</span>
+              <span class="slot-label">រូបភាពទី ៣ <small style="color: #c084fc; font-size: 10px; display: block;">⚡ gallery3.jpg</small></span>
               <div class="slot-thumb" id="galleryThumb3"></div>
               <input type="file" id="galleryInput3" accept="image/*" class="file-input">
               <button type="button" class="slot-btn" onclick="document.getElementById('galleryInput3').click()">ជ្រើសរូប</button>
@@ -608,7 +636,7 @@
 
             <!-- Slot 4 -->
             <div class="gallery-slot">
-              <span class="slot-label">រូបភាពទី ៤</span>
+              <span class="slot-label">រូបភាពទី ៤ <small style="color: #c084fc; font-size: 10px; display: block;">⚡ gallery4.jpg</small></span>
               <div class="slot-thumb" id="galleryThumb4"></div>
               <input type="file" id="galleryInput4" accept="image/*" class="file-input">
               <button type="button" class="slot-btn" onclick="document.getElementById('galleryInput4').click()">ជ្រើសរូប</button>
@@ -631,7 +659,7 @@
                 ▶️ ចាក់ភ្លេងតេស្ត
               </button>
               <label class="music-file-label">
-                📂 ដាក់បទចម្រៀង MP3 ផ្ទាល់ខ្លួន
+                📂 ដាក់បទចម្រៀង MP3 (⚡ Auto: music.mp3 ➡️ GitHub)
                 <input type="file" id="musicFileInput" accept="audio/*" style="display:none">
               </label>
             </div>
@@ -923,14 +951,14 @@
             <span style="font-size: 11px; color: #a0aec0; font-weight: normal;">(កែប្រែបាន)</span>
           </label>
           <div style="display: flex; gap: 8px;">
-            <input type="text" id="modalDomainInput" class="form-control" placeholder="ឧ. https://wedding-pros-pich.onrender.com" style="flex: 1; font-size: 13px;">
+            <input type="text" id="modalDomainInput" class="form-control" placeholder="ឧ. https://username.github.io/repo ឬ https://wedding-pros-toch.onrender.com" style="flex: 1; font-size: 13px;">
             <button type="button" class="btn-tool-outline" id="btnSaveDomain" style="padding: 6px 12px; font-size: 12px; white-space: nowrap; border-color: rgba(223, 158, 40, 0.4); color: #ffd875; background: rgba(223, 158, 40, 0.1);">
               💾 រក្សាទុក
             </button>
           </div>
-          <span class="label-hint" style="color: #94a3b8; font-size: 11.5px; margin-top: 5px; display: block; line-height: 1.4;">
-            💡 បញ្ចូល Link គេហទំព័រដែលបានដាក់លើ Render ឬ Domain ផ្ទាល់ខ្លួន ដើម្បីបង្កើត Link ផ្ញើទៅភ្ញៀវបានស្អាត និងត្រឹមត្រូវ
-          </span>
+          <div style="margin-top: 8px; padding: 7px 10px; border-radius: 6px; background: rgba(245, 158, 11, 0.12); border: 1px solid rgba(245, 158, 11, 0.25); font-size: 11.5px; color: #fde68a; line-height: 1.45;">
+            ⚠️ <strong>បើភ្ញៀវបើកមិនចេញ៖</strong> ដោយសារ Domain នេះមិនទាន់បាន Deploy លើ Render ឬ GitHub Pages។ សូមបង្កើត Static Site លើ Render ឬបើក GitHub Pages ជាមុនសិន។
+          </div>
         </div>
 
         <div class="form-group">
@@ -938,10 +966,13 @@
           <input type="text" id="modalGuestInput" class="form-control" placeholder="ឧ. ឯកឧត្តម សុខា">
         </div>
 
-        <div class="generated-link-box">
-          <input type="text" id="modalGeneratedLink" class="form-control link-input" readonly>
-          <button type="button" class="copy-action-btn" id="btnCopyGeneratedLink">
+        <div class="generated-link-box" style="display: flex; gap: 8px; align-items: center;">
+          <input type="text" id="modalGeneratedLink" class="form-control link-input" readonly style="flex: 1;">
+          <button type="button" class="copy-action-btn" id="btnCopyGeneratedLink" style="white-space: nowrap;">
             📋 ចម្លង Link
+          </button>
+          <button type="button" class="btn-tool-outline" id="btnTestOpenGeneratedLink" title="បើកតេស្តមើលសិន មុនពេលផ្ញើទៅភ្ញៀវ" style="white-space: nowrap; padding: 7px 12px; font-size: 12.5px; color: #6ee7b7; border-color: rgba(110, 231, 183, 0.4); background: rgba(16, 185, 129, 0.15); cursor: pointer; border-radius: 6px;">
+            👁️ តេស្តបើកមើល
           </button>
         </div>
 
@@ -968,51 +999,154 @@
     <div class="modal-card" style="max-width: 520px; border-color: rgba(16, 185, 129, 0.4);">
       <div class="modal-header">
         <h3 class="modal-title" style="color: #6ee7b7; display: flex; align-items: center; gap: 8px;">
-          <span>💾</span> របៀបដាក់ឲ្យភ្ញៀវទាំងអស់មើលឃើញរូបភាព & ទិន្នន័យ
+          <span>💾</span> រក្សាទុក & Upload ចូល GitHub
         </h3>
         <button type="button" class="modal-close" onclick="closeSaveGuideModal()">&times;</button>
       </div>
 
       <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 10px; padding: 14px; margin-bottom: 16px;">
         <p style="font-size: 13.5px; color: #d1fae5; margin: 0 0 6px 0; font-weight: 600;">
-          ✅ ឯកសារ <code>config.js</code> ត្រូវបានទាញយក (Download) ចូលកុំព្យូទ័ររបស់អ្នករួចរាល់ហើយ!
+          ✅ ព័ត៌មាន និងរូបភាពទាំងអស់ត្រូវបានកំណត់រួចរាល់!
         </p>
         <p style="font-size: 12.5px; color: #a7f3d0; margin: 0; line-height: 1.5;">
-          ដោយសារគេហទំព័រលើ Render ភ្ជាប់ជាមួយ GitHub ដូច្នេះដើម្បីឲ្យភ្ញៀវទាំងអស់បើកលើទូរស័ព្ទដៃឃើញរូបភាព និងឈ្មោះដែលអ្នកទើបកែ សូមធ្វើតាម ៣ ជំហានងាយៗខាងក្រោម៖
+          ដើម្បីឱ្យភ្ញៀវទាំងអស់បើកមើលឃើញរូបភាព និងទិន្នន័យលើទូរស័ព្ទដៃ លោកអ្នកអាចជ្រើសរើសជម្រើសខាងក្រោម៖
         </p>
       </div>
 
-      <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px;">
-        <div style="display: flex; gap: 12px; align-items: flex-start; background: rgba(255, 255, 255, 0.03); padding: 10px 14px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.08);">
-          <div style="background: #10b981; color: #000; font-weight: bold; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 13px;">1</div>
-          <div style="font-size: 13px; color: #e2e8f0; line-height: 1.5;">
-            បើកមើលកន្លែងផ្ទុកឯកសារ GitHub របស់អ្នក (GitHub Repository) ក្នុង Browser។
+      <!-- Quick 1-Click GitHub Sync Button -->
+      <div style="background: rgba(168, 85, 247, 0.15); border: 1px solid rgba(168, 85, 247, 0.4); border-radius: 10px; padding: 14px; margin-bottom: 16px; text-align: center;">
+        <div style="font-size: 13px; color: #f3e8ff; font-weight: 600; margin-bottom: 8px;">
+          🚀 ជម្រើសទី ១៖ Upload config.js ចូល GitHub ស្វ័យប្រវត្តិ (1-Click)
+        </div>
+        <button type="button" class="copy-action-btn" id="btnSyncConfigOnlyToGitHub" style="width: 100%; justify-content: center; background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%); border: 1px solid #c084fc; color: #fff; padding: 11px; font-size: 13.5px;">
+          ⚡ Sync config.js ចូល GitHub ឥឡូវនេះ
+        </button>
+      </div>
+
+      <div style="font-size: 12px; color: #94a3b8; margin-bottom: 12px; font-weight: 600;">
+        📥 ជម្រើសទី ២៖ របៀប Upload ដោយដៃ (Manual Drag & Drop)
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px;">
+        <div style="display: flex; gap: 10px; align-items: flex-start; background: rgba(255, 255, 255, 0.03); padding: 8px 12px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.08);">
+          <div style="background: #10b981; color: #000; font-weight: bold; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 12px;">1</div>
+          <div style="font-size: 12.5px; color: #e2e8f0; line-height: 1.4;">
+            បើកមើលកន្លែងផ្ទុកឯកសារ GitHub Repository របស់អ្នកក្នុង Browser។
           </div>
         </div>
 
-        <div style="display: flex; gap: 12px; align-items: flex-start; background: rgba(255, 255, 255, 0.03); padding: 10px 14px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.08);">
-          <div style="background: #10b981; color: #000; font-weight: bold; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 13px;">2</div>
-          <div style="font-size: 13px; color: #e2e8f0; line-height: 1.5;">
+        <div style="display: flex; gap: 10px; align-items: flex-start; background: rgba(255, 255, 255, 0.03); padding: 8px 12px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.08);">
+          <div style="background: #10b981; color: #000; font-weight: bold; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 12px;">2</div>
+          <div style="font-size: 12.5px; color: #e2e8f0; line-height: 1.4;">
             ចុចលើប៊ូតុង <strong>Add file</strong> ➡️ រួចរើស <strong>Upload files</strong>។
           </div>
         </div>
 
-        <div style="display: flex; gap: 12px; align-items: flex-start; background: rgba(255, 255, 255, 0.03); padding: 10px 14px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.08);">
-          <div style="background: #10b981; color: #000; font-weight: bold; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 13px;">3</div>
-          <div style="font-size: 13px; color: #e2e8f0; line-height: 1.5;">
-            អូសទម្លាក់ (Drag & Drop) ឯកសារ <code>config.js</code> ដែលទើបទាញយកអម្បាញ់មិញ រួចចុចប៊ូតុងពណ៌បៃតង <strong>Commit changes</strong>។
+        <div style="display: flex; gap: 10px; align-items: flex-start; background: rgba(255, 255, 255, 0.03); padding: 8px 12px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.08);">
+          <div style="background: #10b981; color: #000; font-weight: bold; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 12px;">3</div>
+          <div style="font-size: 12.5px; color: #e2e8f0; line-height: 1.4;">
+            អូសទម្លាក់ <code>config.js</code> និងរូបភាពដែលបាន Auto Rename រួចចុច <strong>Commit changes</strong>។
           </div>
         </div>
       </div>
 
-      <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 8px; padding: 10px 12px; margin-bottom: 16px; font-size: 12px; color: #fde68a;">
-        ⚡ <strong>ចំណាំ៖</strong> បន្ទាប់ពី Commit រួច Render នឹងដំណើរការ Update ដោយស្វ័យប្រវត្តិក្នុងរយៈពេលប្រហែល ៣០ វិនាទី!
+      <div style="display: flex; gap: 8px;">
+        <button type="button" class="action-btn" id="btnDownloadConfigAgain" style="flex: 1; justify-content: center; background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.2); color: #fff; padding: 10px; font-size: 12px;">
+          💾 ទាញយក config.js ម្តងទៀត
+        </button>
+        <button type="button" class="copy-action-btn" onclick="closeSaveGuideModal()" style="flex: 1; justify-content: center; padding: 10px; font-size: 12px;">
+          យល់ព្រម (OK)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- GitHub Auto-Upload & Auto-Rename Setup Modal -->
+  <div class="modal-backdrop" id="githubModal">
+    <div class="modal-card" style="max-width: 540px; border-color: rgba(168, 85, 247, 0.5);">
+      <div class="modal-header">
+        <h3 class="modal-title" style="color: #d8b4fe; display: flex; align-items: center; gap: 8px;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
+          </svg>
+          <span>កំណត់ប្រព័ន្ធ Auto Rename & Upload ចូល GitHub</span>
+        </h3>
+        <button type="button" class="modal-close" onclick="closeGitHubModal()">&times;</button>
       </div>
 
-      <button type="button" class="copy-action-btn" onclick="closeSaveGuideModal()" style="width: 100%; justify-content: center; display: flex; padding: 12px;">
-        យល់ព្រម (OK)
-      </button>
+      <div style="background: rgba(168, 85, 247, 0.12); border: 1px solid rgba(168, 85, 247, 0.35); border-radius: 10px; padding: 12px 14px; margin-bottom: 16px;">
+        <div style="font-size: 13px; color: #f3e8ff; font-weight: 600; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
+          <span>⚡</span> Auto Rename និង Auto Upload 100% ចូល GitHub Repository
+        </div>
+        <p style="font-size: 12px; color: #e9d5ff; margin: 0; line-height: 1.5;">
+          រាល់ពេលលោកអ្នកជ្រើសរើសរូបភាព ឬកែទិន្នន័យ ប្រព័ន្ធនឹង <strong>Auto Rename</strong> ឈ្មោះឯកសារជាស្ដង់ដា (<code>cover.jpg</code>, <code>bg.jpg</code>, <code>gallery...</code>) និង Upload ចូល GitHub ដោយស្វ័យប្រវត្តិតែម្តង!
+        </p>
+      </div>
+
+      <div class="form-group" style="margin-bottom: 12px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+          <label style="color: #d8b4fe; font-size: 12.5px; font-weight: 600;">1. GitHub Personal Access Token (PAT):</label>
+          <a href="https://github.com/settings/tokens/new?scopes=repo&description=E-Invitation-AutoUpload" target="_blank" rel="noopener noreferrer" style="color: #fde047; font-size: 11.5px; text-decoration: underline; display: flex; align-items: center; gap: 4px;">
+            🔑 យក Token ងាយៗ (1-Click) ↗
+          </a>
+        </div>
+        <div style="position: relative;">
+          <input type="password" id="inputGitHubToken" class="form-control" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" style="font-size: 12.5px; padding-right: 40px;">
+          <button type="button" id="btnToggleTokenVisibility" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #9ca3af; cursor: pointer; padding: 4px; font-size: 14px;" title="បង្ហាញ/លាក់ Token">
+            👁️
+          </button>
+        </div>
+        <span style="font-size: 11px; color: #a78bfa; margin-top: 3px; display: block;">
+          (Token ត្រូវតែមានសិទ្ធិ <strong>repo</strong> ដើម្បីអាច Upload និង Update ឯកសារបាន)
+        </span>
+      </div>
+
+      <div class="form-group" style="margin-bottom: 12px;">
+        <label style="color: #d8b4fe; font-size: 12.5px; font-weight: 600;">2. GitHub Repository (Owner/Repo):</label>
+        <input type="text" id="inputGitHubRepo" class="form-control" placeholder="ឧ. K-RaTaNa/E-Invitation" style="font-size: 12.5px;">
+        <span style="font-size: 11px; color: #9ca3af; margin-top: 3px; display: block;">
+          ឈ្មោះគណនី GitHub និងឈ្មោះ repository របស់អ្នក (ឧ. username/E-Invitation)
+        </span>
+      </div>
+
+      <div class="form-row" style="margin-bottom: 12px;">
+        <div class="form-group flex-1">
+          <label style="color: #d8b4fe; font-size: 12px;">3. Branch:</label>
+          <input type="text" id="inputGitHubBranch" class="form-control" value="main" style="font-size: 12.5px;">
+        </div>
+        <div class="form-group flex-1">
+          <label style="color: #d8b4fe; font-size: 12px;">4. របៀប Auto Rename:</label>
+          <select id="selectGitHubAutoRename" class="form-control" style="font-size: 12px;">
+            <option value="standard">ស្ដង់ដា (cover.jpg, bg.jpg...) [ណែនាំ]</option>
+            <option value="timestamp">តាមកាលបរិច្ឆេទ (cover_time.jpg)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-bottom: 14px;">
+        <label class="toggle-label" for="toggleGitHubSyncConfig" style="font-size: 12px; color: #e9d5ff; cursor: pointer;">
+          <input type="checkbox" id="toggleGitHubSyncConfig" checked>
+          <span class="toggle-slider"></span>
+          <span class="toggle-text">⚡ Auto Upload config.js ចូល GitHub រាល់ពេល Upload រូប</span>
+        </label>
+      </div>
+
+      <div id="githubConnectionStatus" style="font-size: 12px; padding: 8px 12px; border-radius: 6px; margin-bottom: 14px; display: none;"></div>
+
+      <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+        <button type="button" class="action-btn" id="btnTestGitHubConn" style="flex: 1; min-width: 130px; justify-content: center; background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.2); color: #fff; padding: 10px;">
+          🔍 តេស្តការតភ្ជាប់
+        </button>
+        <button type="button" class="copy-action-btn" id="btnSaveGitHubConfig" style="flex: 1.5; min-width: 150px; justify-content: center; background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%); border: 1px solid #c084fc; color: #fff; padding: 10px;">
+          💾 រក្សាទុកការកំណត់
+        </button>
+        <button type="button" class="action-btn" id="btnSyncAllToGitHub" style="width: 100%; justify-content: center; background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; color: #6ee7b7; padding: 10px; margin-top: 4px;" title="Upload config.js និងរូបភាពទាំងអស់ទៅ GitHub ឥឡូវនេះ">
+          🚀 Sync រូបភាព & config.js ទាំងអស់ទៅ GitHub ឥឡូវនេះ
+        </button>
+      </div>
     </div>
+  </div>
+
   <!-- Cloud Database Setup Modal (Supabase Free Auto-Upload) -->
   <div class="modal-backdrop" id="cloudModal">
     <div class="modal-card" style="max-width: 520px; border-color: rgba(56, 189, 248, 0.4);">
